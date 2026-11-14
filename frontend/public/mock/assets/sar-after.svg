@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <filter id="speckleAfter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" seed="29" />
+    <feColorMatrix type="saturate" values="0" />
+  </filter>
+  <rect width="800" height="600" fill="#475569" />
+  <rect width="800" height="600" filter="url(#speckleAfter)" opacity="0.45" />
+  <path d="M 310 290 C 370 250, 490 240, 560 280 C 610 310, 550 370, 450 365 C 360 360, 280 330, 310 290 Z" fill="#18181b" opacity="0.82" />
+</svg>

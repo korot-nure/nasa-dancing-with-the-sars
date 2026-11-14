@@ -1,0 +1,29 @@
+{
+  "total": 3,
+  "locations": [
+    {
+      "id": "oman-caroline-bezengi-2026",
+      "title": "Острови Халланіят, Оман",
+      "coords": [56.02, 17.50],
+      "baseline_date": "2026-06-01",
+      "latest_date": "2026-09-11",
+      "area_km2": 1180.2
+    },
+    {
+      "id": "kerch-strait-2025",
+      "title": "Керченська протока: аварія танкерів",
+      "coords": [36.55, 45.12],
+      "baseline_date": "2024-12-03",
+      "latest_date": "2025-07-14",
+      "area_km2": 86.5
+    },
+    {
+      "id": "maracaibo-chronic-2026",
+      "title": "Озеро Маракайбо: хронічні витоки",
+      "coords": [-71.56, 9.82],
+      "baseline_date": "2026-04-10",
+      "latest_date": "2026-08-03",
+      "area_km2": 264.0
+    }
+  ]
+}

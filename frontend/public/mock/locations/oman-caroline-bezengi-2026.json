@@ -1,0 +1,39 @@
+{
+  "id": "oman-caroline-bezengi-2026",
+  "title": "Острови Халланіят, Оман",
+  "coords": [56.02, 17.50],
+  "bbox": [55.35, 16.90, 56.85, 18.10],
+  "baseline_date": "2026-06-01",
+  "baseline_before_url": "/mock/assets/sar-before.svg",
+  "description": "Посадка на мілину танкера Caroline Bezengi після вибуху призвела до масштабного розливу нафти в Аравійському морі. На радарних знімках NISAR чітко фіксується динаміка розширення гладкої темної плями біля заповідного острова Аль-Кіблія.",
+  "source_url": "https://www.cbsnews.com/news/abandoned-russian-tanker-leaking-oil-off-oman-coast-threatening-environmental-disaster/",
+  "snapshots": [
+    {
+      "step_id": "t1",
+      "date": "2026-07-02",
+      "label": "Початковий шлейф",
+      "area_km2": 420.0,
+      "after_url": "/mock/assets/sar-after.svg",
+      "mask_url": "/mock/assets/spill-mask.svg",
+      "contour_geojson_url": "/mock/geojson/oman-caroline-bezengi-2026_t1.geojson"
+    },
+    {
+      "step_id": "t2",
+      "date": "2026-08-18",
+      "label": "Максимум розливу",
+      "area_km2": 2040.5,
+      "after_url": "/mock/assets/sar-after.svg",
+      "mask_url": "/mock/assets/spill-mask.svg",
+      "contour_geojson_url": "/mock/geojson/oman-caroline-bezengi-2026_t2.geojson"
+    },
+    {
+      "step_id": "t3",
+      "date": "2026-09-11",
+      "label": "Дрейф та розсіювання",
+      "area_km2": 1180.2,
+      "after_url": "/mock/assets/sar-after.svg",
+      "mask_url": "/mock/assets/spill-mask.svg",
+      "contour_geojson_url": "/mock/geojson/oman-caroline-bezengi-2026_t3.geojson"
+    }
+  ]
+}
