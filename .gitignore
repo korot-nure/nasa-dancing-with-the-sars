@@ -1,0 +1,50 @@
+# Local study materials, reference PDFs, and agent metadata
+Info/
+.agents/
+scripts/
+major_oil_spills_nisar_2026_*.pdf
+
+# Deferred backend specs, code, and data (frontend-only phase)
+docs/BACKEND_TECHNICAL_SPEC.md
+backend/
+
+# Legacy mockup drafts and intermediate SVG exports (keep only mockup/index.html)
+mockup/legacy-explorer.html
+mockup/*.svg
+
+# Raw satellite data and heavy archives
+*.h5
+*.hdf5
+*.tif
+*.tiff
+*.rar
+*.zip
+*.7z
+
+# Python virtual environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Frontend dependencies and build outputs
+node_modules/
+dist/
+frontend/node_modules/
+frontend/dist/
+
+# Environment variables and secrets / SSH keys
+.env
+.env.*
+!.env.example
+.ssh/
+*id_ed25519*
+*.pem
+*.key
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dancing with the SARs — MVP Моніторинг розливів (NISAR L2 GCOV)</title>
+  <style>
+    :root {
+      --bg-canvas: #09090b;
+      --bg-panel: #111113;
+      --bg-surface: #18181b;
+      --bg-hover: #1f1f23;
+      --border: #27272a;
+      --border-strong: #3f3f46;
+
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+
+      --accent-active: #f4f4f5;
+      --accent-signal: #3b82f6;
+      --accent-pin: #f97316;
+      --accent-spill: #ef4444;
+
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    select,
+    input {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       APP SHELL (Topbar 36px + 2-column grid)
+       ============================================================ */
+    .app-shell {
+      display: grid;
+      grid-template-rows: 36px 1fr;
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg-canvas);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      user-select: none;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .topbar-sep {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+    }
+
+    .topbar-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-surface);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 24px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--accent-signal);
+      outline-offset: 1px;
+    }
+
+    .btn-icon {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+    }
+
+    .btn-play {
+      height: 26px;
+      padding: 0 9px;
+      margin-left: 4px;
+    }
+
+    .btn-play.is-playing {
+      border-color: var(--accent-signal);
+      color: var(--accent-signal);
+      background: var(--bg-hover);
+    }
+
+    /* ============================================================
+       MAIN 2-COLUMN WORKSPACE
+       ============================================================ */
+    .workspace {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      min-height: 0;
+      height: 100%;
+    }
+
+    /* ============================================================
+       LEFT SIDEBAR (Components 1, 2, 3)
+       ============================================================ */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      min-height: 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-panel);
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    /* [1] OverviewMinimap */
+    .minimap-wrap {
+      position: relative;
+      height: 184px;
+      background: var(--bg-canvas);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .minimap-svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .minimap-reset-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .minimap-reset-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .minimap-caption {
+      position: absolute;
+      left: 8px;
+      bottom: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .map-pin {
+      cursor: pointer;
+    }
+
+    .map-pin:focus-visible {
+      outline: none;
+    }
+
+    .map-pin:hover .pin-core {
+      r: 5.5;
+    }
+
+    /* [2] EventSelect */
+    .event-select-wrap {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-panel);
+      flex-shrink: 0;
+    }
+
+    .select-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .select-box {
+      position: relative;
+    }
+
+    .event-select {
+      width: 100%;
+      height: 34px;
+      padding: 0 30px 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .event-select:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-hover);
+    }
+
+    .select-chevron {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-secondary);
+    }
+
+    /* [3] EventDetailsCard (flat hairline inspector, zero nested card bloat) */
+    .details-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .details-header {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .event-title {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .event-id {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .kv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kv-cell {
+      padding: 10px 12px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kv-cell:nth-child(2n) {
+      border-right: none;
+    }
+
+    .kv-cell:nth-last-child(-n+2) {
+      border-bottom: none;
+    }
+
+    .kv-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .kv-val {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .kv-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .kv-delta.is-up {
+      color: #fca5a5;
+    }
+
+    .kv-delta.is-down {
+      color: #6ee7b7;
+    }
+
+    .kv-delta.is-neutral {
+      color: var(--text-muted);
+    }
+
+    .area-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .spill-swatch {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--accent-spill);
+      flex-shrink: 0;
+    }
+
+    .details-body {
+      padding: 12px;
+      flex: 1;
+    }
+
+    .desc-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .event-desc {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .details-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-panel);
+    }
+
+    /* ============================================================
+       RIGHT STAGE (Components 4, 5, 6)
+       ============================================================ */
+    .stage {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      background: var(--bg-canvas);
+    }
+
+    /* [4] MainComparisonMap */
+    .map-stage {
+      position: relative;
+      flex: 1;
+      min-height: 220px;
+      overflow: hidden;
+      background: #070709;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .map-stage:active {
+      cursor: grabbing;
+    }
+
+    .map-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .curtain-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--text-primary);
+      transform: translateX(-1px);
+      cursor: ew-resize;
+      z-index: 4;
+    }
+
+    .curtain-hit {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -12px;
+      width: 26px;
+      cursor: ew-resize;
+    }
+
+    .curtain-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      background: var(--bg-panel);
+      border: 1px solid var(--text-primary);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: ew-resize;
+    }
+
+    .curtain-handle:hover {
+      background: var(--bg-hover);
+    }
+
+    .stage-badge {
+      position: absolute;
+      top: 12px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-primary);
+      pointer-events: none;
+    }
+
+    .stage-badge-left {
+      left: 12px;
+    }
+
+    .stage-badge-right {
+      right: 52px;
+    }
+
+    .badge-tag {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .map-zoom-stack {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-panel);
+      overflow: hidden;
+    }
+
+    .zoom-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .zoom-btn:last-child {
+      border-bottom: none;
+    }
+
+    .zoom-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .hud-bottom-left {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .hud-bottom-right {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .colorbar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Data colorbar only (allowed by no-slop-ui strictly for scientific scales) */
+    .colorbar-ramp {
+      width: 64px;
+      height: 6px;
+      border: 1px solid var(--border-strong);
+      border-radius: 2px;
+      background: #0d0e11;
+    }
+
+    .scale-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .scale-tick {
+      width: 44px;
+      height: 5px;
+      border-left: 1px solid var(--text-secondary);
+      border-right: 1px solid var(--text-secondary);
+      border-bottom: 1px solid var(--text-secondary);
+    }
+
+    /* [5] SpillOpacitySlider */
+    .opacity-panel {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 46px;
+      padding: 0 14px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .slider-track-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 120px;
+    }
+
+    input[type="range"].sar-slider {
+      flex: 1;
+      height: 4px;
+      appearance: none;
+      background: var(--border-strong);
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    input[type="range"].sar-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--text-primary);
+      border: 1px solid var(--bg-canvas);
+      cursor: ew-resize;
+    }
+
+    input[type="range"].sar-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--text-primary);
+      border: 1px solid var(--bg-canvas);
+      cursor: ew-resize;
+    }
+
+    .opacity-readout {
+      width: 42px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .preset-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chip-btn {
+      height: 22px;
+      padding: 0 7px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .chip-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .chip-btn.is-active {
+      border-color: var(--text-primary);
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .contour-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .contour-toggle input {
+      accent-color: var(--accent-spill);
+      cursor: pointer;
+    }
+
+    .trajectory-toggle input {
+      accent-color: var(--accent-signal);
+    }
+
+    /* [6] SnapshotTimeline */
+    .timeline-panel {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 82px;
+      padding: 0 14px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .timeline-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      width: 248px;
+    }
+
+    .timeline-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-steps {
+      position: relative;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      align-items: center;
+    }
+
+    .timeline-steps::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 15px;
+      height: 1px;
+      background: var(--border-strong);
+      z-index: 0;
+    }
+
+    .step-btn {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-surface);
+      text-align: left;
+      cursor: pointer;
+      min-width: 0;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .step-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
+    }
+
+    .step-btn.is-active {
+      border-color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .step-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 6px;
+    }
+
+    .step-notch {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .notch-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .step-btn.is-active .notch-dot {
+      background: var(--accent-spill);
+    }
+
+    .step-area {
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .step-btn.is-active .step-area {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .step-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    .step-btn.is-active .step-label {
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       API CONTRACT MODAL (Native <dialog>, zero blur)
+       ============================================================ */
+    dialog.contract-dialog {
+      width: min(740px, 92vw);
+      max-height: 82vh;
+      padding: 0;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background: var(--bg-panel);
+      color: var(--text-primary);
+    }
+
+    dialog.contract-dialog::backdrop {
+      background: rgba(9, 9, 11, 0.78);
+    }
+
+    .dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dialog-tabs {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dialog-body {
+      padding: 12px 14px;
+      max-height: 62vh;
+      overflow: auto;
+      background: var(--bg-canvas);
+    }
+
+    .json-pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: #d4d4d8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Responsive fallback below 920px */
+    @media (max-width: 920px) {
+      html,
+      body {
+        overflow: auto;
+      }
+
+      .app-shell {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 520px;
+      }
+
+      .sidebar {
+        order: 2;
+        border-right: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .stage {
+        order: 1;
+        height: 540px;
+      }
+
+      .timeline-panel {
+        height: auto;
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .timeline-meta {
+        width: auto;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Utility Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5" />
+            <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" />
+            <path d="M8 1.5V4M8 12V14.5M1.5 8H4M12 8H14.5" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+          <span>DANCING WITH THE SARs</span>
+        </div>
+        <span class="topbar-sep" aria-hidden="true"></span>
+        <span class="topbar-sub">Інтерактивний макет MVP · NISAR L2 GCOV · Контракт API v1.0</span>
+      </div>
+      <div class="topbar-right">
+        <span class="status-chip mono">
+          <span class="status-dot" aria-hidden="true"></span>
+          EPSG:4326 · 3 події
+        </span>
+        <button type="button" id="openContractBtn" class="btn">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M5 4L2 8L5 12M11 4L14 8L11 12M9 3L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          JSON Контракт
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <!-- LEFT SIDEBAR -->
+      <aside class="sidebar" aria-label="Навігація та деталі події">
+        <div class="section-head">
+          <span class="section-title">Список подій · Координати</span>
+          <span class="mono" style="font-size:11px;color:var(--text-secondary);" id="sidebarCount">3 / 3</span>
+        </div>
+
+        <!-- [1] OverviewMinimap -->
+        <div class="minimap-wrap">
+          <svg id="overviewMinimap" class="minimap-svg" viewBox="0 0 320 150" role="img" aria-label="Оглядова міні-карта подій розливів">
+            <rect x="0" y="0" width="320" height="150" fill="#09090b" />
+            <!-- Graticule lines -->
+            <g stroke="#18181b" stroke-width="0.7">
+              <line x1="0" y1="37.5" x2="320" y2="37.5" />
+              <line x1="0" y1="75" x2="320" y2="75" />
+              <line x1="0" y1="112.5" x2="320" y2="112.5" />
+              <line x1="80" y1="0" x2="80" y2="150" />
+              <line x1="160" y1="0" x2="160" y2="150" />
+              <line x1="240" y1="0" x2="240" y2="150" />
+            </g>
+            <g id="minimapContinents" fill="#18181b" stroke="#27272a" stroke-width="0.8" stroke-linejoin="round"></g>
+            <g id="minimapPins"></g>
+          </svg>
+          <button type="button" id="minimapResetBtn" class="minimap-reset-btn" title="Скинути огляд до карти світу">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div class="minimap-caption mono" id="minimapModeLabel">ОГЛЯД: ВСІ ЛОКАЦІЇ</div>
+        </div>
+
+        <!-- [2] EventSelect -->
+        <div class="event-select-wrap">
+          <label class="select-label" for="eventSelect">Випадаючий список подій</label>
+          <div class="select-box">
+            <select id="eventSelect" class="event-select"></select>
+            <svg class="select-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- [3] EventDetailsCard -->
+        <div class="details-scroll">
+          <div class="details-header">
+            <h1 class="event-title" id="detailTitle">—</h1>
+            <div class="event-id mono" id="detailId">—</div>
+          </div>
+
+          <div class="kv-grid">
+            <div class="kv-cell">
+              <div class="kv-label">Координати</div>
+              <div class="kv-val mono" id="detailCoordsDeg">—</div>
+              <div class="kv-sub mono" id="detailCoordsRaw">—</div>
+            </div>
+            <div class="kv-cell">
+              <div class="kv-label">Площа розливу</div>
+              <div class="area-highlight mono">
+                <span class="spill-swatch" aria-hidden="true"></span>
+                <span id="detailAreaKm2">—</span>
+              </div>
+              <div class="kv-sub mono" id="detailStepId">—</div>
+              <div class="kv-sub mono kv-delta" id="detailAreaDelta">—</div>
+            </div>
+            <div class="kv-cell">
+              <div class="kv-label">Опорна база (T0 «До»)</div>
+              <div class="kv-val mono" id="detailBaselineDate">—</div>
+              <div class="kv-sub mono" id="detailTrackingStart">—</div>
+            </div>
+            <div class="kv-cell">
+              <div class="kv-label">Активний знімок</div>
+              <div class="kv-val mono" id="detailSnapshotDate">—</div>
+              <div class="kv-sub" id="detailSnapshotLabel">—</div>
+              <div class="kv-sub mono" id="detailSnapshotDelta">—</div>
+            </div>
+          </div>
+
+          <div class="details-body">
+            <div class="desc-label">Опис події та SAR-контекст</div>
+            <p class="event-desc" id="detailDescription">—</p>
+          </div>
+
+          <div class="details-footer">
+            <a id="detailSourceLink" class="btn" href="#" target="_blank" rel="noopener noreferrer">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M9 3H13V7M13 3L7 9M6 4H3V13H12V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Першоджерело
+            </a>
+            <button type="button" id="inspectJsonBtn" class="btn mono">
+              meta.json
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT STAGE -->
+      <section class="stage" aria-label="Карта порівняння SAR-знімків та таймлайн">
+        <!-- [4] MainComparisonMap -->
+        <div class="map-stage" id="mapStage">
+          <canvas id="sarCanvas" class="map-canvas"></canvas>
+
+          <div class="stage-badge stage-badge-left mono" id="badgeBefore">
+            <span class="badge-tag">ЗВИЧАЙНА КАРТА</span>
+            <span style="color:var(--text-secondary);font-family:var(--font-sans);">Акваторія та береги</span>
+          </div>
+
+          <div class="stage-badge stage-badge-right mono" id="badgeAfter">
+            <span class="badge-tag" id="badgeAfterTag">SAR РАДАР</span>
+            <span id="badgeAfterDate">—</span>
+            <span style="color:var(--text-muted)">·</span>
+            <span id="badgeAfterLabel" style="font-family:var(--font-sans);">—</span>
+          </div>
+
+          <!-- Draggable split curtain -->
+          <div class="curtain-line" id="curtainLine" role="slider" tabindex="0" aria-label="Шторка порівняння Звичайна карта та SAR Радар" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50">
+            <div class="curtain-hit" id="curtainHit"></div>
+            <div class="curtain-handle" title="Перетягніть ліворуч/праворуч">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M5 5L2 8L5 11M11 5L14 8L11 11M8 2V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="map-zoom-stack" aria-label="Масштаб карти">
+            <button type="button" class="zoom-btn" id="zoomInBtn" title="Наблизити">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button type="button" class="zoom-btn" id="zoomOutBtn" title="Віддалити">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button type="button" class="zoom-btn" id="zoomResetBtn" title="Скинути камеру до bbox">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="hud-bottom-left mono">
+            <span id="hudCursorCoords">Курсор: —</span>
+            <span style="color:var(--border-strong)">|</span>
+            <span id="hudBbox">bbox: —</span>
+          </div>
+
+          <div class="hud-bottom-right mono">
+            <div class="colorbar-wrap" id="colorbarWrap">
+              <span>-25 dB</span>
+              <canvas id="colorbarCanvas" class="colorbar-ramp" width="64" height="6"></canvas>
+              <span>0 dB</span>
+            </div>
+            <span id="colorbarSep" style="color:var(--border-strong)">|</span>
+            <div class="scale-bar">
+              <span class="scale-tick" aria-hidden="true"></span>
+              <span id="hudScaleKm">25 км</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- [5] SpillOpacitySlider -->
+        <div class="opacity-panel">
+          <label class="control-label" for="opacitySlider">Підсвітка розливу</label>
+          <div class="slider-track-wrap">
+            <input id="opacitySlider" class="sar-slider" type="range" min="0" max="100" value="65" />
+            <span id="opacityReadout" class="opacity-readout mono">65%</span>
+          </div>
+          <div class="preset-group" aria-label="Швидкі значення прозорості">
+            <button type="button" class="chip-btn mono" data-opacity="0">0%</button>
+            <button type="button" class="chip-btn mono" data-opacity="50">50%</button>
+            <button type="button" class="chip-btn mono" data-opacity="100">100%</button>
+          </div>
+          <span class="topbar-sep" aria-hidden="true"></span>
+          <label class="contour-toggle">
+            <input type="checkbox" id="contourToggle" checked />
+            <span>GeoJSON контур</span>
+          </label>
+          <label class="contour-toggle trajectory-toggle" title="Показати контури попередніх етапів та вектор дрейфу плями">
+            <input type="checkbox" id="trajectoryToggle" checked />
+            <span>Траєкторія руху</span>
+          </label>
+        </div>
+
+        <!-- [6] SnapshotTimeline -->
+        <div class="timeline-panel">
+          <div class="timeline-meta">
+            <span class="control-label">Таймлайн знімків зі змінами</span>
+            <div class="timeline-nav">
+              <button type="button" id="prevStepBtn" class="btn btn-icon" title="Попередній знімок (←)">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <span class="mono" id="stepCounter" style="font-size:11px;color:var(--text-secondary);">2 / 3</span>
+              <button type="button" id="nextStepBtn" class="btn btn-icon" title="Наступний знімок (→)">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button type="button" id="playTimelineBtn" class="btn btn-play mono" title="Автопрогравання динаміки (T0 → Tn)">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path id="playIconPath" d="M4 3L13 8L4 13V3Z" />
+                </svg>
+                <span id="playTimelineLabel">Старт</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="timeline-steps" id="timelineSteps" role="tablist" aria-label="Часові зрізи події"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Contract Inspection Dialog -->
+  <dialog id="contractDialog" class="contract-dialog" aria-labelledby="dialogHeading">
+    <div class="dialog-head">
+      <div class="dialog-tabs">
+        <span id="dialogHeading" style="font-size:12px;font-weight:600;margin-right:8px;">API_CONTRACT.md v1.0</span>
+        <button type="button" class="chip-btn mono is-active" data-tab="detail">GET /locations/{id}</button>
+        <button type="button" class="chip-btn mono" data-tab="list">GET /locations</button>
+        <button type="button" class="chip-btn mono" data-tab="geojson">contour.geojson</button>
+      </div>
+      <button type="button" id="closeDialogBtn" class="btn">Закрити</button>
+    </div>
+    <div class="dialog-body">
+      <pre id="dialogJsonPre" class="json-pre"></pre>
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      /* ============================================================
+         1. MOCK DATA STRICTLY MATCHING API_CONTRACT.md v1.0
+         ============================================================ */
+      const LOCATIONS_DETAILS = {
+        "oman-caroline-bezengi-2026": {
+          id: "oman-caroline-bezengi-2026",
+          title: "Острови Халланіят, Оман",
+          coords: [56.02, 17.50],
+          bbox: [55.35, 16.90, 56.85, 18.10],
+          baseline_date: "2026-06-01",
+          baseline_before_url: "/data/locations/oman-caroline-bezengi-2026/before.webp",
+          description:
+            "Посадка на мілину танкера Caroline Bezengi після вибуху призвела до масштабного розливу нафти в Аравійському морі. На радарних знімках NISAR чітко фіксується динаміка розширення гладкої темної плями біля заповідного острова Аль-Кіблія.",
+          source_url:
+            "https://www.cbsnews.com/news/abandoned-russian-tanker-leaking-oil-off-oman-coast-threatening-environmental-disaster/",
+          snapshots: [
+            {
+              step_id: "t1",
+              date: "2026-07-02",
+              label: "Початковий шлейф",
+              area_km2: 420.0,
+              after_url: "/data/locations/oman-caroline-bezengi-2026/after_t1.webp",
+              mask_url: "/data/locations/oman-caroline-bezengi-2026/mask_t1.webp",
+              contour_geojson_url: "/api/v1/locations/oman-caroline-bezengi-2026/snapshots/t1/contour.geojson"
+            },
+            {
+              step_id: "t2",
+              date: "2026-08-18",
+              label: "Максимум розливу",
+              area_km2: 2040.5,
+              after_url: "/data/locations/oman-caroline-bezengi-2026/after_t2.webp",
+              mask_url: "/data/locations/oman-caroline-bezengi-2026/mask_t2.webp",
+              contour_geojson_url: "/api/v1/locations/oman-caroline-bezengi-2026/snapshots/t2/contour.geojson"
+            },
+            {
+              step_id: "t3",
+              date: "2026-09-11",
+              label: "Дрейф та розсіювання",
+              area_km2: 1180.2,
+              after_url: "/data/locations/oman-caroline-bezengi-2026/after_t3.webp",
+              mask_url: "/data/locations/oman-caroline-bezengi-2026/mask_t3.webp",
+              contour_geojson_url: "/api/v1/locations/oman-caroline-bezengi-2026/snapshots/t3/contour.geojson"
+            }
+          ]
+        },
+        "kerch-strait-2025": {
+          id: "kerch-strait-2025",
+          title: "Керченська протока: аварія танкерів",
+          coords: [36.55, 45.12],
+          bbox: [36.25, 44.90, 36.92, 45.36],
+          baseline_date: "2024-12-03",
+          baseline_before_url: "/data/locations/kerch-strait-2025/before.webp",
+          description:
+            "Штормова аварія танкерів «Волгонефть-212» та «Волгонефть-239» у грудні 2024 року спричинила витік тисяч тонн важкого мазуту. Багаточасові SAR-сцени дозволяють відстежити міграцію плям уздовж берегової лінії навіть за зимової штормової хмарності.",
+          source_url:
+            "https://ceobs.org/kerch-strait-oil-spill-highlights-environmental-risks-of-shadow-fleet-tankers/",
+          snapshots: [
+            {
+              step_id: "t1",
+              date: "2024-12-19",
+              label: "Перші витоки біля коси",
+              area_km2: 38.4,
+              after_url: "/data/locations/kerch-strait-2025/after_t1.webp",
+              mask_url: "/data/locations/kerch-strait-2025/mask_t1.webp",
+              contour_geojson_url: "/api/v1/locations/kerch-strait-2025/snapshots/t1/contour.geojson"
+            },
+            {
+              step_id: "t2",
+              date: "2025-01-12",
+              label: "Винос у Чорне море",
+              area_km2: 142.8,
+              after_url: "/data/locations/kerch-strait-2025/after_t2.webp",
+              mask_url: "/data/locations/kerch-strait-2025/mask_t2.webp",
+              contour_geojson_url: "/api/v1/locations/kerch-strait-2025/snapshots/t2/contour.geojson"
+            },
+            {
+              step_id: "t3",
+              date: "2025-07-14",
+              label: "Вторинний шлейф від уламків",
+              area_km2: 86.5,
+              after_url: "/data/locations/kerch-strait-2025/after_t3.webp",
+              mask_url: "/data/locations/kerch-strait-2025/mask_t3.webp",
+              contour_geojson_url: "/api/v1/locations/kerch-strait-2025/snapshots/t3/contour.geojson"
+            }
+          ]
+        },
+        "maracaibo-chronic-2026": {
+          id: "maracaibo-chronic-2026",
+          title: "Озеро Маракайбо: хронічні витоки",
+          coords: [-71.56, 9.82],
+          bbox: [-71.95, 9.52, -71.15, 10.15],
+          baseline_date: "2026-04-10",
+          baseline_before_url: "/data/locations/maracaibo-chronic-2026/before.webp",
+          description:
+            "Систематичні витоки з підводних трубопроводів та нафтовидобувних платформ в акваторії озера Маракайбо. У L-діапазоні чітко видно контраст між яскравими металевими буровими вежами та розтіканням поверхневої нафтової плівки.",
+          source_url: "https://earthobservatory.nasa.gov/images/148914/oil-slicks-on-lake-maracaibo",
+          snapshots: [
+            {
+              step_id: "t1",
+              date: "2026-05-04",
+              label: "Точковий викид на східному секторі",
+              area_km2: 95.0,
+              after_url: "/data/locations/maracaibo-chronic-2026/after_t1.webp",
+              mask_url: "/data/locations/maracaibo-chronic-2026/mask_t1.webp",
+              contour_geojson_url: "/api/v1/locations/maracaibo-chronic-2026/snapshots/t1/contour.geojson"
+            },
+            {
+              step_id: "t2",
+              date: "2026-06-22",
+              label: "Злиття шлейфів вздовж течії",
+              area_km2: 310.4,
+              after_url: "/data/locations/maracaibo-chronic-2026/after_t2.webp",
+              mask_url: "/data/locations/maracaibo-chronic-2026/mask_t2.webp",
+              contour_geojson_url: "/api/v1/locations/maracaibo-chronic-2026/snapshots/t2/contour.geojson"
+            },
+            {
+              step_id: "t3",
+              date: "2026-08-03",
+              label: "Прибійний дрейф до берега",
+              area_km2: 264.0,
+              after_url: "/data/locations/maracaibo-chronic-2026/after_t3.webp",
+              mask_url: "/data/locations/maracaibo-chronic-2026/mask_t3.webp",
+              contour_geojson_url: "/api/v1/locations/maracaibo-chronic-2026/snapshots/t3/contour.geojson"
+            }
+          ]
+        }
+      };
+
+      const LOCATIONS_LIST = Object.values(LOCATIONS_DETAILS).map((loc) => {
+        const last = loc.snapshots[loc.snapshots.length - 1];
+        return {
+          id: loc.id,
+          title: loc.title,
+          coords: loc.coords,
+          baseline_date: loc.baseline_date,
+          latest_date: last.date,
+          area_km2: last.area_km2
+        };
+      });
+
+      /* Scene geometry in normalized [0..1] raster coordinates for realistic procedural SAR rendering */
+      const SCENE_PROFILES = {
+        "oman-caroline-bezengi-2026": {
+          seed: 1041,
+          scaleKm: 35,
+          landPolygons: [
+            // Arabian coast north edge
+            [[0.00, 0.00], [0.72, 0.00], [0.68, 0.14], [0.46, 0.21], [0.22, 0.16], [0.00, 0.26]],
+            // Al-Hallaniyah island center-left
+            [[0.29, 0.48], [0.36, 0.45], [0.41, 0.50], [0.38, 0.56], [0.30, 0.55], [0.27, 0.51]],
+            // Al-Qibliyah smaller island
+            [[0.52, 0.43], [0.56, 0.42], [0.58, 0.46], [0.54, 0.48]]
+          ],
+          reflectors: [[0.54, 0.50], [0.39, 0.53], [0.62, 0.34]],
+          cartography: {
+            roads: [
+              [[0.02, 0.15], [0.22, 0.10], [0.46, 0.14], [0.66, 0.07]],
+              [[0.29, 0.50], [0.38, 0.52]]
+            ],
+            shippingLanes: [
+              [[0.04, 0.63], [0.48, 0.56], [0.95, 0.27]]
+            ],
+            settlements: [
+              { x: 0.22, y: 0.10, name: "Хасік", kind: "town" },
+              { x: 0.46, y: 0.14, name: "Шуваймія", kind: "town" },
+              { x: 0.34, y: 0.51, name: "о. Аль-Халланія", kind: "island" },
+              { x: 0.55, y: 0.44, name: "о. Аль-Кіблія (заповідник)", kind: "reserve" },
+              { x: 0.54, y: 0.50, name: "Танкер Caroline Bezengi", kind: "incident" }
+            ],
+            waterLabels: [
+              { x: 0.26, y: 0.80, name: "АРАВІЙСЬКЕ МОРЕ" }
+            ]
+          },
+          spillByStep: {
+            t1: [
+              { cx: 0.56, cy: 0.52, rx: 0.08, ry: 0.045, rot: -0.45, wobble: 0.16 },
+              { cx: 0.62, cy: 0.47, rx: 0.06, ry: 0.032, rot: -0.60, wobble: 0.18 }
+            ],
+            t2: [
+              { cx: 0.57, cy: 0.52, rx: 0.13, ry: 0.065, rot: -0.40, wobble: 0.18 },
+              { cx: 0.68, cy: 0.43, rx: 0.14, ry: 0.075, rot: -0.55, wobble: 0.22 },
+              { cx: 0.77, cy: 0.36, rx: 0.09, ry: 0.045, rot: -0.25, wobble: 0.20 }
+            ],
+            t3: [
+              { cx: 0.65, cy: 0.47, rx: 0.11, ry: 0.050, rot: -0.30, wobble: 0.24 },
+              { cx: 0.78, cy: 0.41, rx: 0.10, ry: 0.052, rot: -0.50, wobble: 0.21 }
+            ]
+          }
+        },
+        "kerch-strait-2025": {
+          seed: 2089,
+          scaleKm: 15,
+          landPolygons: [
+            // Western shore (Crimea)
+            [[0.00, 0.00], [0.36, 0.00], [0.42, 0.24], [0.35, 0.45], [0.27, 0.62], [0.00, 0.66]],
+            // Eastern shore (Taman)
+            [[0.62, 0.00], [1.00, 0.00], [1.00, 0.64], [0.76, 0.56], [0.64, 0.39], [0.58, 0.21]]
+          ],
+          reflectors: [[0.49, 0.54], [0.53, 0.56], [0.48, 0.34], [0.50, 0.41]],
+          cartography: {
+            roads: [
+              [[0.02, 0.28], [0.23, 0.25], [0.39, 0.25], [0.61, 0.21], [0.80, 0.19], [0.97, 0.16]],
+              [[0.04, 0.48], [0.26, 0.44]],
+              [[0.68, 0.38], [0.93, 0.47]]
+            ],
+            shippingLanes: [
+              [[0.49, 0.04], [0.48, 0.32], [0.50, 0.55], [0.54, 0.94]]
+            ],
+            settlements: [
+              { x: 0.23, y: 0.25, name: "м. Керч", kind: "town" },
+              { x: 0.73, y: 0.36, name: "Тамань", kind: "town" },
+              { x: 0.35, y: 0.36, name: "коса Тузла", kind: "island" },
+              { x: 0.66, y: 0.42, name: "мис Панагія", kind: "island" },
+              { x: 0.51, y: 0.55, name: "Волгонефть-212 / 239", kind: "incident" }
+            ],
+            waterLabels: [
+              { x: 0.48, y: 0.10, name: "АЗОВСЬКЕ МОРЕ" },
+              { x: 0.24, y: 0.85, name: "ЧОРНЕ МОРЕ" }
+            ]
+          },
+          spillByStep: {
+            t1: [
+              { cx: 0.51, cy: 0.57, rx: 0.06, ry: 0.045, rot: 0.28, wobble: 0.17 }
+            ],
+            t2: [
+              { cx: 0.50, cy: 0.61, rx: 0.09, ry: 0.065, rot: 0.32, wobble: 0.22 },
+              { cx: 0.57, cy: 0.73, rx: 0.12, ry: 0.060, rot: 0.55, wobble: 0.20 },
+              { cx: 0.44, cy: 0.76, rx: 0.07, ry: 0.042, rot: -0.30, wobble: 0.18 }
+            ],
+            t3: [
+              { cx: 0.52, cy: 0.62, rx: 0.08, ry: 0.050, rot: 0.40, wobble: 0.20 },
+              { cx: 0.61, cy: 0.72, rx: 0.07, ry: 0.038, rot: 0.65, wobble: 0.22 }
+            ]
+          }
+        },
+        "maracaibo-chronic-2026": {
+          seed: 3197,
+          scaleKm: 20,
+          landPolygons: [
+            // Western lakeshore
+            [[0.00, 0.00], [0.24, 0.00], [0.28, 0.34], [0.22, 0.71], [0.30, 1.00], [0.00, 1.00]],
+            // Eastern oil coast
+            [[0.80, 0.00], [1.00, 0.00], [1.00, 1.00], [0.84, 1.00], [0.76, 0.55], [0.82, 0.24]]
+          ],
+          reflectors: [
+            [0.64, 0.42], [0.68, 0.48], [0.61, 0.56], [0.66, 0.64], [0.58, 0.46], [0.70, 0.58]
+          ],
+          cartography: {
+            roads: [
+              [[0.11, 0.05], [0.18, 0.32], [0.13, 0.67], [0.19, 0.96]],
+              [[0.89, 0.05], [0.86, 0.31], [0.83, 0.58], [0.90, 0.95]]
+            ],
+            shippingLanes: [
+              [[0.51, 0.04], [0.50, 0.50], [0.49, 0.96]]
+            ],
+            settlements: [
+              { x: 0.17, y: 0.25, name: "м. Маракайбо", kind: "town" },
+              { x: 0.86, y: 0.31, name: "м. Кабімас", kind: "town" },
+              { x: 0.83, y: 0.58, name: "Сьюдад-Охеда", kind: "town" },
+              { x: 0.66, y: 0.48, name: "Бурові платформи", kind: "incident" }
+            ],
+            waterLabels: [
+              { x: 0.49, y: 0.21, name: "ОЗЕРО МАРАКАЙБО" }
+            ]
+          },
+          spillByStep: {
+            t1: [
+              { cx: 0.63, cy: 0.46, rx: 0.07, ry: 0.045, rot: -0.7, wobble: 0.20 },
+              { cx: 0.66, cy: 0.61, rx: 0.055, ry: 0.035, rot: -0.5, wobble: 0.18 }
+            ],
+            t2: [
+              { cx: 0.58, cy: 0.43, rx: 0.12, ry: 0.068, rot: -0.65, wobble: 0.22 },
+              { cx: 0.55, cy: 0.56, rx: 0.13, ry: 0.070, rot: -0.45, wobble: 0.24 },
+              { cx: 0.47, cy: 0.65, rx: 0.08, ry: 0.045, rot: -0.35, wobble: 0.19 }
+            ],
+            t3: [
+              { cx: 0.48, cy: 0.44, rx: 0.11, ry: 0.055, rot: -0.50, wobble: 0.21 },
+              { cx: 0.43, cy: 0.58, rx: 0.10, ry: 0.052, rot: -0.30, wobble: 0.20 }
+            ]
+          }
+        }
+      };
+
+      /* ============================================================
+         2. APPLICATION STATE
+         ============================================================ */
+      const state = {
+        activeLocationId: "oman-caroline-bezengi-2026",
+        activeStepIdx: 1,       // Start on t2 ("Максимум розливу") for vivid first look
+        spillOpacity: 0.65,     // 0.0 .. 1.0
+        showContour: true,
+        showTrajectory: true,
+        isPlaying: false,
+        playTimerId: null,
+        splitRatio: 0.50,       // 0.05 .. 0.95
+        minimapZoomed: false,
+        zoom: 1.0,
+        panX: 0,
+        panY: 0,
+        dialogTab: "detail"
+      };
+
+      /* ============================================================
+         3. DOM REFERENCES
+         ============================================================ */
+      const el = {
+        minimapSvg: document.getElementById("overviewMinimap"),
+        minimapContinents: document.getElementById("minimapContinents"),
+        minimapPins: document.getElementById("minimapPins"),
+        minimapResetBtn: document.getElementById("minimapResetBtn"),
+        minimapModeLabel: document.getElementById("minimapModeLabel"),
+        eventSelect: document.getElementById("eventSelect"),
+        sidebarCount: document.getElementById("sidebarCount"),
+
+        detailTitle: document.getElementById("detailTitle"),
+        detailId: document.getElementById("detailId"),
+        detailCoordsDeg: document.getElementById("detailCoordsDeg"),
+        detailCoordsRaw: document.getElementById("detailCoordsRaw"),
+        detailAreaKm2: document.getElementById("detailAreaKm2"),
+        detailStepId: document.getElementById("detailStepId"),
+        detailAreaDelta: document.getElementById("detailAreaDelta"),
+        detailBaselineDate: document.getElementById("detailBaselineDate"),
+        detailTrackingStart: document.getElementById("detailTrackingStart"),
+        detailSnapshotDate: document.getElementById("detailSnapshotDate"),
+        detailSnapshotLabel: document.getElementById("detailSnapshotLabel"),
+        detailSnapshotDelta: document.getElementById("detailSnapshotDelta"),
+        detailDescription: document.getElementById("detailDescription"),
+        detailSourceLink: document.getElementById("detailSourceLink"),
+
+        mapStage: document.getElementById("mapStage"),
+        sarCanvas: document.getElementById("sarCanvas"),
+        curtainLine: document.getElementById("curtainLine"),
+        curtainHit: document.getElementById("curtainHit"),
+        badgeAfterDate: document.getElementById("badgeAfterDate"),
+        badgeAfterLabel: document.getElementById("badgeAfterLabel"),
+        hudCursorCoords: document.getElementById("hudCursorCoords"),
+        hudBbox: document.getElementById("hudBbox"),
+        hudScaleKm: document.getElementById("hudScaleKm"),
+        colorbarCanvas: document.getElementById("colorbarCanvas"),
+
+        zoomInBtn: document.getElementById("zoomInBtn"),
+        zoomOutBtn: document.getElementById("zoomOutBtn"),
+        zoomResetBtn: document.getElementById("zoomResetBtn"),
+
+        opacitySlider: document.getElementById("opacitySlider"),
+        opacityReadout: document.getElementById("opacityReadout"),
+        presetBtns: Array.from(document.querySelectorAll("[data-opacity]")),
+        contourToggle: document.getElementById("contourToggle"),
+        trajectoryToggle: document.getElementById("trajectoryToggle"),
+
+        prevStepBtn: document.getElementById("prevStepBtn"),
+        nextStepBtn: document.getElementById("nextStepBtn"),
+        playTimelineBtn: document.getElementById("playTimelineBtn"),
+        playIconPath: document.getElementById("playIconPath"),
+        playTimelineLabel: document.getElementById("playTimelineLabel"),
+        stepCounter: document.getElementById("stepCounter"),
+        timelineSteps: document.getElementById("timelineSteps"),
+
+        contractDialog: document.getElementById("contractDialog"),
+        openContractBtn: document.getElementById("openContractBtn"),
+        inspectJsonBtn: document.getElementById("inspectJsonBtn"),
+        closeDialogBtn: document.getElementById("closeDialogBtn"),
+        dialogJsonPre: document.getElementById("dialogJsonPre"),
+        dialogTabs: Array.from(document.querySelectorAll("[data-tab]"))
+      };
+
+      /* ============================================================
+         4. WORLD MINIMAP PROJECTION & VECTOR SILHOUETTES
+         ============================================================ */
+      function lonLatToMini(lon, lat) {
+        return [
+          ((lon + 180) / 360) * 320,
+          ((90 - lat) / 180) * 150
+        ];
+      }
+
+      const WORLD_OUTLINES_LONLAT = [
+        // North & Central America
+        [[-168, 65], [-140, 70], [-95, 70], [-65, 58], [-55, 48], [-76, 35], [-81, 25], [-96, 20], [-88, 16], [-80, 9], [-85, 11], [-105, 20], [-115, 32], [-125, 48], [-152, 60]],
+        // South America
+        [[-79, 9], [-72, 12], [-62, 10], [-50, 1], [-35, -6], [-39, -18], [-48, -28], [-64, -41], [-68, -54], [-74, -52], [-72, -33], [-71, -18], [-81, -5]],
+        // Europe + Eurasia + Asia
+        [[-9, 36], [-9, 43], [-2, 43], [-4, 48], [6, 53], [10, 58], [18, 69], [40, 68], [72, 72], [115, 73], [168, 66], [160, 55], [140, 52], [130, 40], [122, 31], [109, 20], [103, 2], [97, 16], [89, 22], [78, 8], [70, 21], [58, 25], [56, 22], [52, 15], [44, 13], [35, 29], [36, 37], [28, 41], [32, 46], [37, 45], [39, 47], [29, 44], [24, 38], [16, 38], [9, 44], [2, 41]],
+        // Africa
+        [[-17, 15], [-13, 28], [-5, 36], [10, 37], [32, 31], [43, 12], [51, 11], [41, -2], [40, -16], [32, -26], [19, -35], [14, -22], [10, 3], [2, 6], [-13, 8]],
+        // Australia
+        [[114, -22], [130, -12], [142, -11], [153, -27], [149, -37], [138, -36], [122, -34], [114, -29]],
+        // Greenland
+        [[-52, 60], [-42, 60], [-20, 74], [-35, 82], [-68, 76]]
+      ];
+
+      function initMinimapContinents() {
+        const paths = WORLD_OUTLINES_LONLAT.map((poly) => {
+          const pts = poly.map(([lon, lat]) => {
+            const [x, y] = lonLatToMini(lon, lat);
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          });
+          return `M ${pts.join(" L ")} Z`;
+        });
+        el.minimapContinents.innerHTML = paths.map((d) => `<path d="${d}" />`).join("");
+      }
+
+      function renderMinimap() {
+        const activeLoc = LOCATIONS_DETAILS[state.activeLocationId];
+        if (state.minimapZoomed && activeLoc) {
+          const [cx, cy] = lonLatToMini(activeLoc.coords[0], activeLoc.coords[1]);
+          const w = 110;
+          const h = 51.56;
+          const x0 = Math.max(0, Math.min(320 - w, cx - w / 2));
+          const y0 = Math.max(0, Math.min(150 - h, cy - h / 2));
+          el.minimapSvg.setAttribute("viewBox", `${x0.toFixed(1)} ${y0.toFixed(1)} ${w} ${h}`);
+          el.minimapModeLabel.textContent = `РЕГІОН: ${activeLoc.id.toUpperCase()}`;
+        } else {
+          el.minimapSvg.setAttribute("viewBox", "0 0 320 150");
+          el.minimapModeLabel.textContent = "ОГЛЯД: ВСІ ЛОКАЦІЇ";
+        }
+
+        el.minimapPins.innerHTML = "";
+        const scaleFactor = state.minimapZoomed ? 0.5 : 1;
+
+        LOCATIONS_LIST.forEach((loc) => {
+          const [px, py] = lonLatToMini(loc.coords[0], loc.coords[1]);
+          const isActive = loc.id === state.activeLocationId;
+
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("class", "map-pin");
+          g.setAttribute("role", "button");
+          g.setAttribute("tabindex", "0");
+          g.setAttribute("aria-label", loc.title);
+
+          if (isActive) {
+            const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            ring.setAttribute("cx", px.toFixed(1));
+            ring.setAttribute("cy", py.toFixed(1));
+            ring.setAttribute("r", (8.5 * scaleFactor).toFixed(1));
+            ring.setAttribute("fill", "none");
+            ring.setAttribute("stroke", "#f4f4f5");
+            ring.setAttribute("stroke-width", (1.4 * scaleFactor).toFixed(2));
+            g.appendChild(ring);
+          }
+
+          const core = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          core.setAttribute("class", "pin-core");
+          core.setAttribute("cx", px.toFixed(1));
+          core.setAttribute("cy", py.toFixed(1));
+          core.setAttribute("r", ((isActive ? 5 : 4) * scaleFactor).toFixed(1));
+          core.setAttribute("fill", "#f97316");
+          core.setAttribute("stroke", "#09090b");
+          core.setAttribute("stroke-width", (1.2 * scaleFactor).toFixed(2));
+          g.appendChild(core);
+
+          const titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          titleEl.textContent = `${loc.title} (${loc.area_km2} км²)`;
+          g.appendChild(titleEl);
+
+          g.addEventListener("click", () => selectLocation(loc.id));
+          g.addEventListener("keydown", (evt) => {
+            if (evt.key === "Enter" || evt.key === " ") {
+              evt.preventDefault();
+              selectLocation(loc.id);
+            }
+          });
+          el.minimapPins.appendChild(g);
+        });
+      }
+
+      /* ============================================================
+         5. OFFSCREEN PROCEDURAL SAR RASTER CACHE (W × H EXACT ALIGN)
+         ============================================================ */
+      const RASTER_W = 720;
+      const RASTER_H = 540;
+      const cache = new Map();
+
+      function createPrng(seed) {
+        let s = seed >>> 0;
+        return () => {
+          s = (s * 1664525 + 1013904223) >>> 0;
+          return s / 4294967296;
+        };
+      }
+
+      function pointInPoly(x, y, poly) {
+        let inside = false;
+        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+          const xi = poly[i][0];
+          const yi = poly[i][1];
+          const xj = poly[j][0];
+          const yj = poly[j][1];
+          const intersect =
+            yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-12) + xi;
+          if (intersect) inside = !inside;
+        }
+        return inside;
+      }
+
+      function buildBlobPolygonNorm(blob, pointsCount = 36) {
+        const pts = [];
+        const cosR = Math.cos(blob.rot);
+        const sinR = Math.sin(blob.rot);
+        for (let i = 0; i < pointsCount; i++) {
+          const theta = (i / pointsCount) * Math.PI * 2;
+          const mod =
+            1 +
+            blob.wobble *
+              (0.55 * Math.sin(theta * 3 + 0.7) +
+                0.30 * Math.cos(theta * 5 - 1.2) +
+                0.15 * Math.sin(theta * 7 + 2.1));
+          const lx = Math.cos(theta) * blob.rx * mod;
+          const ly = Math.sin(theta) * blob.ry * mod;
+          const gx = blob.cx + lx * cosR - ly * sinR;
+          const gy = blob.cy + lx * sinR + ly * cosR;
+          pts.push([gx, gy]);
+        }
+        return pts;
+      }
+
+      function spillIntensityAt(nx, ny, blobs) {
+        let best = 0;
+        for (const b of blobs) {
+          const dx = nx - b.cx;
+          const dy = ny - b.cy;
+          const cosR = Math.cos(-b.rot);
+          const sinR = Math.sin(-b.rot);
+          const lx = dx * cosR - dy * sinR;
+          const ly = dx * sinR + dy * cosR;
+          const theta = Math.atan2(ly, lx);
+          const mod =
+            1 +
+            b.wobble *
+              (0.55 * Math.sin(theta * 3 + 0.7) +
+                0.30 * Math.cos(theta * 5 - 1.2) +
+                0.15 * Math.sin(theta * 7 + 2.1));
+          const dist = Math.hypot(lx / (b.rx * mod), ly / (b.ry * mod));
+          if (dist < 1.15) {
+            const val = Math.max(0, Math.min(1, (1.12 - dist) / 0.25));
+            if (val > best) best = val;
+          }
+        }
+        return best;
+      }
+
+      function getLocationLayers(locId, stepId) {
+        const key = `${locId}::${stepId}`;
+        if (cache.has(key)) return cache.get(key);
+
+        const profile = SCENE_PROFILES[locId];
+        const baseKey = `${locId}::before`;
+        let baseData;
+
+        if (cache.has(baseKey)) {
+          baseData = cache.get(baseKey);
+        } else {
+          const beforeCanvas = document.createElement("canvas");
+          beforeCanvas.width = RASTER_W;
+          beforeCanvas.height = RASTER_H;
+          const bCtx = beforeCanvas.getContext("2d");
+          const img = bCtx.createImageData(RASTER_W, RASTER_H);
+          const d = img.data;
+
+          const baseMapCanvas = document.createElement("canvas");
+          baseMapCanvas.width = RASTER_W;
+          baseMapCanvas.height = RASTER_H;
+          const bmCtx = baseMapCanvas.getContext("2d");
+          const bmImg = bmCtx.createImageData(RASTER_W, RASTER_H);
+          const bmd = bmImg.data;
+
+          const rand = createPrng(profile.seed);
+
+          // Base scalar backscatter field
+          const baseValues = new Uint8ClampedArray(RASTER_W * RASTER_H);
+          const landMask = new Uint8Array(RASTER_W * RASTER_H);
+
+          for (let py = 0; py < RASTER_H; py++) {
+            const ny = py / RASTER_H;
+            for (let px = 0; px < RASTER_W; px++) {
+              const nx = px / RASTER_W;
+              const idx = py * RASTER_W + px;
+
+              let onLand = false;
+              for (const poly of profile.landPolygons) {
+                if (pointInPoly(nx, ny, poly)) {
+                  onLand = true;
+                  break;
+                }
+              }
+              landMask[idx] = onLand ? 1 : 0;
+
+              // SAR speckle (rayleigh-like multi-look approximation)
+              const speckle = (rand() + rand() + rand()) / 3 - 0.5;
+              const wave = Math.sin(nx * 26 + ny * 18) * 6 + Math.cos(nx * 54 - ny * 40) * 4;
+              const relief = Math.sin(nx * 38 + ny * 22) * 18 + Math.cos(ny * 44) * 12;
+
+              let gray;
+              if (onLand) {
+                gray = 152 + relief + speckle * 65;
+              } else {
+                gray = 96 + wave + speckle * 42;
+              }
+
+              // Bright double-bounce point targets (tanker wrecks / rigs)
+              for (const [rx, ry] of profile.reflectors) {
+                const d2 = (nx - rx) ** 2 + (ny - ry) ** 2;
+                if (d2 < 0.000045) {
+                  gray += 155 * (1 - d2 / 0.000045);
+                }
+              }
+
+              const gClamp = Math.max(12, Math.min(252, Math.round(gray)));
+              baseValues[idx] = gClamp;
+              const p4 = idx * 4;
+              d[p4] = gClamp;
+              d[p4 + 1] = gClamp;
+              d[p4 + 2] = gClamp;
+              d[p4 + 3] = 255;
+
+              // Human-readable cartographic basemap (OSM Dark / Topographic style)
+              if (onLand) {
+                const shade = Math.round(relief * 0.35);
+                bmd[p4] = Math.max(25, Math.min(72, 42 + shade));
+                bmd[p4 + 1] = Math.max(30, Math.min(82, 50 + shade));
+                bmd[p4 + 2] = Math.max(28, Math.min(72, 44 + shade));
+                bmd[p4 + 3] = 255;
+              } else {
+                const bathy = Math.sin(nx * 11 + ny * 9) * 5 + Math.cos(nx * 19 - ny * 14) * 3;
+                bmd[p4] = Math.round(13 + bathy * 0.35);
+                bmd[p4 + 1] = Math.round(35 + bathy * 0.65);
+                bmd[p4 + 2] = Math.round(58 + bathy * 0.85);
+                bmd[p4 + 3] = 255;
+              }
+            }
+          }
+          bCtx.putImageData(img, 0, 0);
+          bmCtx.putImageData(bmImg, 0, 0);
+
+          // Vector coastlines, shipping lanes & highways onto human baseMapCanvas
+          bmCtx.save();
+          // Shipping corridors
+          if (profile.cartography && profile.cartography.shippingLanes) {
+            bmCtx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+            bmCtx.lineWidth = 1.4;
+            bmCtx.setLineDash([6, 6]);
+            profile.cartography.shippingLanes.forEach((lane) => {
+              bmCtx.beginPath();
+              lane.forEach(([lx, ly], idx) => {
+                if (idx === 0) bmCtx.moveTo(lx * RASTER_W, ly * RASTER_H);
+                else bmCtx.lineTo(lx * RASTER_W, ly * RASTER_H);
+              });
+              bmCtx.stroke();
+            });
+            bmCtx.setLineDash([]);
+          }
+
+          // Coastlines
+          bmCtx.strokeStyle = "#64748b";
+          bmCtx.lineWidth = 1.8;
+          profile.landPolygons.forEach((poly) => {
+            bmCtx.beginPath();
+            poly.forEach(([lx, ly], idx) => {
+              if (idx === 0) bmCtx.moveTo(lx * RASTER_W, ly * RASTER_H);
+              else bmCtx.lineTo(lx * RASTER_W, ly * RASTER_H);
+            });
+            bmCtx.closePath();
+            bmCtx.stroke();
+          });
+
+          // Land highways / roads
+          if (profile.cartography && profile.cartography.roads) {
+            bmCtx.strokeStyle = "#b45309";
+            bmCtx.lineWidth = 1.6;
+            profile.cartography.roads.forEach((road) => {
+              bmCtx.beginPath();
+              road.forEach(([lx, ly], idx) => {
+                if (idx === 0) bmCtx.moveTo(lx * RASTER_W, ly * RASTER_H);
+                else bmCtx.lineTo(lx * RASTER_W, ly * RASTER_H);
+              });
+              bmCtx.stroke();
+            });
+          }
+          bmCtx.restore();
+
+          baseData = { beforeCanvas, baseMapCanvas, baseValues, landMask };
+          cache.set(baseKey, baseData);
+        }
+
+        // Generate after_<step> and mask_<step> strictly aligned at RASTER_W × RASTER_H
+        const blobs = profile.spillByStep[stepId] || [];
+        const afterCanvas = document.createElement("canvas");
+        afterCanvas.width = RASTER_W;
+        afterCanvas.height = RASTER_H;
+        const aCtx = afterCanvas.getContext("2d");
+        const aImg = aCtx.createImageData(RASTER_W, RASTER_H);
+        const ad = aImg.data;
+
+        const maskCanvas = document.createElement("canvas");
+        maskCanvas.width = RASTER_W;
+        maskCanvas.height = RASTER_H;
+        const mCtx = maskCanvas.getContext("2d");
+        const mImg = mCtx.createImageData(RASTER_W, RASTER_H);
+        const md = mImg.data;
+
+        const randStep = createPrng(profile.seed + stepId.charCodeAt(1) * 97);
+
+        for (let py = 0; py < RASTER_H; py++) {
+          const ny = py / RASTER_H;
+          for (let px = 0; px < RASTER_W; px++) {
+            const nx = px / RASTER_W;
+            const idx = py * RASTER_W + px;
+            const p4 = idx * 4;
+            const isLand = baseData.landMask[idx] === 1;
+            const driftNoise = (randStep() - 0.5) * 14;
+
+            let g = baseData.baseValues[idx] + driftNoise;
+            let spillVal = 0;
+
+            if (!isLand) {
+              spillVal = spillIntensityAt(nx, ny, blobs);
+              if (spillVal > 0.02) {
+                // Physical oil slick damping: drop backscatter into smooth dark band
+                g = g * (1 - spillVal * 0.78) + 14 * spillVal;
+              }
+            }
+
+            const gc = Math.max(8, Math.min(252, Math.round(g)));
+            ad[p4] = gc;
+            ad[p4 + 1] = gc;
+            ad[p4 + 2] = gc;
+            ad[p4 + 3] = 255;
+
+            // Binary mask_t*.webp contract: #ef4444 (239, 68, 68, 255) or transparent (0,0,0,0)
+            if (!isLand && spillVal >= 0.48) {
+              md[p4] = 239;
+              md[p4 + 1] = 68;
+              md[p4 + 2] = 68;
+              md[p4 + 3] = 255;
+            } else {
+              md[p4] = 0;
+              md[p4 + 1] = 0;
+              md[p4 + 2] = 0;
+              md[p4 + 3] = 0;
+            }
+          }
+        }
+        aCtx.putImageData(aImg, 0, 0);
+        mCtx.putImageData(mImg, 0, 0);
+
+        const contoursNorm = getStepContoursNorm(locId, stepId);
+        const result = {
+          beforeCanvas: baseData.beforeCanvas,
+          baseMapCanvas: baseData.baseMapCanvas,
+          afterCanvas,
+          maskCanvas,
+          contoursNorm
+        };
+        cache.set(key, result);
+        return result;
+      }
+
+      /* ============================================================
+         6. MAIN STAGE CANVAS RENDERER (SAR / Hybrid / Human Map)
+         ============================================================ */
+      function getDrawTransform(stageW, stageH) {
+        const coverScale = Math.max(stageW / RASTER_W, stageH / RASTER_H);
+        const s = coverScale * state.zoom;
+        const drawW = RASTER_W * s;
+        const drawH = RASTER_H * s;
+        const ox = (stageW - drawW) / 2 + state.panX;
+        const oy = (stageH - drawH) / 2 + state.panY;
+        return { ox, oy, drawW, drawH, s };
+      }
+
+      function getStepContoursNorm(locId, stepId) {
+        const profile = SCENE_PROFILES[locId];
+        const blobs = (profile && profile.spillByStep[stepId]) || [];
+        return blobs.map((b) => buildBlobPolygonNorm(b, 36));
+      }
+
+      function getContoursCentroidNorm(contoursNorm) {
+        let totalArea = 0;
+        let sumX = 0;
+        let sumY = 0;
+        contoursNorm.forEach((poly) => {
+          if (!poly.length) return;
+          let area2 = 0;
+          let cx = 0;
+          let cy = 0;
+          for (let i = 0; i < poly.length; i++) {
+            const [x0, y0] = poly[i];
+            const [x1, y1] = poly[(i + 1) % poly.length];
+            const cross = x0 * y1 - x1 * y0;
+            area2 += cross;
+            cx += (x0 + x1) * cross;
+            cy += (y0 + y1) * cross;
+          }
+          if (Math.abs(area2) > 1e-8) {
+            const absA = Math.abs(area2);
+            totalArea += absA;
+            sumX += (cx / (3 * area2)) * absA;
+            sumY += (cy / (3 * area2)) * absA;
+          }
+        });
+        if (totalArea <= 0) return null;
+        return [sumX / totalArea, sumY / totalArea];
+      }
+
+      function drawSpillOverlay(ctx, layers, ox, oy, drawW, drawH) {
+        if (state.spillOpacity > 0) {
+          ctx.save();
+          ctx.globalAlpha = state.spillOpacity;
+          ctx.drawImage(layers.maskCanvas, ox, oy, drawW, drawH);
+          ctx.restore();
+        }
+
+        if (state.showContour) {
+          ctx.save();
+          ctx.strokeStyle = "#ef4444";
+          ctx.lineWidth = 1.6;
+          ctx.globalAlpha = Math.max(0.45, state.spillOpacity);
+          layers.contoursNorm.forEach((poly) => {
+            ctx.beginPath();
+            poly.forEach(([nx, ny], idx) => {
+              const px = ox + nx * drawW;
+              const py = oy + ny * drawH;
+              if (idx === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            });
+            ctx.closePath();
+            ctx.stroke();
+          });
+          ctx.restore();
+        }
+      }
+
+      function drawDriftTrajectory(ctx, detail, ox, oy, drawW, drawH) {
+        if (state.activeStepIdx < 0) return;
+
+        const centroids = [];
+        for (let i = 0; i <= state.activeStepIdx; i++) {
+          const s = detail.snapshots[i];
+          const contours = getStepContoursNorm(detail.id, s.step_id);
+          const center = getContoursCentroidNorm(contours);
+
+          // Draw faint dashed outline for earlier slices so expansion & drift read at a glance
+          if (i < state.activeStepIdx) {
+            ctx.save();
+            ctx.strokeStyle = "rgba(251, 191, 36, 0.70)";
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([4, 4]);
+            contours.forEach((poly) => {
+              ctx.beginPath();
+              poly.forEach(([nx, ny], idx) => {
+                const px = ox + nx * drawW;
+                const py = oy + ny * drawH;
+                if (idx === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+              });
+              ctx.closePath();
+              ctx.stroke();
+            });
+            ctx.restore();
+          }
+
+          if (center) {
+            centroids.push({
+              stepLabel: s.step_id.toUpperCase(),
+              px: ox + center[0] * drawW,
+              py: oy + center[1] * drawH,
+              isActive: i === state.activeStepIdx
+            });
+          }
+        }
+
+        if (!centroids.length) return;
+
+        ctx.save();
+        // Vector path & directional arrowheads between consecutive spill centroids
+        for (let i = 0; i < centroids.length - 1; i++) {
+          const a = centroids[i];
+          const b = centroids[i + 1];
+          ctx.strokeStyle = "#fbbf24";
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(a.px, a.py);
+          ctx.lineTo(b.px, b.py);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          const angle = Math.atan2(b.py - a.py, b.px - a.px);
+          const headLen = 7;
+          ctx.fillStyle = "#fbbf24";
+          ctx.beginPath();
+          ctx.moveTo(b.px - Math.cos(angle) * 6, b.py - Math.sin(angle) * 6);
+          ctx.lineTo(b.px - headLen * Math.cos(angle - Math.PI / 6) - Math.cos(angle) * 5, b.py - headLen * Math.sin(angle - Math.PI / 6) - Math.sin(angle) * 5);
+          ctx.lineTo(b.px - headLen * Math.cos(angle + Math.PI / 6) - Math.cos(angle) * 5, b.py - headLen * Math.sin(angle + Math.PI / 6) - Math.sin(angle) * 5);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Centroid nodes with T1, T2, ... tags
+        centroids.forEach((pt) => {
+          ctx.beginPath();
+          ctx.arc(pt.px, pt.py, pt.isActive ? 4.5 : 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = pt.isActive ? "#fef08a" : "#09090b";
+          ctx.fill();
+          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = "#fbbf24";
+          ctx.stroke();
+
+          ctx.font = '600 10px "JetBrains Mono", monospace';
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "rgba(9, 9, 11, 0.90)";
+          ctx.strokeText(pt.stepLabel, pt.px, pt.py - 7);
+          ctx.fillStyle = pt.isActive ? "#fef08a" : "#fbbf24";
+          ctx.fillText(pt.stepLabel, pt.px, pt.py - 7);
+        });
+        ctx.restore();
+      }
+
+      function drawGeographyOverlay(ctx, profile, ox, oy, drawW, drawH, mode) {
+        const isHumanVisible = mode !== "sar";
+        const carto = profile.cartography;
+        if (!carto) return;
+
+        // Subtle coastline outline even in SAR mode so shorelines read immediately
+        if (mode === "sar") {
+          ctx.save();
+          ctx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+          ctx.lineWidth = 1;
+          profile.landPolygons.forEach((poly) => {
+            ctx.beginPath();
+            poly.forEach(([lx, ly], idx) => {
+              const px = ox + lx * drawW;
+              const py = oy + ly * drawH;
+              if (idx === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            });
+            ctx.closePath();
+            ctx.stroke();
+          });
+          ctx.restore();
+        }
+
+        // Water area labels (seas / lakes)
+        if (carto.waterLabels) {
+          ctx.save();
+          ctx.font = '600 11px "Inter", sans-serif';
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = isHumanVisible ? "rgba(147, 197, 253, 0.55)" : "rgba(161, 161, 170, 0.40)";
+          carto.waterLabels.forEach((wl) => {
+            ctx.fillText(wl.name, ox + wl.x * drawW, oy + wl.y * drawH);
+          });
+          ctx.restore();
+        }
+
+        // Settlements, islands, reserves & incident pin
+        if (carto.settlements) {
+          ctx.save();
+          carto.settlements.forEach((item) => {
+            const px = ox + item.x * drawW;
+            const py = oy + item.y * drawH;
+
+            if (item.kind === "incident") {
+              // Crisp orange diamond marker matching OverviewMinimap pin palette
+              ctx.fillStyle = "#f97316";
+              ctx.strokeStyle = "#09090b";
+              ctx.lineWidth = 1.5;
+              ctx.beginPath();
+              ctx.moveTo(px, py - 5.5);
+              ctx.lineTo(px + 5.5, py);
+              ctx.lineTo(px, py + 5.5);
+              ctx.lineTo(px - 5.5, py);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+            } else if (item.kind === "town") {
+              ctx.fillStyle = isHumanVisible ? "#f4f4f5" : "#a1a1aa";
+              ctx.strokeStyle = "#09090b";
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            } else if (item.kind === "reserve") {
+              ctx.strokeStyle = isHumanVisible ? "#34d399" : "rgba(52, 211, 153, 0.65)";
+              ctx.lineWidth = 1.2;
+              ctx.setLineDash([3, 3]);
+              ctx.beginPath();
+              ctx.arc(px, py, 14, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            } else {
+              ctx.fillStyle = isHumanVisible ? "#cbd5e1" : "#71717a";
+              ctx.beginPath();
+              ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Crisp outlined label (always readable over both bright SAR pixels and dark ocean)
+            ctx.font = item.kind === "incident"
+              ? '600 11px "Inter", sans-serif'
+              : '500 11px "Inter", sans-serif';
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+            const tx = px + 9;
+            const ty = py - (item.kind === "reserve" ? 16 : 0);
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "rgba(9, 9, 11, 0.88)";
+            ctx.strokeText(item.name, tx, ty);
+
+            if (item.kind === "incident") {
+              ctx.fillStyle = "#fdba74";
+            } else if (item.kind === "reserve") {
+              ctx.fillStyle = isHumanVisible ? "#6ee7b7" : "rgba(110, 231, 183, 0.78)";
+            } else {
+              ctx.fillStyle = isHumanVisible ? "#f4f4f5" : "rgba(228, 228, 231, 0.72)";
+            }
+            ctx.fillText(item.name, tx, ty);
+          });
+          ctx.restore();
+        }
+      }
+
+      function diffDaysIso(fromIso, toIso) {
+        const a = Date.parse(`${fromIso}T00:00:00Z`);
+        const b = Date.parse(`${toIso}T00:00:00Z`);
+        return Math.round((b - a) / 86400000);
+      }
+
+      function getActiveStepMeta(detail) {
+        const startSnap = detail.snapshots[0];
+        if (state.activeStepIdx < 0) {
+          const daysBeforeStart = diffDaysIso(detail.baseline_date, startSnap.date);
+          return {
+            isBaseline: true,
+            stepId: "t0",
+            date: detail.baseline_date,
+            label: "До аварії (базовий SAR)",
+            areaKm2: 0,
+            layerStepId: startSnap.step_id,
+            trackingStartDate: startSnap.date,
+            daysText: `−${daysBeforeStart} дн. до старту T1`,
+            areaDeltaText: "опорна сцена до розливу",
+            areaDeltaClass: "is-neutral"
+          };
+        }
+        const snap = detail.snapshots[state.activeStepIdx] || startSnap;
+        const daysFromStart = diffDaysIso(startSnap.date, snap.date);
+        const daysFromBaseline = diffDaysIso(detail.baseline_date, snap.date);
+        const prevArea = state.activeStepIdx > 0 ? detail.snapshots[state.activeStepIdx - 1].area_km2 : 0;
+        const prevStepLabel = state.activeStepIdx > 0 ? detail.snapshots[state.activeStepIdx - 1].step_id.toUpperCase() : "T0";
+        const deltaArea = snap.area_km2 - prevArea;
+        const sign = deltaArea >= 0 ? "+" : "";
+
+        return {
+          isBaseline: false,
+          stepId: snap.step_id,
+          date: snap.date,
+          label: snap.label,
+          areaKm2: snap.area_km2,
+          layerStepId: snap.step_id,
+          trackingStartDate: startSnap.date,
+          daysText: state.activeStepIdx === 0
+            ? `Старт відстеження (+${daysFromBaseline} дн. від T0)`
+            : `+${daysFromStart} дн. від T1`,
+          areaDeltaText: `${sign}${deltaArea.toFixed(1)} км² до ${prevStepLabel}`,
+          areaDeltaClass: deltaArea > 0 ? "is-up" : deltaArea < 0 ? "is-down" : "is-neutral"
+        };
+      }
+
+      function renderMapStage() {
+        const rect = el.mapStage.getBoundingClientRect();
+        const w = Math.max(100, Math.round(rect.width));
+        const h = Math.max(100, Math.round(rect.height));
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+
+        if (el.sarCanvas.width !== Math.round(w * dpr) || el.sarCanvas.height !== Math.round(h * dpr)) {
+          el.sarCanvas.width = Math.round(w * dpr);
+          el.sarCanvas.height = Math.round(h * dpr);
+        }
+
+        const ctx = el.sarCanvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = "#070709";
+        ctx.fillRect(0, 0, w, h);
+
+        const detail = LOCATIONS_DETAILS[state.activeLocationId];
+        const meta = getActiveStepMeta(detail);
+        const profile = SCENE_PROFILES[detail.id];
+        const layers = getLocationLayers(detail.id, meta.layerStepId);
+        const { ox, oy, drawW, drawH } = getDrawTransform(w, h);
+        const splitX = Math.round(w * state.splitRatio);
+
+        // 1. Left side of curtain: Human cartographic map (roads, water, coasts, labels)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, splitX, h);
+        ctx.clip();
+        ctx.drawImage(layers.baseMapCanvas, ox, oy, drawW, drawH);
+        drawGeographyOverlay(ctx, profile, ox, oy, drawW, drawH, "map");
+        ctx.restore();
+
+        // 2. Right side of curtain: SAR radar + oil spill mask + GeoJSON contour (clean baseline SAR at T0)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(splitX, 0, w - splitX, h);
+        ctx.clip();
+        ctx.drawImage(meta.isBaseline ? layers.beforeCanvas : layers.afterCanvas, ox, oy, drawW, drawH);
+        if (!meta.isBaseline) {
+          drawSpillOverlay(ctx, layers, ox, oy, drawW, drawH);
+        }
+        if (state.showTrajectory) {
+          drawDriftTrajectory(ctx, detail, ox, oy, drawW, drawH);
+        }
+        drawGeographyOverlay(ctx, profile, ox, oy, drawW, drawH, "sar");
+        ctx.restore();
+
+        el.curtainLine.style.left = `${(state.splitRatio * 100).toFixed(2)}%`;
+        el.curtainLine.setAttribute("aria-valuenow", String(Math.round(state.splitRatio * 100)));
+
+        // Subtle geospatial grid lines across viewport
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+          const gx = (w * i) / 4;
+          ctx.beginPath();
+          ctx.moveTo(gx, 0);
+          ctx.lineTo(gx, h);
+          ctx.stroke();
+        }
+        for (let j = 1; j < 4; j++) {
+          const gy = (h * j) / 4;
+          ctx.beginPath();
+          ctx.moveTo(0, gy);
+          ctx.lineTo(w, gy);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Scale readout
+        const km = (profile.scaleKm / state.zoom).toFixed(state.zoom > 1.8 ? 1 : 0);
+        el.hudScaleKm.textContent = `${km} км`;
+      }
+
+      /* Draw scientific grayscale ramp once on colorbarCanvas */
+      function drawColorbar() {
+        const ctx = el.colorbarCanvas.getContext("2d");
+        for (let x = 0; x < 64; x++) {
+          const v = Math.round((x / 63) * 235 + 15);
+          ctx.fillStyle = `rgb(${v},${v},${v})`;
+          ctx.fillRect(x, 0, 1, 6);
+        }
+      }
+
+      /* ============================================================
+         7. UI SYNCHRONIZATION & HELPERS
+         ============================================================ */
+      function formatDeg(lon, lat) {
+        const ns = lat >= 0 ? "N" : "S";
+        const ew = lon >= 0 ? "E" : "W";
+        return `${Math.abs(lat).toFixed(2)}°${ns}, ${Math.abs(lon).toFixed(2)}°${ew}`;
+      }
+
+      function populateEventSelect() {
+        el.eventSelect.innerHTML = "";
+        LOCATIONS_LIST.forEach((loc) => {
+          const opt = document.createElement("option");
+          opt.value = loc.id;
+          opt.textContent = `${loc.title} (${loc.area_km2} км²)`;
+          el.eventSelect.appendChild(opt);
+        });
+        el.eventSelect.value = state.activeLocationId;
+        el.sidebarCount.textContent = `${LOCATIONS_LIST.length} / ${LOCATIONS_LIST.length}`;
+      }
+
+      function renderDetailsCard() {
+        const detail = LOCATIONS_DETAILS[state.activeLocationId];
+        const meta = getActiveStepMeta(detail);
+
+        el.detailTitle.textContent = detail.title;
+        el.detailId.textContent = detail.id;
+        el.detailCoordsDeg.textContent = formatDeg(detail.coords[0], detail.coords[1]);
+        el.detailCoordsRaw.textContent = `[${detail.coords[0].toFixed(2)}, ${detail.coords[1].toFixed(2)}]`;
+
+        el.detailAreaKm2.textContent = `${meta.areaKm2.toFixed(1)} км²`;
+        el.detailStepId.textContent = meta.isBaseline ? "база t0" : `зріз ${meta.stepId}`;
+        el.detailAreaDelta.textContent = meta.areaDeltaText;
+        el.detailAreaDelta.className = `kv-sub mono kv-delta ${meta.areaDeltaClass}`;
+
+        el.detailBaselineDate.textContent = detail.baseline_date;
+        el.detailTrackingStart.textContent = `Старт T1: ${meta.trackingStartDate}`;
+        el.detailSnapshotDate.textContent = meta.date;
+        el.detailSnapshotLabel.textContent = meta.label;
+        el.detailSnapshotDelta.textContent = meta.daysText;
+
+        el.detailDescription.textContent = detail.description;
+
+        if (detail.source_url) {
+          el.detailSourceLink.href = detail.source_url;
+          el.detailSourceLink.style.display = "inline-flex";
+        } else {
+          el.detailSourceLink.style.display = "none";
+        }
+
+        el.badgeAfterDate.textContent = meta.date;
+        el.badgeAfterLabel.textContent = meta.label;
+        el.hudBbox.textContent = `bbox: [${detail.bbox.map((v) => v.toFixed(2)).join(", ")}]`;
+      }
+
+      function renderTimeline() {
+        const detail = LOCATIONS_DETAILS[state.activeLocationId];
+        const snaps = detail.snapshots;
+        const startDate = snaps[0].date;
+        const timelineItems = [
+          {
+            idx: -1,
+            date: detail.baseline_date,
+            area_km2: 0,
+            title: "T0 · База (до аварії)"
+          },
+          ...snaps.map((snap, idx) => {
+            const dFromStart = diffDaysIso(startDate, snap.date);
+            const tag = idx === 0 ? "Старт" : `+${dFromStart}д`;
+            return {
+              idx,
+              date: snap.date,
+              area_km2: snap.area_km2,
+              title: `${snap.step_id.toUpperCase()} · ${tag} · ${snap.label}`
+            };
+          })
+        ];
+
+        el.timelineSteps.style.gridTemplateColumns = `repeat(${timelineItems.length}, minmax(0, 1fr))`;
+        el.timelineSteps.innerHTML = "";
+
+        timelineItems.forEach((item) => {
+          const isActive = item.idx === state.activeStepIdx;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `step-btn${isActive ? " is-active" : ""}`;
+          btn.setAttribute("role", "tab");
+          btn.setAttribute("aria-selected", String(isActive));
+
+          btn.innerHTML = `
+            <div class="step-top">
+              <span class="step-notch mono">
+                <span class="notch-dot" aria-hidden="true"></span>
+                ${item.date}
+              </span>
+              <span class="step-area mono">${item.area_km2.toFixed(1)} км²</span>
+            </div>
+            <div class="step-label">${item.title}</div>
+          `;
+
+          btn.addEventListener("click", () => {
+            stopPlayback();
+            selectSnapshotStep(item.idx);
+          });
+          el.timelineSteps.appendChild(btn);
+        });
+
+        el.stepCounter.textContent = `${state.activeStepIdx + 2} / ${timelineItems.length}`;
+        el.prevStepBtn.disabled = state.activeStepIdx <= -1;
+        el.nextStepBtn.disabled = state.activeStepIdx >= snaps.length - 1;
+      }
+
+      function renderPlayButton() {
+        el.playTimelineBtn.classList.toggle("is-playing", state.isPlaying);
+        el.playTimelineLabel.textContent = state.isPlaying ? "Пауза" : "Старт";
+        el.playIconPath.setAttribute(
+          "d",
+          state.isPlaying ? "M4 3H7V13H4V3ZM9 3H12V13H9V3Z" : "M4 3L13 8L4 13V3Z"
+        );
+      }
+
+      function stopPlayback() {
+        if (state.playTimerId !== null) {
+          window.clearInterval(state.playTimerId);
+          state.playTimerId = null;
+        }
+        if (state.isPlaying) {
+          state.isPlaying = false;
+          renderPlayButton();
+        }
+      }
+
+      function togglePlayback() {
+        if (state.isPlaying) {
+          stopPlayback();
+          return;
+        }
+        state.isPlaying = true;
+        renderPlayButton();
+        state.playTimerId = window.setInterval(() => {
+          const snaps = LOCATIONS_DETAILS[state.activeLocationId].snapshots;
+          const nextIdx = state.activeStepIdx >= snaps.length - 1 ? -1 : state.activeStepIdx + 1;
+          selectSnapshotStep(nextIdx);
+        }, 1200);
+      }
+
+      function renderOpacityControls() {
+        const pct = Math.round(state.spillOpacity * 100);
+        el.opacitySlider.value = String(pct);
+        el.opacityReadout.textContent = `${pct}%`;
+        el.presetBtns.forEach((btn) => {
+          btn.classList.toggle("is-active", Number(btn.dataset.opacity) === pct);
+        });
+      }
+
+      function buildGeoJsonPayload(detail, snap) {
+        const layers = getLocationLayers(detail.id, snap.step_id);
+        const [west, south, east, north] = detail.bbox;
+        const polygons = layers.contoursNorm.map((poly) => [
+          poly
+            .filter((_, idx) => idx % 4 === 0)
+            .concat([poly[0]])
+            .map(([nx, ny]) => [
+              Number((west + nx * (east - west)).toFixed(4)),
+              Number((north - ny * (north - south)).toFixed(4))
+            ])
+        ]);
+
+        return {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: {
+                location_id: detail.id,
+                step_id: snap.step_id,
+                area_km2: snap.area_km2
+              },
+              geometry: {
+                type: "MultiPolygon",
+                coordinates: polygons
+              }
+            }
+          ]
+        };
+      }
+
+      function renderContractDialogContent() {
+        const detail = LOCATIONS_DETAILS[state.activeLocationId];
+        const snap = detail.snapshots[Math.max(0, state.activeStepIdx)];
+        let payload;
+
+        if (state.dialogTab === "list") {
+          payload = { total: LOCATIONS_LIST.length, locations: LOCATIONS_LIST };
+        } else if (state.dialogTab === "geojson") {
+          payload = buildGeoJsonPayload(detail, snap);
+        } else {
+          payload = detail;
+        }
+        el.dialogJsonPre.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function renderAll() {
+        el.eventSelect.value = state.activeLocationId;
+        renderMinimap();
+        renderDetailsCard();
+        renderTimeline();
+        renderOpacityControls();
+        renderMapStage();
+        if (el.contractDialog.open) renderContractDialogContent();
+      }
+
+      function selectLocation(locationId) {
+        if (!LOCATIONS_DETAILS[locationId]) return;
+        stopPlayback();
+        state.activeLocationId = locationId;
+        const snaps = LOCATIONS_DETAILS[locationId].snapshots;
+        // Start on peak / latest informative slice (t2 for 3-slice mocks or last)
+        state.activeStepIdx = snaps.length >= 2 ? 1 : 0;
+        state.zoom = 1.0;
+        state.panX = 0;
+        state.panY = 0;
+        renderAll();
+      }
+
+      function selectSnapshotStep(idx) {
+        const snaps = LOCATIONS_DETAILS[state.activeLocationId].snapshots;
+        if (idx < -1 || idx >= snaps.length) return;
+        state.activeStepIdx = idx;
+        renderAll();
+      }
+
+      /* ============================================================
+         8. INTERACTIONS (Curtain Drag, Pan, Zoom, Keys, Dialog)
+         ============================================================ */
+      function initInteractions() {
+        // Event select
+        el.eventSelect.addEventListener("change", (e) => selectLocation(e.target.value));
+
+        // Minimap reset toggle
+        el.minimapResetBtn.addEventListener("click", () => {
+          state.minimapZoomed = !state.minimapZoomed;
+          renderMinimap();
+        });
+
+        // Split curtain drag
+        let draggingCurtain = false;
+        const updateSplitFromPointer = (clientX) => {
+          const rect = el.mapStage.getBoundingClientRect();
+          const ratio = (clientX - rect.left) / Math.max(1, rect.width);
+          state.splitRatio = Math.max(0.05, Math.min(0.95, ratio));
+          renderMapStage();
+        };
+
+        el.curtainLine.addEventListener("pointerdown", (e) => {
+          e.stopPropagation();
+          draggingCurtain = true;
+          el.curtainLine.setPointerCapture(e.pointerId);
+          updateSplitFromPointer(e.clientX);
+        });
+
+        el.curtainLine.addEventListener("pointermove", (e) => {
+          if (!draggingCurtain) return;
+          updateSplitFromPointer(e.clientX);
+        });
+
+        const stopCurtain = () => {
+          draggingCurtain = false;
+        };
+        el.curtainLine.addEventListener("pointerup", stopCurtain);
+        el.curtainLine.addEventListener("pointercancel", stopCurtain);
+
+        el.curtainLine.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            state.splitRatio = Math.max(0.05, state.splitRatio - 0.03);
+            renderMapStage();
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            state.splitRatio = Math.min(0.95, state.splitRatio + 0.03);
+            renderMapStage();
+          }
+        });
+
+        // Map stage pan & live cursor geographic coordinates
+        let panning = false;
+        let panStartX = 0;
+        let panStartY = 0;
+        let startPanX = 0;
+        let startPanY = 0;
+
+        el.mapStage.addEventListener("pointerdown", (e) => {
+          if (
+            e.target.closest(".map-zoom-stack") ||
+            e.target.closest(".curtain-line")
+          ) {
+            return;
+          }
+          panning = true;
+          panStartX = e.clientX;
+          panStartY = e.clientY;
+          startPanX = state.panX;
+          startPanY = state.panY;
+          el.mapStage.setPointerCapture(e.pointerId);
+        });
+
+        el.mapStage.addEventListener("pointermove", (e) => {
+          const rect = el.mapStage.getBoundingClientRect();
+          const mx = e.clientX - rect.left;
+          const my = e.clientY - rect.top;
+
+          if (panning) {
+            state.panX = startPanX + (e.clientX - panStartX);
+            state.panY = startPanY + (e.clientY - panStartY);
+            renderMapStage();
+          }
+
+          // Convert mouse pixel to [lon, lat] inside bbox
+          const detail = LOCATIONS_DETAILS[state.activeLocationId];
+          const [west, south, east, north] = detail.bbox;
+          const { ox, oy, drawW, drawH } = getDrawTransform(rect.width, rect.height);
+          const nx = Math.max(0, Math.min(1, (mx - ox) / drawW));
+          const ny = Math.max(0, Math.min(1, (my - oy) / drawH));
+          const lon = west + nx * (east - west);
+          const lat = north - ny * (north - south);
+          el.hudCursorCoords.textContent = `Курсор: ${lon.toFixed(3)}, ${lat.toFixed(3)}`;
+        });
+
+        const stopPan = () => {
+          panning = false;
+        };
+        el.mapStage.addEventListener("pointerup", stopPan);
+        el.mapStage.addEventListener("pointercancel", stopPan);
+
+        // Wheel zoom
+        el.mapStage.addEventListener(
+          "wheel",
+          (e) => {
+            e.preventDefault();
+            const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+            state.zoom = Math.max(1.0, Math.min(3.5, state.zoom * factor));
+            if (state.zoom === 1.0) {
+              state.panX = 0;
+              state.panY = 0;
+            }
+            renderMapStage();
+          },
+          { passive: false }
+        );
+
+        // Zoom buttons
+        el.zoomInBtn.addEventListener("click", () => {
+          state.zoom = Math.min(3.5, state.zoom * 1.25);
+          renderMapStage();
+        });
+        el.zoomOutBtn.addEventListener("click", () => {
+          state.zoom = Math.max(1.0, state.zoom / 1.25);
+          if (state.zoom === 1.0) {
+            state.panX = 0;
+            state.panY = 0;
+          }
+          renderMapStage();
+        });
+        el.zoomResetBtn.addEventListener("click", () => {
+          state.zoom = 1.0;
+          state.panX = 0;
+          state.panY = 0;
+          renderMapStage();
+        });
+
+        // Spill opacity controls
+        el.opacitySlider.addEventListener("input", (e) => {
+          state.spillOpacity = Number(e.target.value) / 100;
+          renderOpacityControls();
+          renderMapStage();
+        });
+
+        el.presetBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.spillOpacity = Number(btn.dataset.opacity) / 100;
+            renderOpacityControls();
+            renderMapStage();
+          });
+        });
+
+        el.contourToggle.addEventListener("change", (e) => {
+          state.showContour = e.target.checked;
+          renderMapStage();
+        });
+
+        el.trajectoryToggle.addEventListener("change", (e) => {
+          state.showTrajectory = e.target.checked;
+          renderMapStage();
+        });
+
+        // Timeline controls
+        el.prevStepBtn.addEventListener("click", () => {
+          stopPlayback();
+          selectSnapshotStep(state.activeStepIdx - 1);
+        });
+        el.nextStepBtn.addEventListener("click", () => {
+          stopPlayback();
+          selectSnapshotStep(state.activeStepIdx + 1);
+        });
+        el.playTimelineBtn.addEventListener("click", togglePlayback);
+
+        // Keyboard arrow navigation between snapshots when not in slider/select/curtain
+        window.addEventListener("keydown", (e) => {
+          const activeTag = document.activeElement ? document.activeElement.tagName : "";
+          if (
+            activeTag === "INPUT" ||
+            activeTag === "SELECT" ||
+            document.activeElement === el.curtainLine ||
+            el.contractDialog.open
+          ) {
+            return;
+          }
+          if (e.key === "ArrowLeft") {
+            stopPlayback();
+            selectSnapshotStep(state.activeStepIdx - 1);
+          } else if (e.key === "ArrowRight") {
+            stopPlayback();
+            selectSnapshotStep(state.activeStepIdx + 1);
+          }
+        });
+
+        // Contract modal dialog
+        const openModal = (tab) => {
+          state.dialogTab = tab || "detail";
+          el.dialogTabs.forEach((b) => b.classList.toggle("is-active", b.dataset.tab === state.dialogTab));
+          renderContractDialogContent();
+          el.contractDialog.showModal();
+        };
+
+        el.openContractBtn.addEventListener("click", () => openModal("detail"));
+        el.inspectJsonBtn.addEventListener("click", () => openModal("detail"));
+        el.closeDialogBtn.addEventListener("click", () => el.contractDialog.close());
+
+        // Light dismiss on backdrop click
+        el.contractDialog.addEventListener("click", (e) => {
+          if (e.target === el.contractDialog) el.contractDialog.close();
+        });
+
+        el.dialogTabs.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.dialogTab = btn.dataset.tab;
+            el.dialogTabs.forEach((b) => b.classList.toggle("is-active", b.dataset.tab === state.dialogTab));
+            renderContractDialogContent();
+          });
+        });
+
+        // Responsive redraw
+        const resizeObserver = new ResizeObserver(() => renderMapStage());
+        resizeObserver.observe(el.mapStage);
+      }
+
+      /* ============================================================
+         9. BOOTSTRAP
+         ============================================================ */
+      initMinimapContinents();
+      drawColorbar();
+      populateEventSelect();
+      initInteractions();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
