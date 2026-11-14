@@ -46,8 +46,8 @@ NASA_Dancing_with_the_SARs/
 ## Team Git Workflow
 
 1. **`main` always runs cleanly** — never push unfinished code directly to `main`.
-2. **Feature branches per module:**
-   - `feat/stage-map` — Dev 1 (`frontend/src/components/stage/`)
-   - `feat/sidebar-timeline` — Dev 2 (`frontend/src/api/`, `sidebar/`, `timeline/`)
+2. **Feature branches per role:**
+   - `feat/core-map` — Dev 1 Lead (`src/api/`, `stage/`, `OverviewMinimap.tsx`, `SnapshotTimeline.tsx`, `App.tsx`)
+   - `feat/ui-components` — Dev 2 UI (`EventSelect.tsx`, `EventDetailsCard.tsx`, `SpillOpacitySlider.tsx`)
    - `feat/api-integration` — Connecting `frontend` to live endpoints later
 3. **Contract-first changes:** Any change to mock/API data structures or shared TypeScript interfaces must update `docs/API_CONTRACT.md`, `docs/FRONTEND_WORK_PLAN.md`, and `src/types/location.ts` together.

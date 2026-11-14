@@ -89,97 +89,116 @@ export interface AppState {
 
 ---
 
-## 3. Розподіл завдань між 2 розробниками (Zero Merge Conflicts)
+## 3. Асиметричний розподіл завдань (Lead + UI, Zero Merge Conflicts)
 
-Файли розділено по незалежних директоріях — розробники **не редагують одні й ті самі файли** після стартового налаштування.
+Файли розділено так, щоб **`Dev 1 (Lead)`** закривав усю складну інфраструктуру, карту `Leaflet`, API, координати та таймлайн, а **`Dev 2 (UI / із підтримкою AI)`** відповідав за **3 ізольовані, прості презентаційні UI-компоненти** за готовими `Props` і візуальним еталоном [mockup/index.html](../mockup/index.html). Після Етапу 0 розробники **не редагують одні й ті самі файли**.
 
 ### Структура репозиторію фронтенду
 
 ```text
 frontend/
 ├── public/
-│   └── mock/                       # Моки до готовності бекенда (спільна точка опори)
+│   └── mock/                       # [Dev 1] Моки до готовності бекенда (спільна точка опори)
 ├── src/
-│   ├── api/                        # [Dev 2] fetch-клієнт, хуки, mock-фолбек
+│   ├── api/                        # [Dev 1] fetch-клієнт, хуки, mock-фолбек
 │   │   └── locationsApi.ts
-│   ├── types/                      # [Спільний, фіксується на Етапі 0]
+│   ├── types/                      # [Dev 1, фіксується на Етапі 0]
 │   │   └── location.ts
 │   ├── components/
-│   │   ├── stage/                  # [Dev 1] Права робоча зона
+│   │   ├── stage/                  # [Dev 1] Права картографічна сцена
 │   │   │   ├── MainComparisonMap.tsx
-│   │   │   ├── SplitCurtainControl.tsx
+│   │   │   └── SplitCurtainControl.tsx
+│   │   ├── controls/               # [Dev 2] Панель прозорості та перемикачів
 │   │   │   └── SpillOpacitySlider.tsx
-│   │   ├── sidebar/                # [Dev 2] Ліва панель навігації та картки
-│   │   │   ├── OverviewMinimap.tsx
-│   │   │   ├── EventSelect.tsx
-│   │   │   └── EventDetailsCard.tsx
-│   │   └── timeline/               # [Dev 2] Нижній таймлайн дат
+│   │   ├── sidebar/
+│   │   │   ├── OverviewMinimap.tsx # [Dev 1] SVG-мінікарта з координатами світу
+│   │   │   ├── EventSelect.tsx     # [Dev 2] Випадаючий список подій
+│   │   │   └── EventDetailsCard.tsx# [Dev 2] Картка події + підказка «Чому SAR?»
+│   │   └── timeline/               # [Dev 1] Нижній таймлайн дат і Play/Pause
 │   │       └── SnapshotTimeline.tsx
-│   ├── App.tsx                     # [Інтеграція на Етапі 2] 2-колонковий Grid + стейт
+│   ├── App.tsx                     # [Dev 1] 2-колонковий Grid, стейт і таймер Play
 │   └── main.tsx
 ├── package.json
 └── vite.config.ts
 ```
 
-### Зона відповідальності Розробника 1 (`Dev 1` — Карта, SAR-шари, шторка та підсвітка)
-- **Папка:** `src/components/stage/`
+### Зона відповідальності `Dev 1 (Lead)` — Каркас, карта, API та таймлайн
+- **Файли:** `src/types/location.ts`, `src/api/locationsApi.ts`, `src/components/stage/`, `OverviewMinimap.tsx`, `SnapshotTimeline.tsx`, `App.tsx`, `public/mock/`
 - **Завдання:**
-  1. Налаштувати головний контейнер карти (`Leaflet` зі зрозумілою для людини базовою підкладкою — напр., `OSM` / супутникові тайли з берегами, містами та рельєфом).
-  2. Реалізувати переліт камери `map.fitBounds([[south, west], [north, east]])` при зміні `activeDetail`.
-  3. Накласти активний SAR-шар (`baseline_before_url` при `activeStepIdx === -1`, або `snapshots[activeStepIdx].after_url` при `activeStepIdx >= 0`) як `L.imageOverlay` в окремий `mapPane` та зв'язати з перетягуваною шторкою (`splitRatio`):
-     - **Ліворуч від шторки:** чиста звичайна карта (базова підкладка `Leaflet`).
-     - **Праворуч від шторки:** SAR-радар + червона підсвітка плями (`clip-path: inset(0 0 0 calc(var(--split) * 100%))` або за `containerPoint` для плавного панорамування/зуму). **Контракт [API_CONTRACT.md](./API_CONTRACT.md) (`v1.0`) і бекенд не змінюються.**
-  4. Накласти шар підсвітки розливу (`mask_url` як `imageOverlay` та/або `contour_geojson_url` як `L.geoJSON`) у праву (SAR) область шторки (приховувати при `activeStepIdx === -1`). Додати перемикач **«Траєкторія руху»** (`showTrajectory`): поверх SAR-боку шторки малювати пунктирні контури попередніх кроків `snapshots[0..activeStepIdx-1]` та пунктирну стрілку дрейфу між центроїдами GeoJSON-полігонів (повністю на клієнті без змін у бекенді).
-  5. Зверстати `SpillOpacitySlider` (**«підсвітка розливу»**) із перемикачами `GeoJSON контур` та `Траєкторія руху`, прив'язати до `spillOpacity` (`0..1`), оновлюючи `overlay.setOpacity(spillOpacity)` і `geoJsonLayer.setStyle({ fillOpacity: spillOpacity * 0.45, opacity: spillOpacity })` на льоту.
+  1. **Етап 0:** підняти Vite + React + TypeScript + Leaflet, зафіксувати типи в `src/types/location.ts`, покласти mock-дані, створити базову dark-тему CSS (за `mockup/index.html`) і порожні файли-заглушки з точними `Props` для `Dev 2`.
+  2. **`locationsApi.ts`:** реалізувати `fetchLocations()`, `fetchLocationDetail(id)`, `fetchGeoJson(url)` із перемикачем `VITE_USE_MOCK=true`, обробкою `loading` та помилок.
+  3. **`MainComparisonMap` + `SplitCurtainControl`:**
+     - Налаштувати `Leaflet` зі зрозумілою базовою підкладкою (`OSM / супутник`) та `map.fitBounds([[south, west], [north, east]])`.
+     - Накласти активний SAR-шар (`baseline_before_url` при `activeStepIdx === -1`, інакше `snapshots[activeStepIdx].after_url`) та підсвітку (`mask_url` / `contour_geojson_url`) праворуч від шторки `splitRatio`. **Контракт [API_CONTRACT.md](./API_CONTRACT.md) (`v1.0`) не змінюється.**
+     - Реалізувати шар **«Траєкторія руху»** (`showTrajectory`): пунктирні контури попередніх кроків `snapshots[0..activeStepIdx-1]` та пунктирну стрілку дрейфу між центроїдами GeoJSON-полігонів на клієнті.
+  4. **`OverviewMinimap`:** SVG-мінікарта світу з помаранчевими пінами подій і кнопкою скидання масштабу.
+  5. **`SnapshotTimeline`:** шкала `T0 · База (до аварії)` (`idx = -1`), `T1 · Старт`, `T2 · +Nд`..., підтримка `←` / `→` та кнопка **`▶ Старт / Пауза`** (`isPlaying`).
 
-### Зона відповідальності Розробника 2 (`Dev 2` — Дані, сайдбар і таймлайн)
-- **Папки:** `src/api/`, `src/components/sidebar/`, `src/components/timeline/`
-- **Завдання:**
-  1. Написати `locationsApi.ts` + кастомні хуки (`fetchLocations()`, `fetchLocationDetail(id)`, `fetchGeoJson(url)`) з автоматичним перемиканням між реальним REST API та локальними моками (`/mock/*.json`) через `.env` (`VITE_USE_MOCK=true`).
-  2. Зробити `OverviewMinimap`: міні-карта з помаранчевими маркерами всіх подій із `locations[]`, обробником кліку по маркеру (`onSelectLocation(id)`) та кнопкою скидання виду / масштабу у правому верхньому куті.
-  3. Зробити `EventSelect`: випадаючий список подій, завжди синхронізований із `activeLocationId`.
-  4. Зробити `EventDetailsCard`: охайна картка події:
-     - `title` + `coords` (у форматі `17.50°N, 56.02°E`);
-     - `area_km2` у км² (`0.0 км²` на кроці `T0 До` або площа з активного кроку `snapshots[activeStepIdx]`) **+ приріст/спад `Δ км²`** відносно попереднього зрізу;
-     - `baseline_date` (`T0`) із явним підписом **`Старт T1: <snapshots[0].date>`** і відліком **`+N дн. від T1`** на активному знімку;
-     - `description` та опціональна кнопка-посилання `source_url`.
-  5. Зробити `SnapshotTimeline` (**«таймлайн знімків зі змінами»**):
-     - Горизонтальна шкала з великими клікабельними засічками дат: першою точкою виступає `T0 · База (до аварії)` (`baseline_date`, `0 км²`, індекс `-1`), за нею — `T1 · Старт` (`snapshots[0]`), `T2 · +Nд`, ...;
-     - Кнопка **`▶ Старт / Пауза`** (`isPlaying`) для циклічного автопрогравання `T0 → T1 → ... → Tn` (зупиняється при ручному кліку чи натисканні клавіш), а також підтримка `←` / `→`.
+### Зона відповідальності `Dev 2 (UI)` — 3 ізольовані презентаційні компоненти
+- **Файли:** `EventSelect.tsx`, `EventDetailsCard.tsx`, `SpillOpacitySlider.tsx` *(працюють лише від вхідних `Props`, без доступу до `Leaflet` або `fetch`)*
+- **Завдання (із готовими контрактами пропсів для зручної роботи з AI):**
+  1. **`EventSelect.tsx`** (~40–50 рядків) — випадаючий список подій, синхронізований із вибраною локацією:
+     ```ts
+     export interface EventSelectProps {
+       locations: LocationSummary[];
+       activeLocationId: string | null;
+       onSelectLocation: (id: string) => void;
+     }
+     ```
+  2. **`EventDetailsCard.tsx`** (~80–120 рядків) — охайна картка події в сайдбарі + (за бажанням) коротка згортана плашка **«Чому це бачить саме SAR?»**:
+     ```ts
+     export interface EventDetailsCardProps {
+       detail: LocationDetail | null;
+       activeStepIdx: number; // -1 = T0 ("До аварії"), 0..N-1 = індекс у snapshots[]
+       loading?: boolean;
+     }
+     ```
+     - Виводить `title`, `coords` (`17.50°N, 56.02°E`), площу `area_km2` (`0.0 км²` на `T0` + приріст/спад `Δ км²` до попереднього зрізу), `baseline_date` (`T0`), явну дату **`Старт T1: <snapshots[0].date>`**, зсув `+N дн. від T1`, `description` та кнопку-посилання `source_url`.
+  3. **`SpillOpacitySlider.tsx`** (~60–80 рядків) — панель керування під картою:
+     ```ts
+     export interface SpillOpacitySliderProps {
+       spillOpacity: number;    // 0.0 .. 1.0
+       showContour: boolean;
+       showTrajectory: boolean;
+       onOpacityChange: (value: number) => void;
+       onToggleContour: (checked: boolean) => void;
+       onToggleTrajectory: (checked: boolean) => void;
+     }
+     ```
+     - Повзунок `0%–100%`, кнопки швидких значень (`0%`, `50%`, `100%`) і два чекбокси (`GeoJSON контур`, `Траєкторія руху`).
 
 ---
 
 ## 4. Поетапний план робіт (Roadmap)
 
-### Етап 0. Спільний старт і контракт (1–2 години вдвох)
+### Етап 0. Старт, каркас і заглушки для `Dev 2` (робить `Dev 1`)
 - Ініціалізувати Vite + React + TypeScript (`npm create vite@latest`), підключити `leaflet` і `@types/leaflet`.
-- Створити `src/types/location.ts` і покласти 2–3 реалістичні mock-кейси в `public/mock/` (включно із заглушками `before.webp`, `after.webp`, `mask.webp`, `contour.geojson`).
-- Зверстати порожній 2-колонковий каркас в `App.tsx` (CSS Grid: `320px 1fr` або `30% 70%`, повна висота `100vh` без зайвого скролу).
-- Зафіксувати гілку `main`.
+- Створити `src/types/location.ts`, покласти 2–3 mock-кейси в `public/mock/`, перенести базові dark-стилі з `mockup/index.html`.
+- Створити порожні компоненти-заглушки `EventSelect.tsx`, `EventDetailsCard.tsx`, `SpillOpacitySlider.tsx` з уже описаними `Props`-інтерфейсами і 2-колонковий `App.tsx`.
+- Зафіксувати гілку `main`, щоб `Dev 2` міг одразу бачити свій UI наживо через `npm run dev`.
 
-### Етап 1. Паралельна розробка компонентів (2 окремі гілки)
-- **Гілка `feat/stage-map` (Dev 1):** розробляє `MainComparisonMap`, механіку шторки `Звичайна карта ↔ SAR-накладення` та `SpillOpacitySlider` на підготовлених моках.
-- **Гілка `feat/sidebar-timeline` (Dev 2):** розробляє `locationsApi`, `OverviewMinimap`, `EventSelect`, `EventDetailsCard` та `SnapshotTimeline` (`T0` + `snapshots[]`) на тих самих моках.
-- *Конфліктів у Git немає:* кожен працює у своїй папці.
+### Етап 1. Паралельна розробка у 2 гілках
+- **Гілка `feat/core-map` (`Dev 1`):** розробляє `locationsApi`, `OverviewMinimap`, `MainComparisonMap`, `SplitCurtainControl` (`Звичайна карта ↔ SAR-накладення` + `Траєкторія руху`), `SnapshotTimeline` (`T0..Tn` + `Play`) та `App.tsx`.
+- **Гілка `feat/ui-components` (`Dev 2`):** заповнює 3 файли (`EventSelect.tsx`, `EventDetailsCard.tsx`, `SpillOpacitySlider.tsx`) за готовим стилем із [mockup/index.html](../mockup/index.html) та прописаними `Props`.
+- *Конфліктів у Git немає:* кожен редагує тільки свої файли.
 
-### Етап 2. Збірка та синхронізація стейту (разом)
-- Змерджити обидві гілки в `main`.
-- В `App.tsx` з'єднати пропси:
-  - Клік по піну в `OverviewMinimap` або вибір в `EventSelect` $\rightarrow$ змінює `activeLocationId` $\rightarrow$ підвантажує `activeDetail` $\rightarrow$ встановлює `activeStepIdx` на інформативний зріз/останній знімок (`snapshots.length - 1`) $\rightarrow$ переносить камеру `MainComparisonMap`.
-  - Клік по засічці в `SnapshotTimeline` (або автопрогравання `▶ Старт`) $\rightarrow$ оновлює `activeStepIdx` (`-1` для `T0 До` або `0..N-1`) $\rightarrow$ оновлює активний SAR-шар (`before_url` або `after_url` + `mask` + `geojson` + опціональну «Траєкторію руху») праворуч від шторки та показники `area_km2`, `Δ км²` і `+N дн.` в `EventDetailsCard`.
-  - Рух `SpillOpacitySlider` $\rightarrow$ плавно змінює прозорість підсвітки розливу на карті; перемикачі `GeoJSON контур` та `Траєкторія руху` вмикають векторні межі й історію дрейфу.
+### Етап 2. Збірка та синхронізація стейту (Pull Request у `main`)
+- `Dev 1` перевіряє PR із `feat/ui-components`, мерджить обидві гілки в `main` і з'єднує всі пропси в `App.tsx`:
+  - Клік по піну в `OverviewMinimap` або вибір в `EventSelect` $\rightarrow$ змінює `activeLocationId` $\rightarrow$ підвантажує `activeDetail` $\rightarrow$ встановлює `activeStepIdx` на останній знімок (`snapshots.length - 1`) $\rightarrow$ переносить камеру `MainComparisonMap`.
+  - Клік по засічці в `SnapshotTimeline` (або автопрогравання `▶ Старт`) $\rightarrow$ оновлює `activeStepIdx` (`-1` для `T0 До` або `0..N-1`) $\rightarrow$ оновлює SAR-шар, `Траєкторію руху` та показники в `EventDetailsCard`.
+  - Зміни в `SpillOpacitySlider` $\rightarrow$ оновлюють прозорість маски, контурів і траєкторії на карті.
 
 ### Етап 3. Інтеграція з бекендом і полірування
 - Перемкнути `VITE_USE_MOCK=false`, налаштувати proxy у `vite.config.ts` на адресу FastAPI (`/api` та `/data` $\rightarrow$ `http://localhost:8000`).
-- Перевірити стани завантаження (`loading`-скелетон при зміні локації або кроку таймлайну), обробку порожніх чи одиничних `snapshots` (якщо в локації поки лише 1 знімок «Після»), мобільну/планшетну адаптацію (сайдбар згортається під карту на вузьких екранах) та CORS на бекенді.
+- Перевірити стани завантаження (`loading`-скелетон), обробку одиничних `snapshots`, адаптацію на вузьких екранах та CORS на бекенді.
 
 ---
 
 ## 5. Правила роботи в Git
 
-1. **`main` завжди запускається** — не пушити незавершений код напряму.
-2. **Гілки строго по фічах:** `feat/stage-map` (Dev 1), `feat/sidebar-timeline` (Dev 2), `feat/api-integration`.
-3. **Якщо потрібно змінити формат API або спільний тип `LocationDetail`:** спочатку оновити `docs/API_CONTRACT.md`, `docs/FRONTEND_WORK_PLAN.md` і `src/types/location.ts`, щоб обидва розробники дивилися в одне джерело правди.
+1. **`main` завжди запускається** — не пушити незавершений код напряму (працюємо через гілки та Pull Request).
+2. **Гілки строго по ролях:** `feat/core-map` (`Dev 1 — Lead`), `feat/ui-components` (`Dev 2 — UI`), `feat/api-integration`.
+3. **Якщо потрібно змінити формат API або інтерфейси `Props` / `LocationDetail`:** спочатку оновити `docs/API_CONTRACT.md`, `docs/FRONTEND_WORK_PLAN.md` і `src/types/location.ts`, щоб не зламати роботу напарника.
 
 ---
 
