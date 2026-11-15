@@ -7,13 +7,13 @@ export interface EventSelectProps {
 }
 
 const SELECT_ID = "event-select-input";
-const META_ID = "event-select-meta";
 
 /** Локальні стилі компонента (hover / disabled), без змін у глобальному index.css. */
 const scopedCss = `
 .d2-event-select {
   width: 100%;
-  height: 32px;
+  min-width: 0;
+  height: 30px;
   padding: 0 30px 0 10px;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -52,17 +52,21 @@ export function EventSelect({
 }: EventSelectProps) {
   const isEmpty = locations.length === 0;
   const activeLoc = locations.find((loc) => loc.id === activeLocationId) ?? null;
+  const activeHint = activeLoc
+    ? `${activeLoc.title} · ${activeLoc.area_km2.toFixed(1)} км² · ${activeLoc.latest_date}`
+    : undefined;
 
   return (
     <div
       style={{
-        padding: "10px 12px",
+        padding: "8px 12px",
         borderBottom: "1px solid var(--border)",
         background: "var(--bg-panel)",
         display: "flex",
         flexDirection: "column",
-        gap: "6px",
+        gap: "5px",
         flexShrink: 0,
+        minWidth: 0,
       }}
     >
       <style>{scopedCss}</style>
@@ -92,7 +96,7 @@ export function EventSelect({
           className="d2-event-select"
           value={activeLocationId ?? ""}
           disabled={isEmpty}
-          aria-describedby={activeLoc ? META_ID : undefined}
+          title={activeHint}
           onChange={(e) => onSelectLocation(e.target.value)}
         >
           {isEmpty ? (
@@ -137,25 +141,6 @@ export function EventSelect({
         </svg>
       </div>
 
-      {activeLoc && (
-        <div
-          id={META_ID}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "8px",
-            fontSize: "11px",
-            color: "var(--text-secondary)",
-          }}
-        >
-          <span>
-            Площа: <span className="mono">{activeLoc.area_km2.toFixed(1)} км²</span>
-          </span>
-          <span>
-            Останній знімок: <span className="mono">{activeLoc.latest_date}</span>
-          </span>
-        </div>
-      )}
     </div>
   );
 }

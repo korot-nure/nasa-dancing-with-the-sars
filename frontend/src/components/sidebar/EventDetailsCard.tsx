@@ -39,6 +39,15 @@ function pluralSnapshots(n: number): string {
 }
 
 const scopedCss = `
+.d2-card { min-width: 0; }
+.d2-card .section-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.d2-card .kv-cell { min-width: 0; }
+.d2-card .kv-val,
+.d2-card .kv-sub { overflow-wrap: anywhere; }
 .d2-skel {
   display: block;
   height: 10px;
@@ -153,7 +162,7 @@ export function EventDetailsCard({
   // --- Етап і дата ---
   const stageBadge = activeSnap ? `T${activeStepIdx + 1}` : "T0";
   const stageLabel = activeSnap ? activeSnap.label : "T0 · До аварії (база)";
-  const stageDate = activeSnap ? activeSnap.date : detail.baseline_date;
+  const stageDate = (activeSnap ? activeSnap.date : detail.baseline_date) || "—";
 
   let offsetText = "До початку інциденту";
   if (activeSnap && firstSnap) {
@@ -191,9 +200,13 @@ export function EventDetailsCard({
   }
 
   const snapCount = snapshots.length;
+  const stageBadgeText = snapCount > 0 ? `${stageBadge} / T${snapCount}` : "T0";
+  const description = detail.description?.trim() ?? "";
+  const sourceUrl = detail.source_url?.trim() ?? "";
 
   return (
     <div
+      className="d2-card"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -269,7 +282,7 @@ export function EventDetailsCard({
             color: activeSnap ? "var(--text-primary)" : "var(--text-secondary)",
           }}
         >
-          {stageBadge} / T{snapCount}
+          {stageBadgeText}
         </span>
       </div>
 
@@ -315,7 +328,7 @@ export function EventDetailsCard({
           gap: "10px",
         }}
       >
-        {detail.description && (
+        {description && (
           <p
             style={{
               margin: 0,
@@ -324,14 +337,14 @@ export function EventDetailsCard({
               lineHeight: 1.5,
             }}
           >
-            {detail.description}
+            {description}
           </p>
         )}
 
-        {detail.source_url && (
+        {sourceUrl && (
           <div>
             <a
-              href={detail.source_url}
+              href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="btn"

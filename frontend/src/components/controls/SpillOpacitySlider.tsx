@@ -13,9 +13,10 @@ const PRESETS = [0, 0.5, 1] as const;
 /** Локальні стилі повзунка, пресетів і перемикачів (плаский темний стиль, без тіней). */
 const scopedCss = `
 .d2-range {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 4px;
-  margin: 6px 0;
+  margin: 0;
   appearance: none;
   -webkit-appearance: none;
   background: var(--border-strong);
@@ -46,7 +47,10 @@ const scopedCss = `
   background: var(--accent-spill);
 }
 .d2-preset {
-  flex: 1;
+  min-width: 40px;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 10px;
   color: var(--text-secondary);
 }
 .d2-preset.is-active {
@@ -58,7 +62,8 @@ const scopedCss = `
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 26px;
+  min-width: 0;
+  height: 24px;
   padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -109,7 +114,9 @@ function LayerToggle({
           opacity: checked ? 1 : 0.4,
         }}
       />
-      <span>{label}</span>
+      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {label}
+      </span>
       <input
         id={id}
         type="checkbox"
@@ -137,10 +144,10 @@ export function SpillOpacitySlider({
   return (
     <div
       style={{
-        padding: "10px 12px",
+        padding: "8px 12px",
         display: "flex",
         flexDirection: "column",
-        gap: "8px",
+        gap: "7px",
         marginTop: "auto",
         borderTop: "1px solid var(--border)",
         background: "var(--bg-panel)",
@@ -174,20 +181,25 @@ export function SpillOpacitySlider({
         </span>
       </div>
 
-      <input
-        id={RANGE_ID}
-        className="d2-range"
-        type="range"
-        min={0}
-        max={1}
-        step={0.05}
-        value={spillOpacity}
-        aria-valuetext={`${opacityPercent}%`}
-        onChange={(e) => onOpacityChange(Number(e.target.value))}
-      />
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+        <input
+          id={RANGE_ID}
+          className="d2-range"
+          type="range"
+          min={0}
+          max={1}
+          step={0.05}
+          value={spillOpacity}
+          aria-valuetext={`${opacityPercent}%`}
+          onChange={(e) => onOpacityChange(Number(e.target.value))}
+        />
 
-      <div role="group" aria-label="Швидкі значення прозорості" style={{ display: "flex", gap: "6px" }}>
-        {PRESETS.map((preset) => {
+        <div
+          role="group"
+          aria-label="Швидкі значення прозорості"
+          style={{ display: "flex", gap: "4px", flexShrink: 0 }}
+        >
+          {PRESETS.map((preset) => {
           const isActive = Math.abs(spillOpacity - preset) < 0.01;
           return (
             <button
@@ -200,10 +212,11 @@ export function SpillOpacitySlider({
               {Math.round(preset * 100)}%
             </button>
           );
-        })}
+          })}
+        </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px", paddingTop: "2px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         <LayerToggle
           id="toggle-contour-layer"
           label="Векторний контур плями"
