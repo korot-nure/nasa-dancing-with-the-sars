@@ -1,0 +1,27 @@
+{
+ "name": "ev_twin_baltic_bloom",
+ "bbox": [
+  18.9,
+  56.7,
+  21.2,
+  57.9
+ ],
+ "start": "2026-06-19",
+ "end": "2026-08-31",
+ "res": 60.0,
+ "known_source": null,
+ "notes": "Known event: Cyanobacteria bloom, Gotland Basin (Baltic), summer 2026",
+ "extra": {
+  "event_id": "twin_baltic_bloom",
+  "event_type": "twin:cyanobacteria",
+  "event_name": "Cyanobacteria bloom, Gotland Basin (Baltic), summer 2026",
+  "source_radius_km": null,
+  "active_start": "2026-06",
+  "active_end": "2026-08",
+  "control_dates": "",
+  "search_bbox": "18.9,56.7,21.2,57.9",
+  "polarizations": "HH;HH+HV;VV",
+  "confidence": "medium",
+  "label_note": "take as twin (verify bloom dates with Sentinel-3/2)"
+ }
+}

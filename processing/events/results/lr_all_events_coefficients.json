@@ -1,0 +1,21 @@
+{
+ "log_dist_platform": -0.3998,
+ "log_area": 0.2309,
+ "scene_obj_density": 0.1849,
+ "n_detectors": 0.1816,
+ "margin_db": -0.1519,
+ "log_dist_land": 0.1308,
+ "contrast_p10_db": -0.1264,
+ "solidity": -0.1177,
+ "edge_step_db": 0.107,
+ "compactness": -0.1066,
+ "cv_ratio_in_out": -0.106,
+ "drift_misalign_deg": 0.1036,
+ "log_dist_ship": 0.1015,
+ "cv_inside": 0.0828,
+ "origin_recur": 0.0543,
+ "elongation": 0.0485,
+ "edge_grad_db_km": 0.0345,
+ "persist_iou": 0.0241,
+ "contrast_med_db": -0.0135
+}

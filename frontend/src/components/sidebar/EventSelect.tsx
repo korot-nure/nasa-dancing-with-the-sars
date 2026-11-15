@@ -9,7 +9,7 @@ export interface EventSelectProps {
 
 const SELECT_ID = "event-select-input";
 
-/** Локальні стилі компонента (hover / disabled), без змін у глобальному index.css. */
+/** Component-local styles (hover / disabled), with no changes to the global index.css. */
 const scopedCss = `
 .d2-event-select {
   width: 100%;
@@ -43,8 +43,8 @@ const scopedCss = `
 `;
 
 /**
- * Вибір активного інциденту розливу нафти (ліва панель).
- * Нативний <select> — повна підтримка клавіатури та екранних читачів.
+ * Selection of the active oil spill incident (left panel).
+ * Native <select>: full keyboard and screen reader support.
  */
 export function EventSelect({
   locations,

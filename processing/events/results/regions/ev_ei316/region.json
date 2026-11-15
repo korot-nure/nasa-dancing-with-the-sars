@@ -1,0 +1,30 @@
+{
+ "name": "ev_ei316",
+ "bbox": [
+  -92.0266,
+  27.9035,
+  -91.2107,
+  28.6221
+ ],
+ "start": "2025-11-21",
+ "end": "2026-10-30",
+ "res": 60.0,
+ "known_source": [
+  -91.61861,
+  28.26278
+ ],
+ "notes": "Known event: Eugene Island 316 recurring slick (suspected pipeline), Gulf of Mexico off Louisiana",
+ "extra": {
+  "event_id": "ei316",
+  "event_type": "chronic",
+  "event_name": "Eugene Island 316 recurring slick (suspected pipeline), Gulf of Mexico off Louisiana",
+  "source_radius_km": 3.0,
+  "active_start": "2026-08-03",
+  "active_end": "2026-09-21",
+  "control_dates": "",
+  "search_bbox": "",
+  "polarizations": "HH+HV",
+  "confidence": "high",
+  "label_note": "take"
+ }
+}

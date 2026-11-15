@@ -49,3 +49,8 @@ frontend/dist/
 Thumbs.db
 .vscode/
 .idea/
+
+# Processing pipeline: generated runs and downloaded input data (regenerable from public archives)
+processing/runs/
+processing/oman_case/data_cache/
+processing/web_data/

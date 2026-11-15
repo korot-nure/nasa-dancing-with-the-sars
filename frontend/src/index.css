@@ -316,7 +316,7 @@ input:focus-visible {
     flex-shrink: 0;
   }
 
-  /* На вузьких екранах прокручується весь сайдбар, тож картка не стискається до 0 */
+  /* On narrow screens the whole sidebar scrolls, so the card does not shrink to 0 */
   .sidebar-scroll {
     flex: none;
     overflow-y: visible;

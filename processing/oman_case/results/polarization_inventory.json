@@ -1,0 +1,6 @@
+{
+  "query": "ASF Search API, platform=NISAR, processingLevel=RSLC, bbox=55.5,16.8,59.6,20.8, 2026-06-15..2026-11-13",
+  "queried_utc": "2026-11-14",
+  "counts_by_mode_and_polarization": {"2005 DHDH": 120, "2005 SHSH": 33, "4005 DHDH": 11, "0005 NASV": 45},
+  "notes": "DHDH = dual-pol HH/HV (frequency A); SHSH = single HH; NASV = frequency B only, VV (joint L+S observation). No quad-pol (QP) and no simultaneous HH+VV acquisitions over the Oman case area."
+}

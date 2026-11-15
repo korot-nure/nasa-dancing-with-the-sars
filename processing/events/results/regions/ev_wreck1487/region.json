@@ -1,0 +1,30 @@
+{
+ "name": "ev_wreck1487",
+ "bbox": [
+  -70.3873,
+  39.7412,
+  -69.4477,
+  40.4599
+ ],
+ "start": "2025-10-31",
+ "end": "2026-10-31",
+ "res": 60.0,
+ "known_source": [
+  -69.9175,
+  40.10056
+ ],
+ "notes": "Known event: Wreck 1487, ~90 NM south of Nantucket (NW Atlantic)",
+ "extra": {
+  "event_id": "wreck1487",
+  "event_type": "chronic (shipwreck)",
+  "event_name": "Wreck 1487, ~90 NM south of Nantucket (NW Atlantic)",
+  "source_radius_km": 3.0,
+  "active_start": "continuous",
+  "active_end": "continuous",
+  "control_dates": "",
+  "search_bbox": "",
+  "polarizations": "VV+VH",
+  "confidence": "high",
+  "label_note": "take; VV+VH 5MHz sideband only"
+ }
+}

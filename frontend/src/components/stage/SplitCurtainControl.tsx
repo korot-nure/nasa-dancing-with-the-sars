@@ -12,7 +12,7 @@ function clampRatio(value: number): number {
 }
 
 /**
- * [Dev 1 — Lead] Інтерактивна вертикальна шторка порівняння "Звичайна карта ↔ SAR-накладення".
+ * [Dev 1 — Lead] Interactive vertical comparison curtain "Base map ↔ SAR overlay".
  */
 export function SplitCurtainControl({ splitRatio, onSplitChange }: SplitCurtainControlProps) {
   const { lang } = useI18n();

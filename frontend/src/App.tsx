@@ -46,7 +46,7 @@ export function App() {
       } catch (err) {
         if (cancelled) return;
         const message =
-          err instanceof Error ? err.message : "Не вдалося завантажити список подій";
+          err instanceof Error ? err.message : "Failed to load the event list";
         setState((prev) => ({ ...prev, loading: false, error: message }));
       }
     }
@@ -79,7 +79,7 @@ export function App() {
       } catch (err) {
         if (cancelled) return;
         const message =
-          err instanceof Error ? err.message : "Не вдалося завантажити деталі події";
+          err instanceof Error ? err.message : "Failed to load event details";
         setState((prev) => ({ ...prev, loading: false, error: message }));
       }
     }

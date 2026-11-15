@@ -1,0 +1,30 @@
+{
+ "name": "ev_gc600",
+ "bbox": [
+  -90.9789,
+  27.0105,
+  -90.1697,
+  27.7292
+ ],
+ "start": "2026-06-21",
+ "end": "2026-10-31",
+ "res": 60.0,
+ "known_source": [
+  -90.5743,
+  27.36986
+ ],
+ "notes": "Known event: Green Canyon 600 natural seeps (Mega Plume vent), Gulf of Mexico",
+ "extra": {
+  "event_id": "gc600",
+  "event_type": "seep",
+  "event_name": "Green Canyon 600 natural seeps (Mega Plume vent), Gulf of Mexico",
+  "source_radius_km": 3.0,
+  "active_start": "continuous",
+  "active_end": "continuous",
+  "control_dates": "",
+  "search_bbox": "",
+  "polarizations": "VV",
+  "confidence": "high",
+  "label_note": "take; VV-only 5MHz; other seeps in scene are not background"
+ }
+}

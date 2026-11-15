@@ -1,12 +1,12 @@
 /**
- * Єдиний TypeScript-контракт даних (API_CONTRACT.md v1.2 + FRONTEND_WORK_PLAN.md).
- * Спільне джерело правди для обох розробників.
+ * Single TypeScript data contract (API_CONTRACT.md v1.2 + FRONTEND_WORK_PLAN.md).
+ * Shared source of truth for both developers.
  */
 
 export interface LocationSummary {
   id: string;
   title: string;
-  /** Центр події у форматі [lon, lat] (EPSG:4326) */
+  /** Event centre as [lon, lat] (EPSG:4326) */
   coords: [number, number];
   baseline_date: string; // YYYY-MM-DD
   latest_date: string;   // YYYY-MM-DD
@@ -24,42 +24,42 @@ export type LabelSource = "manual" | "auto";
 export interface SnapshotStep {
   step_id: string;
   date: string;          // YYYY-MM-DD
-  /** 1.1: трек знімка, напр. "056A" */
+  /** 1.1: pass track, e.g. "056A" */
   track: string;
-  /** 1.1: поляризація знімка */
+  /** 1.1: pass polarization */
   polarization: Polarization;
-  /** 1.1: «До» того самого треку й поляризації */
+  /** 1.1: "Before" image of the same track and polarization */
   before_url: string;
   /** 1.1: YYYY-MM-DD */
   before_date: string;
   label: string;
-  /** 1.1: manual — підпис людини, auto — за правилами з даних */
+  /** 1.1: manual = human-written label, auto = rule-based label derived from data */
   label_source: LabelSource;
-  /** 1.1: попередження (штиль, неповне покриття) */
+  /** 1.1: warning (calm wind, partial coverage) */
   note?: string | null;
-  /** Площа плям класу probable (км²) */
+  /** Area of probable-class slicks (km²) */
   area_km2: number;
   after_url: string;
   mask_url: string;
   contour_geojson_url: string;
-  /** 1.1, опціонально */
+  /** 1.1, optional */
   targets_geojson_url?: string | null;
 }
 
 export interface LocationDetail {
   id: string;
   title: string;
-  /** Центр події у форматі [lon, lat] (EPSG:4326) */
+  /** Event centre as [lon, lat] (EPSG:4326) */
   coords: [number, number];
-  /** Межі зображення [west, south, east, north] (EPSG:4326) */
+  /** Image bounds [west, south, east, north] (EPSG:4326) */
   bbox: [number, number, number, number];
-  /** = before_date першого зрізу (сумісність з 1.0) */
+  /** = before_date of the first snapshot (1.0 compatibility) */
   baseline_date: string; // YYYY-MM-DD
-  /** = before_url першого зрізу (сумісність з 1.0) */
+  /** = before_url of the first snapshot (1.0 compatibility) */
   baseline_before_url: string;
   description: string;
   source_url?: string | null;
-  /** 1.1, опціонально */
+  /** 1.1, optional */
   sources_geojson_url?: string | null;
   snapshots: SnapshotStep[];
 }
@@ -70,17 +70,17 @@ export type SlickFlag = "near_coast" | "low_wind" | "near_noise" | "rain" | "sma
 export interface SpillContourProperties {
   location_id: string;
   step_id: string;
-  /** Площа цієї плями (км²) */
+  /** Area of this slick (km²) */
   area_km2: number;
   /** 1.1 */
   slick_id: string;
   /** 1.1 */
   class: SlickClass;
-  /** 1.1: 0..1, ранжування, а не ймовірність */
+  /** 1.1: 0..1, a ranking score, not a probability */
   score: number;
-  /** 1.1: чому оцінку знижено */
+  /** 1.1: reasons the score was lowered */
   flags: SlickFlag[];
-  /** 1.2: pipeline — знайдено конвеєром, reference — еталонна розмітка відомої події */
+  /** 1.2: pipeline = detected by the pipeline, reference = reference annotation of a known event */
   origin?: "pipeline" | "reference";
 }
 
@@ -146,17 +146,17 @@ export interface AppState {
   locations: LocationSummary[];
   activeLocationId: string | null;
   activeDetail: LocationDetail | null;
-  /** -1 = T0 ("До аварії" / baseline_before_url), 0..N-1 = індекс у snapshots[] */
+  /** -1 = T0 ("Before incident" / baseline_before_url), 0..N-1 = index into snapshots[] */
   activeStepIdx: number;
-  /** Прозорість шару підсвітки розливу (0.0 .. 1.0) */
+  /** Opacity of the spill highlight layer (0.0 .. 1.0) */
   spillOpacity: number;
-  /** Показ векторного контуру активного кроку */
+  /** Show the vector contour of the active step */
   showContour: boolean;
-  /** Показ контурів попередніх етапів і вектора дрейфу (клієнтський розрахунок) */
+  /** Show contours of previous steps and the drift vector (computed client-side) */
   showTrajectory: boolean;
-  /** Автопрогравання кроків таймлайну T0 -> Tn */
+  /** Autoplay of timeline steps T0 -> Tn */
   isPlaying: boolean;
-  /** Позиція шторки (0.05 .. 0.95): Звичайна карта / SAR «До» ↔ SAR «Після» */
+  /** Curtain position (0.05 .. 0.95): base map / SAR "Before" ↔ SAR "After" */
   splitRatio: number;
   loading: boolean;
   error: string | null;

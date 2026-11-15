@@ -26,11 +26,11 @@ const targetsCache = new Map<string, Promise<TargetFeatureCollection>>();
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: не вдалося завантажити ${url}`);
+    throw new Error(`HTTP ${res.status}: failed to load ${url}`);
   }
   const contentType = res.headers.get("content-type") ?? "";
   if (contentType.includes("text/html")) {
-    throw new Error(`Очікувався JSON, але отримано HTML (${url}). Оновіть сторінку (Ctrl+Shift+R).`);
+    throw new Error(`Expected JSON but received HTML (${url}). Reload the page (Ctrl+Shift+R).`);
   }
   return (await res.json()) as T;
 }
