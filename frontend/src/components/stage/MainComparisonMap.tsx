@@ -194,10 +194,10 @@ function contourStyleForFeature(
   if (props?.class === "possible") {
     return {
       renderer,
-      color: "#fbbf24",
+      color: "#a78bfa",
       weight: 1.6,
       dashArray: "4 4",
-      fillColor: "#fbbf24",
+      fillColor: "#a78bfa",
       fillOpacity: 0.01
     };
   }
