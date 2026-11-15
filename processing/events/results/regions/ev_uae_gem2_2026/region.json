@@ -1,0 +1,27 @@
+{
+ "name": "ev_uae_gem2_2026",
+ "bbox": [
+  54.9,
+  25.2,
+  56.0,
+  26.1
+ ],
+ "start": "2026-06-18",
+ "end": "2026-11-02",
+ "res": 60.0,
+ "known_source": null,
+ "notes": "Known event (event-level check): Tanker GEM No. 2 leak off Umm Al Quwain, UAE",
+ "extra": {
+  "event_id": "uae_gem2_2026",
+  "event_type": "one-off",
+  "event_name": "Tanker GEM No. 2 leak off Umm Al Quwain, UAE",
+  "source_radius_km": null,
+  "active_start": "2026-10-19",
+  "active_end": "2026-10-30",
+  "control_dates": "2026-06-18..2026-10-05",
+  "search_bbox": "55.49,25.64,55.78,25.92",
+  "polarizations": "HH+HV",
+  "confidence": "event high / source location low",
+  "label_note": "take as event-level check (S1 polygon of 10-21 as label), not for source localisation"
+ }
+}

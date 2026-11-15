@@ -1,0 +1,849 @@
+{
+ "generated_utc": "2026-11-14T13:58:46Z",
+ "sources": {
+  "era5": {
+   "endpoint": "https://archive-api.open-meteo.com/v1/archive (models=era5)",
+   "resolution": "0.25 deg, hourly; linear in time to the acquisition minute",
+   "variables": "wind_speed_10m, wind_direction_10m, precipitation"
+  },
+  "sst": {
+   "endpoint": "https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41 (fallback ncdcOisst21Agg_LonPM180)",
+   "resolution": "0.01 deg daily (MUR L4, 09:00 UTC analysis)"
+  },
+  "chl": {
+   "endpoint": "https://coastwatch.pfeg.noaa.gov/erddap/griddap/noaacwNPPN20S3ASCIDINEOF2kmDaily (+ raw nesdisVHNnoaa20chlaDaily, nesdisVHNchlaDaily)",
+   "resolution": "gap-filled ~0.02 deg daily; raw 0.0375 deg daily with cloud gaps"
+  },
+  "currents": {
+   "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+   "resolution": "model native 0.08 deg hourly (MeteoFrance SMOC), sampled every 1/6 deg",
+   "convention": "u,v in m/s, direction = flow towards"
+  }
+ },
+ "scenes": {
+  "HH_0624": {
+   "time_utc": "2026-06-24T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 11.26,
+    "wspd_min": 5.96,
+    "wdir_from_median": 207.9,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 23.13,
+    "median_c": 25.15,
+    "max_c": 28.4,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 2.022,
+    "p90_mg_m3": 6.003,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-06-24)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.683,
+    "speed_max_ms": 1.25,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "HH_0706": {
+   "time_utc": "2026-07-06T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 12.87,
+    "wspd_min": 5.16,
+    "wdir_from_median": 217.2,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 21.63,
+    "median_c": 23.23,
+    "max_c": 26.77,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 1.678,
+    "p90_mg_m3": 5.31,
+    "raw_source": "nesdisVHNchlaDaily (2026-07-09)",
+    "raw_days_from_scene": 3,
+    "raw_coverage_best_within_3d": 0.015,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.617,
+    "speed_max_ms": 1.417,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "HH_0718": {
+   "time_utc": "2026-07-18T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 11.99,
+    "wspd_min": 6.68,
+    "wdir_from_median": 211.6,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 20.97,
+    "median_c": 22.05,
+    "max_c": 25.28,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.836,
+    "p90_mg_m3": 3.187,
+    "raw_source": "nesdisVHNchlaDaily (2026-07-15)",
+    "raw_days_from_scene": -3,
+    "raw_coverage_best_within_3d": 0.015,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.639,
+    "speed_max_ms": 1.389,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "HH_0811": {
+   "time_utc": "2026-08-11T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 10.61,
+    "wspd_min": 5.17,
+    "wdir_from_median": 214.0,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 19.78,
+    "median_c": 21.31,
+    "max_c": 24.63,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.782,
+    "p90_mg_m3": 1.471,
+    "raw_source": "nesdisVHNchlaDaily (2026-08-12)",
+    "raw_days_from_scene": 1,
+    "raw_coverage_best_within_3d": 0.001,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.48,
+    "speed_max_ms": 1.083,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "HH_0823": {
+   "time_utc": "2026-08-23T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 10.15,
+    "wspd_min": 5.25,
+    "wdir_from_median": 210.8,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 21.16,
+    "median_c": 22.46,
+    "max_c": 24.6,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.565,
+    "p90_mg_m3": 2.442,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-08-23)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.417,
+    "speed_max_ms": 0.833,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "HH_0904": {
+   "time_utc": "2026-09-04T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 8.34,
+    "wspd_min": 5.85,
+    "wdir_from_median": 183.0,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 21.4,
+    "median_c": 23.22,
+    "max_c": 26.15,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.726,
+    "p90_mg_m3": 1.93,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-09-02)",
+    "raw_days_from_scene": -2,
+    "raw_coverage_best_within_3d": 0.085,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.333,
+    "speed_max_ms": 0.944,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "HH_0916": {
+   "time_utc": "2026-09-16T14:49",
+   "aoi": "island_hh",
+   "era5": {
+    "ok": true,
+    "wspd_median": 7.37,
+    "wspd_min": 5.94,
+    "wdir_from_median": 201.4,
+    "precip_3h_max_mm": 0.0,
+    "grid": "8x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.84,
+    "min_c": 23.0,
+    "median_c": 25.34,
+    "max_c": 27.23,
+    "grid": "146x161"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 2.695,
+    "p90_mg_m3": 7.297,
+    "raw_source": "nesdisVHNchlaDaily (2026-09-16)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.825,
+    "raw_coverage_same_day": 0.825
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.306,
+    "speed_max_ms": 0.573,
+    "valid_frac": 0.879,
+    "grid": "11x12"
+   }
+  },
+  "VV_0618": {
+   "time_utc": "2026-06-18T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 9.1,
+    "wspd_min": 5.79,
+    "wdir_from_median": 209.3,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 23.6,
+    "median_c": 27.87,
+    "max_c": 29.64,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.581,
+    "p90_mg_m3": 3.096,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-06-16)",
+    "raw_days_from_scene": -2,
+    "raw_coverage_best_within_3d": 0.249,
+    "raw_coverage_same_day": 0.001
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.565,
+    "speed_max_ms": 1.259,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "VV_0630": {
+   "time_utc": "2026-06-30T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 11.64,
+    "wspd_min": 3.55,
+    "wdir_from_median": 215.3,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 23.47,
+    "median_c": 26.44,
+    "max_c": 28.5,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.663,
+    "p90_mg_m3": 5.438,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-06-30)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.528,
+    "speed_max_ms": 1.194,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "VV_0712": {
+   "time_utc": "2026-07-12T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 11.36,
+    "wspd_min": 5.98,
+    "wdir_from_median": 221.0,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 20.79,
+    "median_c": 23.82,
+    "max_c": 26.92,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.442,
+    "p90_mg_m3": 3.277,
+    "raw_source": "nesdisVHNchlaDaily (2026-07-12)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.006,
+    "raw_coverage_same_day": 0.006
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.5,
+    "speed_max_ms": 1.444,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "VV_0724": {
+   "time_utc": "2026-07-24T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 14.58,
+    "wspd_min": 6.66,
+    "wdir_from_median": 223.3,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 20.31,
+    "median_c": 22.91,
+    "max_c": 26.44,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.607,
+    "p90_mg_m3": 1.173,
+    "raw_source": "nesdisVHNchlaDaily (2026-07-25)",
+    "raw_days_from_scene": 1,
+    "raw_coverage_best_within_3d": 0.001,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.639,
+    "speed_max_ms": 1.25,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "VV_0817": {
+   "time_utc": "2026-08-17T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 12.82,
+    "wspd_min": 6.82,
+    "wdir_from_median": 215.7,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 20.27,
+    "median_c": 23.44,
+    "max_c": 26.01,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.61,
+    "p90_mg_m3": 1.467,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-08-17)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.481,
+    "speed_max_ms": 1.028,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "VV_0829": {
+   "time_utc": "2026-08-29T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 10.51,
+    "wspd_min": 6.33,
+    "wdir_from_median": 204.0,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 19.36,
+    "median_c": 23.87,
+    "max_c": 26.47,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": -2,
+    "median_mg_m3": 0.695,
+    "p90_mg_m3": 1.583,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-08-27)",
+    "raw_days_from_scene": -2,
+    "raw_coverage_best_within_3d": 0.07,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.417,
+    "speed_max_ms": 1.0,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "VV_0910": {
+   "time_utc": "2026-09-10T01:40",
+   "aoi": "island_vv",
+   "era5": {
+    "ok": true,
+    "wspd_median": 9.14,
+    "wspd_min": 6.82,
+    "wdir_from_median": 215.3,
+    "precip_3h_max_mm": 0.0,
+    "grid": "9x12"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.925,
+    "min_c": 22.33,
+    "median_c": 25.48,
+    "max_c": 27.3,
+    "grid": "181x256"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 2.005,
+    "p90_mg_m3": 6.111,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-09-13)",
+    "raw_days_from_scene": 3,
+    "raw_coverage_best_within_3d": 0.264,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.407,
+    "speed_max_ms": 1.222,
+    "valid_frac": 0.946,
+    "grid": "13x17"
+   }
+  },
+  "CA_0717": {
+   "time_utc": "2026-07-17T01:33",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 10.14,
+    "wspd_min": 4.3,
+    "wdir_from_median": 197.4,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 22.42,
+    "median_c": 24.81,
+    "max_c": 25.88,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.988,
+    "p90_mg_m3": 3.449,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-07-17)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.389,
+    "speed_max_ms": 1.083,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  },
+  "CD_0723": {
+   "time_utc": "2026-07-23T14:40",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 12.85,
+    "wspd_min": 3.33,
+    "wdir_from_median": 208.3,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 22.01,
+    "median_c": 24.24,
+    "max_c": 25.93,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.628,
+    "p90_mg_m3": 1.999,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-07-23)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.417,
+    "speed_max_ms": 1.25,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  },
+  "CA_0810": {
+   "time_utc": "2026-08-10T01:33",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 8.06,
+    "wspd_min": 3.71,
+    "wdir_from_median": 204.1,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 20.72,
+    "median_c": 22.86,
+    "max_c": 25.77,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.583,
+    "p90_mg_m3": 1.968,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-08-10)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.333,
+    "speed_max_ms": 1.108,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  },
+  "CD_0816": {
+   "time_utc": "2026-08-16T14:40",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 10.75,
+    "wspd_min": 4.73,
+    "wdir_from_median": 203.0,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 20.79,
+    "median_c": 23.23,
+    "max_c": 26.01,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.799,
+    "p90_mg_m3": 3.37,
+    "raw_source": "nesdisVHNchlaDaily (2026-08-16)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.035,
+    "raw_coverage_same_day": 0.035
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.389,
+    "speed_max_ms": 1.083,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  },
+  "CA_0822": {
+   "time_utc": "2026-08-22T01:33",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 8.55,
+    "wspd_min": 2.45,
+    "wdir_from_median": 210.8,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 21.65,
+    "median_c": 23.09,
+    "max_c": 25.85,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 0.665,
+    "p90_mg_m3": 2.8,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-08-22)",
+    "raw_days_from_scene": 0,
+    "raw_coverage_best_within_3d": 0.0,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.361,
+    "speed_max_ms": 1.028,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  },
+  "CD_0828": {
+   "time_utc": "2026-08-28T14:40",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 9.95,
+    "wspd_min": 4.56,
+    "wdir_from_median": 201.7,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 20.03,
+    "median_c": 22.8,
+    "max_c": 26.04,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 1,
+    "median_mg_m3": 1.007,
+    "p90_mg_m3": 6.205,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-08-30)",
+    "raw_days_from_scene": 2,
+    "raw_coverage_best_within_3d": 0.856,
+    "raw_coverage_same_day": 0.369
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.389,
+    "speed_max_ms": 1.417,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  },
+  "CA_0903": {
+   "time_utc": "2026-09-03T01:33",
+   "aoi": "coast",
+   "era5": {
+    "ok": true,
+    "wspd_median": 7.7,
+    "wspd_min": 3.29,
+    "wdir_from_median": 197.1,
+    "precip_3h_max_mm": 0.0,
+    "grid": "10x9"
+   },
+   "sst": {
+    "ok": true,
+    "source": "MUR SST v4.1 (jplMURSST41) 0.01deg",
+    "valid_frac": 0.758,
+    "min_c": 20.21,
+    "median_c": 23.08,
+    "max_c": 26.33,
+    "grid": "211x176"
+   },
+   "chl": {
+    "ok": true,
+    "source": "noaacwNPPN20S3ASCIDINEOF2kmDaily (DINEOF gap-filled, ~2 km)",
+    "days_from_scene": 0,
+    "median_mg_m3": 3.243,
+    "p90_mg_m3": 9.286,
+    "raw_source": "nesdisVHNnoaa20chlaDaily (2026-09-02)",
+    "raw_days_from_scene": -1,
+    "raw_coverage_best_within_3d": 0.013,
+    "raw_coverage_same_day": 0.0
+   },
+   "currents": {
+    "ok": true,
+    "speed_median_ms": 0.222,
+    "speed_max_ms": 1.111,
+    "valid_frac": 0.85,
+    "grid": "15x12"
+   }
+  }
+ },
+ "cache": {
+  "dir": "oman_case/data_cache/ancillary",
+  "n_files": 84,
+  "size_mb": 1.9
+ }
+}

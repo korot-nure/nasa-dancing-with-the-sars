@@ -1,0 +1,1250 @@
+{
+ "ei316": {
+  "mpsr_days": [
+   "2026-04-05",
+   "2026-07-30",
+   "2026-08-14",
+   "2026-08-15",
+   "2026-08-17",
+   "2026-08-27",
+   "2026-09-03",
+   "2026-09-08",
+   "2026-09-09",
+   "2026-09-11",
+   "2026-09-17",
+   "2026-09-20"
+  ],
+  "nisar_same_day": [
+   "2026-08-15",
+   "2026-08-27",
+   "2026-09-08",
+   "2026-09-17",
+   "2026-09-20"
+  ],
+  "nisar_pm1": [
+   "2026-08-15",
+   "2026-08-27",
+   "2026-09-08",
+   "2026-09-12",
+   "2026-09-17",
+   "2026-09-20"
+  ],
+  "reports": [
+   {
+    "date": "2026-09-20",
+    "time": "1210",
+    "sensor": "RADARSAT2",
+    "area_km2": 11.8,
+    "file": "20260920_1210_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-09-20",
+    "time": "0009",
+    "sensor": "SENTINEL1D",
+    "area_km2": 4.42,
+    "file": "20260920_0009_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-17",
+    "time": "1632",
+    "sensor": "LANDSAT8",
+    "area_km2": 0.78,
+    "file": "20260917_1632b_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-09-11",
+    "time": "1638",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.92,
+    "file": "20260911_1638_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-09-09",
+    "time": "1632",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.23,
+    "file": "20260909_1632_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-09-09",
+    "time": "0011",
+    "sensor": "RADARSAT2",
+    "area_km2": 3.32,
+    "file": "20260909_0011_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-09-08",
+    "time": "1638",
+    "sensor": "LANDSAT8",
+    "area_km2": 0.33,
+    "file": "20260908_1638_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-09-08",
+    "time": "0009",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.53,
+    "file": "20260908_0009_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-03",
+    "time": "1647",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.27,
+    "file": "20260903_1647_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-08-27",
+    "time": "1210",
+    "sensor": "RADARSAT2",
+    "area_km2": 6.23,
+    "file": "20260827_1210_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-08-17",
+    "time": "1650",
+    "sensor": "SENTINEL2B",
+    "area_km2": 2.17,
+    "file": "20260817_1650_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-15",
+    "time": "0009",
+    "sensor": "SENTINEL1D",
+    "area_km2": 3.65,
+    "file": "20260815_0009_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-14",
+    "time": "1647",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.1,
+    "file": "20260814_1647_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-07-30",
+    "time": "1638",
+    "sensor": "LANDSAT9",
+    "area_km2": 1.1,
+    "file": "20260730_1638_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-04-05",
+    "time": "1210",
+    "sensor": "RADARSAT2",
+    "area_km2": 3.57,
+    "file": "20260405_1210_RADARSAT2_OIL.txt"
+   }
+  ]
+ },
+ "wreck1487": {
+  "mpsr_days": [
+   "2025-10-03",
+   "2025-10-05",
+   "2025-10-07",
+   "2025-10-10",
+   "2025-10-23",
+   "2025-11-09",
+   "2025-11-21",
+   "2025-11-25",
+   "2026-01-03",
+   "2026-02-18",
+   "2026-03-04",
+   "2026-03-09",
+   "2026-03-29",
+   "2026-04-14",
+   "2026-04-25",
+   "2026-05-08",
+   "2026-05-18",
+   "2026-05-25",
+   "2026-05-27",
+   "2026-05-28",
+   "2026-05-29",
+   "2026-06-02",
+   "2026-06-07",
+   "2026-06-08",
+   "2026-06-12",
+   "2026-06-16",
+   "2026-06-22",
+   "2026-06-24",
+   "2026-06-25",
+   "2026-06-27",
+   "2026-07-03",
+   "2026-07-05",
+   "2026-07-07",
+   "2026-07-09",
+   "2026-07-12",
+   "2026-07-14",
+   "2026-07-17",
+   "2026-07-27",
+   "2026-07-29",
+   "2026-08-01",
+   "2026-08-02",
+   "2026-08-05",
+   "2026-08-06",
+   "2026-08-11",
+   "2026-08-14",
+   "2026-08-15",
+   "2026-08-16",
+   "2026-08-20",
+   "2026-08-25",
+   "2026-08-26",
+   "2026-08-29",
+   "2026-08-31",
+   "2026-09-01",
+   "2026-09-05",
+   "2026-09-07",
+   "2026-09-08",
+   "2026-09-12",
+   "2026-09-13",
+   "2026-09-16",
+   "2026-10-02",
+   "2026-10-07",
+   "2026-10-25",
+   "2026-10-30",
+   "2026-11-02",
+   "2026-11-03",
+   "2026-11-04",
+   "2026-11-05",
+   "2026-11-06"
+  ],
+  "nisar_same_day": [
+   "2026-06-16",
+   "2026-07-03",
+   "2026-07-27",
+   "2026-08-15",
+   "2026-08-20",
+   "2026-09-01",
+   "2026-09-08",
+   "2026-10-02",
+   "2026-10-07"
+  ],
+  "nisar_pm1": [
+   "2025-11-24",
+   "2026-01-04",
+   "2026-06-16",
+   "2026-06-21",
+   "2026-06-28",
+   "2026-07-03",
+   "2026-07-10",
+   "2026-07-15",
+   "2026-07-27",
+   "2026-08-15",
+   "2026-08-20",
+   "2026-08-27",
+   "2026-09-01",
+   "2026-09-08",
+   "2026-10-02",
+   "2026-10-07",
+   "2026-10-26",
+   "2026-10-31"
+  ],
+  "reports": [
+   {
+    "date": "2025-11-25",
+    "time": "1047",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.7,
+    "file": "20251125_1047_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2025-11-21",
+    "time": "1048",
+    "sensor": "SENTINEL1C",
+    "area_km2": 2.33,
+    "file": "20251121_1048_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2025-11-09",
+    "time": "1048",
+    "sensor": "SENTINEL1C",
+    "area_km2": 4.97,
+    "file": "20251109_1048_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2025-10-23",
+    "time": "2234",
+    "sensor": "SENTINEL1A",
+    "area_km2": 3.41,
+    "file": "20251023_2234_SENTINEL1A_OIL.txt"
+   },
+   {
+    "date": "2025-10-23",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 0.43,
+    "file": "20251023_1040_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2025-10-10",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.08,
+    "file": "20251010_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2025-10-07",
+    "time": "2233",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.66,
+    "file": "20251007_2233_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2025-10-05",
+    "time": "1536",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.47,
+    "file": "20251005_1536_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2025-10-03",
+    "time": "1521",
+    "sensor": "LANDSAT8",
+    "area_km2": 1.09,
+    "file": "20251003_1521_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-11-06",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.79,
+    "file": "20261106_2233b_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-11-06",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 0.6,
+    "file": "20261106_1040_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-11-05",
+    "time": "1049",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.14,
+    "file": "20261105_1049b_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-11-04",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.46,
+    "file": "20261104_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-11-03",
+    "time": "1043",
+    "sensor": "RADARSAT2",
+    "area_km2": 1.35,
+    "file": "20261103_1043_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-11-02",
+    "time": "2229",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.76,
+    "file": "20261102_2229b_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-10-30",
+    "time": "1521",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.03,
+    "file": "20261030_1521_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-10-25",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 3.27,
+    "file": "20261025_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-10-25",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.3,
+    "file": "20261025_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-10-25",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 1.77,
+    "file": "20261025_1040_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-10-07",
+    "time": "1515",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.73,
+    "file": "20261007_1515_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-10-02",
+    "time": "1537",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.11,
+    "file": "20261002_1537b_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-09-16",
+    "time": "1043",
+    "sensor": "RADARSAT2",
+    "area_km2": 2.78,
+    "file": "20260916_1043_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-09-13",
+    "time": "1040",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.31,
+    "file": "20260913_1040_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-12",
+    "time": "1537",
+    "sensor": "SENTINEL2A",
+    "area_km2": 3.65,
+    "file": "20260912_1537_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-09-12",
+    "time": "1048",
+    "sensor": "SENTINEL1C",
+    "area_km2": 2.66,
+    "file": "20260912_1048_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-09-08",
+    "time": "2233",
+    "sensor": "RADARSAT2",
+    "area_km2": 2.52,
+    "file": "20260908_2233_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-09-07",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.96,
+    "file": "20260907_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-05",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.68,
+    "file": "20260905_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-09-05",
+    "time": "1515",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.61,
+    "file": "20260905_1515_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-09-01",
+    "time": "1040",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.98,
+    "file": "20260901_1040_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-31",
+    "time": "1535",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.16,
+    "file": "20260831_1535_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-08-29",
+    "time": "2225",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.98,
+    "file": "20260829_2225_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-08-26",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.11,
+    "file": "20260826_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-26",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.28,
+    "file": "20260826_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-26",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 0.39,
+    "file": "20260826_1040_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-08-25",
+    "time": "1049",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.48,
+    "file": "20260825_1049_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-20",
+    "time": "1040",
+    "sensor": "SENTINEL1D",
+    "area_km2": 2.46,
+    "file": "20260820_1040_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-16",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 2.71,
+    "file": "20260816_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-15",
+    "time": "2233",
+    "sensor": "RADARSAT2",
+    "area_km2": 1.38,
+    "file": "20260815_2233_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-08-14",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.19,
+    "file": "20260814_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-14",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 0.17,
+    "file": "20260814_1040_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-08-11",
+    "time": "1535",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.11,
+    "file": "20260811_1535_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-08-06",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.08,
+    "file": "20260806_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-05",
+    "time": "2225",
+    "sensor": "RADARSAT2",
+    "area_km2": 5.8,
+    "file": "20260805_2225_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-08-02",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.08,
+    "file": "20260802_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-02",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 2.4,
+    "file": "20260802_1040_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-08-01",
+    "time": "1536",
+    "sensor": "SENTINEL2C",
+    "area_km2": 1.48,
+    "file": "20260801_1536_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-08-01",
+    "time": "1048",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.91,
+    "file": "20260801_1048_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-07-29",
+    "time": "2229",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.42,
+    "file": "20260729_2229_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-07-27",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.24,
+    "file": "20260727_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-07-17",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.54,
+    "file": "20260717_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-07-14",
+    "time": "1537",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.13,
+    "file": "20260714_1537_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-07-12",
+    "time": "2225",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.31,
+    "file": "20260712_2225_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-07-12",
+    "time": "1536",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.37,
+    "file": "20260712_1536_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-07-09",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.5,
+    "file": "20260709_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-07-07",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.05,
+    "file": "20260707_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-07-05",
+    "time": "2229",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.84,
+    "file": "20260705_2229_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-07-03",
+    "time": "1514",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.3,
+    "file": "20260703_1514_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-06-27",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.63,
+    "file": "20260627_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-06-25",
+    "time": "1514",
+    "sensor": "LANDSAT8",
+    "area_km2": 0.08,
+    "file": "20260625_1514_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-06-24",
+    "time": "1537",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.4,
+    "file": "20260624_1537_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-06-22",
+    "time": "1535",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.32,
+    "file": "20260622_1535_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-06-16",
+    "time": "1520",
+    "sensor": "LANDSAT8",
+    "area_km2": 0.09,
+    "file": "20260616_1520_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-06-12",
+    "time": "1536",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.02,
+    "file": "20260612_1536_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-06-12",
+    "time": "1043",
+    "sensor": "RADARSAT2",
+    "area_km2": 3.24,
+    "file": "20260612_1043_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-06-08",
+    "time": "2234",
+    "sensor": "SENTINEL1A",
+    "area_km2": 0.84,
+    "file": "20260608_2234_SENTINEL1A_OIL.txt"
+   },
+   {
+    "date": "2026-06-08",
+    "time": "1520",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.17,
+    "file": "20260608_1520_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-06-07",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.24,
+    "file": "20260607_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-06-02",
+    "time": "1535",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.69,
+    "file": "20260602_1535_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-05-29",
+    "time": "1051",
+    "sensor": "RADARSAT2",
+    "area_km2": 5.26,
+    "file": "20260529_1051_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-05-28",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.05,
+    "file": "20260528_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-05-27",
+    "time": "2234",
+    "sensor": "SENTINEL1A",
+    "area_km2": 0.67,
+    "file": "20260527_2234_SENTINEL1A_OIL.txt"
+   },
+   {
+    "date": "2026-05-25",
+    "time": "2225",
+    "sensor": "RADARSAT2",
+    "area_km2": 1.18,
+    "file": "20260525_2225_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-05-18",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.08,
+    "file": "20260518_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-05-08",
+    "time": "1514",
+    "sensor": "LANDSAT8",
+    "area_km2": 0.91,
+    "file": "20260508_1514_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-04-25",
+    "time": "1537",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.2,
+    "file": "20260425_1537_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-04-14",
+    "time": "1514",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.32,
+    "file": "20260414_1514_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-03-29",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.11,
+    "file": "20260329_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-03-09",
+    "time": "1535",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.25,
+    "file": "20260309_1535_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-03-04",
+    "time": "2233",
+    "sensor": "SENTINEL1A",
+    "area_km2": 1.87,
+    "file": "20260304_2233_SENTINEL1A_OIL.txt"
+   },
+   {
+    "date": "2026-02-18",
+    "time": "2225",
+    "sensor": "RADARSAT2",
+    "area_km2": 2.78,
+    "file": "20260218_2225_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-01-03",
+    "time": "2234",
+    "sensor": "SENTINEL1A",
+    "area_km2": 0.22,
+    "file": "20260103_2234_SENTINEL1A_OIL.txt"
+   }
+  ]
+ },
+ "dry_tortugas494": {
+  "mpsr_days": [
+   "2026-05-14",
+   "2026-06-23",
+   "2026-06-26",
+   "2026-07-06",
+   "2026-07-13",
+   "2026-07-16",
+   "2026-07-28",
+   "2026-08-06",
+   "2026-08-13",
+   "2026-08-15",
+   "2026-08-18",
+   "2026-08-22",
+   "2026-08-30",
+   "2026-09-11",
+   "2026-09-22",
+   "2026-09-23",
+   "2026-09-24",
+   "2026-10-05",
+   "2026-11-03",
+   "2026-11-09"
+  ],
+  "nisar_same_day": [
+   "2026-07-13",
+   "2026-08-18",
+   "2026-08-30",
+   "2026-09-11",
+   "2026-09-23",
+   "2026-10-05"
+  ],
+  "nisar_pm1": [
+   "2026-06-24",
+   "2026-07-13",
+   "2026-07-15",
+   "2026-07-27",
+   "2026-08-18",
+   "2026-08-30",
+   "2026-09-11",
+   "2026-09-23",
+   "2026-09-25",
+   "2026-10-05"
+  ],
+  "reports": [
+   {
+    "date": "2026-11-09",
+    "time": "1602",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.55,
+    "file": "20261109_1602_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-11-03",
+    "time": "1604",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.06,
+    "file": "20261103_1604_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-10-05",
+    "time": "2335",
+    "sensor": "SENTINEL1D",
+    "area_km2": 2.54,
+    "file": "20261005_2335_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-24",
+    "time": "1559",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.74,
+    "file": "20260924_1559_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-09-23",
+    "time": "2332",
+    "sensor": "RADARSAT2",
+    "area_km2": 5.11,
+    "file": "20260923_2332_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-09-22",
+    "time": "1602",
+    "sensor": "LANDSAT9",
+    "area_km2": 1.62,
+    "file": "20260922_1602_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-09-11",
+    "time": "2335",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.91,
+    "file": "20260911_2335_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-11",
+    "time": "1607",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.89,
+    "file": "20260911_1607_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-08-30",
+    "time": "2335",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.91,
+    "file": "20260830_2335_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-30",
+    "time": "1558",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.33,
+    "file": "20260830_1558_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-08-22",
+    "time": "1607",
+    "sensor": "SENTINEL2A",
+    "area_km2": 2.77,
+    "file": "20260822_1607_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-08-18",
+    "time": "2335",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.32,
+    "file": "20260818_2335_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-15",
+    "time": "1558",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.47,
+    "file": "20260815_1558_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-13",
+    "time": "1602",
+    "sensor": "LANDSAT8",
+    "area_km2": 2.15,
+    "file": "20260813_1602_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-08-06",
+    "time": "2335",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.04,
+    "file": "20260806_2335_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-07-28",
+    "time": "1602",
+    "sensor": "LANDSAT8",
+    "area_km2": 0.99,
+    "file": "20260728_1602_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-07-16",
+    "time": "1558",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.12,
+    "file": "20260716_1558_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-07-13",
+    "time": "2335",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.48,
+    "file": "20260713_2335_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-07-06",
+    "time": "1558",
+    "sensor": "SENTINEL2B",
+    "area_km2": 1.03,
+    "file": "20260706_1558_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-06-26",
+    "time": "1558",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.76,
+    "file": "20260626_1558_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-06-23",
+    "time": "1607",
+    "sensor": "SENTINEL2A",
+    "area_km2": 1.21,
+    "file": "20260623_1607_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-05-14",
+    "time": "1607",
+    "sensor": "SENTINEL2A",
+    "area_km2": 1.27,
+    "file": "20260514_1607_SENTINEL2A_OIL.txt"
+   }
+  ]
+ },
+ "bright_bank": {
+  "mpsr_days": [
+   "2026-08-06",
+   "2026-08-10",
+   "2026-08-12",
+   "2026-08-15",
+   "2026-08-16",
+   "2026-08-20",
+   "2026-08-22",
+   "2026-08-27"
+  ],
+  "nisar_same_day": [
+   "2026-08-10",
+   "2026-08-22"
+  ],
+  "nisar_pm1": [
+   "2026-08-10",
+   "2026-08-19",
+   "2026-08-22"
+  ],
+  "reports": [
+   {
+    "date": "2026-08-27",
+    "time": "1638",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.38,
+    "file": "20260827_1638_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-22",
+    "time": "1645",
+    "sensor": "LANDSAT9",
+    "area_km2": 1.02,
+    "file": "20260822_1645_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-08-20",
+    "time": "0017",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.21,
+    "file": "20260820_0017_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-08-16",
+    "time": "0011",
+    "sensor": "RADARSAT2",
+    "area_km2": 0.83,
+    "file": "20260816_0011_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-08-15",
+    "time": "1648",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.91,
+    "file": "20260815_1648_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-08-12",
+    "time": "1638",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.19,
+    "file": "20260812_1638_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-08-10",
+    "time": "1648",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.19,
+    "file": "20260810_1648_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-08-06",
+    "time": "1645",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.41,
+    "file": "20260806_1645_LANDSAT9_OIL.txt"
+   }
+  ]
+ },
+ "andrea_doria": {
+  "mpsr_days": [
+   "2026-09-30",
+   "2026-10-01",
+   "2026-10-02",
+   "2026-10-25",
+   "2026-10-30",
+   "2026-11-02",
+   "2026-11-05",
+   "2026-11-06"
+  ],
+  "nisar_same_day": [
+   "2026-10-02"
+  ],
+  "nisar_pm1": [
+   "2026-10-02",
+   "2026-10-26"
+  ],
+  "reports": [
+   {
+    "date": "2026-11-06",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.65,
+    "file": "20261106_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-11-05",
+    "time": "1049",
+    "sensor": "SENTINEL1D",
+    "area_km2": 0.09,
+    "file": "20261105_1049_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-11-02",
+    "time": "2229",
+    "sensor": "RADARSAT2",
+    "area_km2": 1.41,
+    "file": "20261102_2229_RADARSAT2_OIL.txt"
+   },
+   {
+    "date": "2026-10-30",
+    "time": "1521",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.6,
+    "file": "20261030_1521b_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-10-30",
+    "time": "1048",
+    "sensor": "SENTINEL1C",
+    "area_km2": 1.08,
+    "file": "20261030_1048_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-10-25",
+    "time": "1040",
+    "sensor": "SENTINEL1C",
+    "area_km2": 7.51,
+    "file": "20261025_1040b_SENTINEL1C_OIL.txt"
+   },
+   {
+    "date": "2026-10-02",
+    "time": "1537",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.29,
+    "file": "20261002_1537_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-10-01",
+    "time": "2233",
+    "sensor": "SENTINEL1D",
+    "area_km2": 4.75,
+    "file": "20261001_2233_SENTINEL1D_OIL.txt"
+   },
+   {
+    "date": "2026-09-30",
+    "time": "1049",
+    "sensor": "SENTINEL1D",
+    "area_km2": 1.75,
+    "file": "20260930_1049_SENTINEL1D_OIL.txt"
+   }
+  ]
+ },
+ "taylor_mc20": {
+  "mpsr_days": [
+   "2026-02-28",
+   "2026-03-12",
+   "2026-03-26",
+   "2026-04-16",
+   "2026-05-05",
+   "2026-09-08",
+   "2026-09-10"
+  ],
+  "nisar_same_day": [
+   "2026-09-10"
+  ],
+  "nisar_pm1": [
+   "2026-09-10"
+  ],
+  "reports": [
+   {
+    "date": "2026-09-10",
+    "time": "1637",
+    "sensor": "SENTINEL2A",
+    "area_km2": 0.15,
+    "file": "20260910_1637_SENTINEL2A_OIL.txt"
+   },
+   {
+    "date": "2026-09-08",
+    "time": "1628",
+    "sensor": "SENTINEL2C",
+    "area_km2": 0.03,
+    "file": "20260908_1628_SENTINEL2C_OIL.txt"
+   },
+   {
+    "date": "2026-05-05",
+    "time": "1625",
+    "sensor": "LANDSAT8",
+    "area_km2": 1.05,
+    "file": "20260505_1625_LANDSAT8_OIL.txt"
+   },
+   {
+    "date": "2026-04-16",
+    "time": "1628",
+    "sensor": "SENTINEL2B",
+    "area_km2": 0.09,
+    "file": "20260416_1628_SENTINEL2B_OIL.txt"
+   },
+   {
+    "date": "2026-03-26",
+    "time": "1626",
+    "sensor": "LANDSAT9",
+    "area_km2": 0.38,
+    "file": "20260326_1626_LANDSAT9_OIL.txt"
+   },
+   {
+    "date": "2026-03-12",
+    "time": "0001",
+    "sensor": "SENTINEL1A",
+    "area_km2": 47.92,
+    "file": "20260312_0001_SENTINEL1A_OIL.txt"
+   },
+   {
+    "date": "2026-02-28",
+    "time": "0001",
+    "sensor": "SENTINEL1A",
+    "area_km2": 2.54,
+    "file": "20260228_0001_SENTINEL1A_OIL.txt"
+   }
+  ]
+ }
+}

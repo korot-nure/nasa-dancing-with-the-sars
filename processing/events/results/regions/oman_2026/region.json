@@ -1,0 +1,30 @@
+{
+ "name": "oman_2026",
+ "bbox": [
+  56.2,
+  17.2,
+  58.0,
+  18.3
+ ],
+ "start": "2026-06-15",
+ "end": "2026-09-20",
+ "res": 60.0,
+ "known_source": [
+  56.341,
+  17.5
+ ],
+ "notes": "Regression case: tanker Caroline Bezengi grounded at Al-Qibliyah island 2026-06-30.",
+ "extra": {
+  "event_id": "oman_2026",
+  "event_type": "one-off",
+  "event_name": "Caroline Bezengi tanker grounding, Al-Qibliyah Island (Hallaniyat), Oman",
+  "source_radius_km": 6.0,
+  "active_start": "2026-07-06",
+  "active_end": "2026-09-16",
+  "control_dates": "2026-06-18;2026-06-24",
+  "search_bbox": "",
+  "polarizations": "HH;HH+HV;VV",
+  "confidence": "high",
+  "label_note": "take (already labelled); mark dates after 2026-09-16 as unknown"
+ }
+}

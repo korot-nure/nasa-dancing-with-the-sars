@@ -1,0 +1,30 @@
+{
+ "name": "ev_coal_oil_point",
+ "bbox": [
+  -120.3188,
+  34.0407,
+  -119.4478,
+  34.7593
+ ],
+ "start": "2026-06-01",
+ "end": "2026-11-01",
+ "res": 60.0,
+ "known_source": [
+  -119.8833,
+  34.4
+ ],
+ "notes": "Known event: Coal Oil Point seep field, Santa Barbara Channel",
+ "extra": {
+  "event_id": "coal_oil_point",
+  "event_type": "seep",
+  "event_name": "Coal Oil Point seep field, Santa Barbara Channel",
+  "source_radius_km": 4.0,
+  "active_start": "continuous",
+  "active_end": "continuous",
+  "control_dates": "",
+  "search_bbox": "",
+  "polarizations": "HH+HV;VV+VH",
+  "confidence": "medium",
+  "label_note": "take"
+ }
+}

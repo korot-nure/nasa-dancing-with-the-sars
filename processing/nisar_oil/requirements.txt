@@ -1,0 +1,20 @@
+# Python 3.12+; versions used for the executed notebook (2026-11-14)
+numpy
+scipy
+pandas
+matplotlib
+pillow
+pyshp
+pyproj
+scikit-learn
+scikit-image
+h5py
+fsspec
+aiohttp
+requests
+xarray
+netCDF4
+jupyter
+nbconvert
+ipykernel
+tabulate

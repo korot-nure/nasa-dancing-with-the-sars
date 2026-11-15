@@ -1,0 +1,30 @@
+{
+ "name": "ev_neft_dashlari",
+ "bbox": [
+  50.2699,
+  39.7869,
+  51.4467,
+  40.6853
+ ],
+ "start": "2025-11-26",
+ "end": "2026-11-02",
+ "res": 60.0,
+ "known_source": [
+  50.8583,
+  40.2361
+ ],
+ "notes": "Known event: Neft Dashlari (Oil Rocks), Caspian Sea",
+ "extra": {
+  "event_id": "neft_dashlari",
+  "event_type": "production",
+  "event_name": "Neft Dashlari (Oil Rocks), Caspian Sea",
+  "source_radius_km": 8.0,
+  "active_start": "continuous",
+  "active_end": "continuous",
+  "control_dates": "",
+  "search_bbox": "",
+  "polarizations": "HH+HV",
+  "confidence": "medium",
+  "label_note": "take; other slicks in scene (natural seeps) are not background"
+ }
+}

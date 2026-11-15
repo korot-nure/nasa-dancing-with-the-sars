@@ -46,10 +46,25 @@ NASA_Dancing_with_the_SARs/
 ├── docs/                # API contract, backend spec, frontend plan, submission pack
 ├── frontend/            # React + TypeScript + Vite + Leaflet web application
 ├── mockup/              # Standalone HTML prototype
-├── scripts/             # SAR processing utilities
+├── processing/          # NISAR processing pipeline, validation and docs (see processing/README.md)
 ├── LICENSE              # MIT License
 └── README.md
 ```
+
+---
+
+## Data Processing & Methodology
+
+The slick masks, contours, bright targets and source points shown in the app come from the Python pipeline in [`processing/`](./processing/README.md):
+
+- [`processing/docs/ALGORITHM.md`](./processing/docs/ALGORITHM.md) — the processing algorithm, step by step:
+  - remote NISAR L2 GCOV cut-outs;
+  - self-calibrated detectors;
+  - candidate slicks with radiometric, shape, polarimetric, wind/drift and time-series features;
+  - oil-likeness score;
+  - bright targets and source clustering;
+  - web export.
+- [`processing/docs/METHODOLOGY.md`](./processing/docs/METHODOLOGY.md) — physical basis, method battery on the Oman reference spill, validation on 9 known events (7 oil events + 2 oil-free look-alike areas), results, limitations and future work.
 
 ---
 
