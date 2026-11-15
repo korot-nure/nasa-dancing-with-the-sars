@@ -449,20 +449,16 @@
               </ul>
             </div>
           </div>
-          <div class="card" style="background: #070709; justify-content: center; align-items: center; text-align: center; border-style: dashed; border-color: var(--border-strong);">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5" style="margin-bottom: 12px;">
-              <circle cx="12" cy="12" r="9" />
-              <circle cx="12" cy="12" r="4" />
-              <line x1="12" y1="12" x2="19" y2="5" />
-            </svg>
-            <h3 class="mono">LIVE APP PREVIEW</h3>
-            <p style="max-width: 340px; font-size: 13px;">
-              Interactive Split-Curtain Map + Drift Timeline<br/>
-              <span class="mono" style="color: var(--accent-signal);">korot-nure.github.io/nasa-dancing-with-the-sars/</span>
-            </p>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
-              (Replace this box with a live app screenshot before PDF export if desired)
-            </p>
+          <div class="card" style="padding: 10px; background: #070709; justify-content: space-between; gap: 8px;">
+            <img
+              src="./assets/slide-oman-split.jpg"
+              alt="Dancing with the SARs — Al Hallaniyat Islands Split Curtain"
+              style="width: 100%; height: 330px; object-fit: cover; object-position: center; border-radius: 4px; border: 1px solid var(--border);"
+            />
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 4px;">
+              <span class="mono" style="font-size: 11px; color: var(--text-secondary);">Al Hallaniyat Islands, Oman (T11 · 919.4 km²)</span>
+              <span class="mono" style="font-size: 11px; color: var(--accent-signal);">Live Split-Curtain UI</span>
+            </div>
           </div>
         </div>
       </div>
@@ -529,25 +525,39 @@
       <div class="slide-body">
         <h2>Tested Across 3 Real Marine Spill &amp; Seep Events</h2>
         <div class="grid-3">
-          <div class="card card-accent-red">
+          <div class="card card-accent-red" style="padding: 18px; gap: 8px;">
+            <img
+              src="./assets/slide-oman-sat.jpg"
+              alt="Al Hallaniyat Islands Satellite vs SAR"
+              style="width: 100%; height: 150px; object-fit: cover; object-position: 62% 52%; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 4px;"
+            />
             <span class="badge mono">ARABIAN SEA · OMAN</span>
             <h3>Al Hallaniyat Islands</h3>
-            <div class="stat-val mono" style="font-size: 28px; color: var(--accent-spill);">138.2 km²</div>
-            <p>Major oil spill following the grounding of tanker <em>Caroline Bezengi</em>. Multi-pass NISAR acquisitions track slick expansion near Al-Qibliyah Island.</p>
+            <div class="stat-val mono" style="font-size: 24px; color: var(--accent-spill);">138.2 – 919.4 km²</div>
+            <p style="font-size: 13px;">Tanker <em>Caroline Bezengi</em> grounding. Multi-pass NISAR acquisitions track slick expansion near Al-Qibliyah Island.</p>
             <span class="mono" style="font-size: 11px; color: var(--text-muted);">2026-06-18 → 2026-09-16</span>
           </div>
-          <div class="card card-accent-orange">
+          <div class="card card-accent-orange" style="padding: 18px; gap: 8px;">
+            <img
+              src="./assets/slide-greencanyon-seeps.jpg"
+              alt="Green Canyon 600 Natural Seeps SAR"
+              style="width: 100%; height: 150px; object-fit: cover; object-position: 78% 50%; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 4px;"
+            />
             <span class="badge mono">GULF OF MEXICO</span>
             <h3>Green Canyon 600</h3>
-            <div class="stat-val mono" style="font-size: 28px; color: var(--accent-drift);">Natural Seeps</div>
-            <p>Persistent natural hydrocarbon seeps producing recurring surface films—ideal for validating multi-date SAR contrast stability and contour extraction.</p>
+            <div class="stat-val mono" style="font-size: 24px; color: var(--accent-drift);">Natural Seeps</div>
+            <p style="font-size: 13px;">Persistent natural hydrocarbon seeps producing recurring surface films—validating multi-date SAR contrast stability.</p>
             <span class="mono" style="font-size: 11px; color: var(--text-muted);">2026-10-19 → 2026-10-31</span>
           </div>
-          <div class="card card-accent-blue">
+          <div class="card card-accent-blue" style="padding: 18px; gap: 8px;">
+            <div style="width: 100%; height: 150px; border-radius: 4px; border: 1px solid var(--border); background: #070709; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; margin-bottom: 4px;">
+              <span class="mono" style="font-size: 12px; color: var(--accent-signal);">28.26°N, 91.62°W</span>
+              <span class="mono" style="font-size: 11px; color: var(--text-muted);">NISAR L2 GCOV · Multi-Pass</span>
+            </div>
             <span class="badge mono">GULF OF MEXICO</span>
             <h3>Eugene Island 316</h3>
-            <div class="stat-val mono" style="font-size: 28px; color: var(--accent-signal);">Offshore Zone</div>
-            <p>Monitoring surface slick behavior around dense offshore energy infrastructure using calibrated L-band backscatter pairs.</p>
+            <div class="stat-val mono" style="font-size: 24px; color: var(--accent-signal);">Offshore Zone</div>
+            <p style="font-size: 13px;">Monitoring surface slick behavior around dense offshore energy infrastructure using calibrated L-band backscatter pairs.</p>
             <span class="mono" style="font-size: 11px; color: var(--text-muted);">2026-01-20 → 2026-10-14</span>
           </div>
         </div>
