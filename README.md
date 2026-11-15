@@ -1,53 +1,82 @@
-# Dancing with the SARs (Frontend MVP)
+# Dancing with the SARs
 
-Interactive geospatial web interface for **NASA Space Apps Challenge** designed to visualize **NISAR L2 GCOV** Synthetic Aperture Radar (SAR) oil spill detections, drift trajectories, and multi-temporal area changes.
+**All-weather, day-and-night marine oil spill detection, drift tracking, and multi-temporal impact visualization powered by NASA-ISRO SAR (NISAR) L2 GCOV data.**
 
-> **Current repository scope:** Frontend planning, JSON/GeoJSON data contract, and interactive UI prototype (no backend files or satellite binaries are included yet).
-
----
-
-## Documentation (`docs/`)
-
-- [`docs/FRONTEND_WORK_PLAN.md`](./docs/FRONTEND_WORK_PLAN.md) — Frontend architecture (React + Vite + TypeScript + Leaflet), `AppState` design, and zero-conflict task split for 2 developers (`Dev 1` stage map & `Dev 2` sidebar/timeline).
-- [`docs/API_CONTRACT.md`](./docs/API_CONTRACT.md) — Shared JSON & GeoJSON schema contract (`v1.0`) used to structure `frontend/public/mock/` data, TypeScript interfaces (`src/types/location.ts`), and future API integration.
+- **Live Demo (GitHub Pages):** https://korot-nure.github.io/nasa-dancing-with-the-sars/
+- **Repository:** https://github.com/korot-nure/nasa-dancing-with-the-sars
+- **Submission & Demo Pack:** [`docs/SUBMISSION_GUIDE_PACK.md`](./docs/SUBMISSION_GUIDE_PACK.md)
 
 ---
 
-## Interactive UI Prototype (`mockup/`)
+## Overview
 
-- [`mockup/index.html`](./mockup/index.html) — Standalone browser-ready MVP prototype featuring:
-  - **Human Map ↔ SAR Overlay Split Curtain**: draggable comparison between a readable cartographic basemap on the left and SAR backscatter + segmented `#ef4444` oil slick mask & GeoJSON contour on the right.
-  - **Multi-Temporal Snapshot Timeline (`T0..T3`) + Auto-Play**: baseline `T0 · База (до аварії)`, tracking start marker `T1 · Старт`, relative `+Nд` offsets, and `Старт / Пауза` animation.
-  - **Drift Trajectory Overlay**: previous-step dashed outlines, computed GeoJSON centroids, directional drift arrows, and step-to-step `Δ км²` readouts.
-  - **Spill Opacity Slider & Overview Minimap**: live opacity/contour controls, multi-event minimap/select navigation, HUD coordinates, and a built-in `v1.0` JSON contract inspector.
+Optical satellites are blind through thick clouds, smoke, and polar or tropical night—precisely when maritime disasters and illegal bilge dumping often go unnoticed. **Dancing with the SARs** transforms **NASA NISAR Level 2 Geocoded Covariance (L2 GCOV)** Synthetic Aperture Radar products into an interactive, browser-based geospatial intelligence tool for rapid oil spill response.
 
-Open `mockup/index.html` directly in any modern browser to preview the interface.
+Because oil dampens sea-surface capillary waves, it produces a distinct dark backscatter signature ($\gamma^0_{HH}$ / $\gamma^0_{HV}$) in L-band SAR imagery. Our platform pairs this radar physics with an intuitive **Split-Curtain Map**, **Multi-Temporal Snapshot Timeline**, and **Drift Trajectory Overlay** so responders, researchers, and environmental agencies can inspect spills in seconds.
 
 ---
 
-## Planned Frontend Structure
+## Key Features
+
+- **Cartographic Basemap ↔ SAR Split Curtain:** Drag a live comparison curtain between a readable geographic map on the left and calibrated SAR backscatter + segmented `#ef4444` oil slick masks and GeoJSON contours on the right.
+- **Multi-Temporal Snapshot Timeline (`T0..Tn`) + Auto-Play:** Step through pre-event baselines (`T0`), initial detections (`T1`), and follow-up satellite passes (`+N` days) with play/pause animation.
+- **Drift Trajectory & Area Delta (`Δ km²`):** Automatically computes GeoJSON slick centroids, directional drift vectors between passes, previous-step dashed outlines, and step-to-step area changes.
+- **Live Layer Controls & Multi-Event Minimap:** Adjust slick mask opacity (`0%–100%`), toggle contour outlines, inspect coordinate HUDs, and jump across global spill/seep case studies.
+
+---
+
+## Included NISAR Case Studies
+
+1. **Al Hallaniyat Islands, Oman (`oman-caroline-bezengi-2026`)** — Major oil spill following the grounding of the tanker *Caroline Bezengi* in the Arabian Sea (138.2 km² peak tracked area).
+2. **Green Canyon 600, Gulf of Mexico (`green-canyon-600-seeps-2026`)** — Natural hydrocarbon seeps and surface slick dynamics monitored across multi-pass NISAR acquisitions.
+3. **Eugene Island 316, Gulf of Mexico (`eugene-island-316-2026`)** — Persistent offshore infrastructure and surface slick monitoring.
+
+---
+
+## Tech Stack & Architecture
+
+- **Frontend:** React 18, TypeScript, Vite, Leaflet (`frontend/`)
+- **Data Pipeline & Spec:** Python / HDF5 (`NISAR L2 GCOV`) → dB radiometric calibration, background offset compensation, speckle filtering, slick segmentation → georeferenced WebP rasters + GeoJSON contours + `v1.0` JSON contract (`docs/API_CONTRACT.md`, `docs/BACKEND_TECHNICAL_SPEC.md`)
+- **Deployment:** Automated static build & deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`)
 
 ```text
 NASA_Dancing_with_the_SARs/
-├── .gitignore
-├── README.md
-├── docs/
-│   ├── API_CONTRACT.md
-│   └── FRONTEND_WORK_PLAN.md
-├── mockup/
-│   └── index.html
-└── frontend/          # Upcoming: Vite + React + TypeScript + Leaflet app
-    ├── public/mock/   # Static mock JSON/WebP/GeoJSON datasets (contract v1.0)
-    └── src/
+├── .github/workflows/   # GitHub Pages CI/CD
+├── data/locations/      # Processed WebP, GeoJSON & metadata per event
+├── docs/                # API contract, backend spec, frontend plan, submission pack
+├── frontend/            # React + TypeScript + Vite + Leaflet web application
+├── mockup/              # Standalone HTML prototype
+├── scripts/             # SAR processing utilities
+├── LICENSE              # MIT License
+└── README.md
 ```
 
 ---
 
-## Team Git Workflow
+## Local Development
 
-1. **`main` always runs cleanly** — never push unfinished code directly to `main`.
-2. **Feature branches per role:**
-   - `feat/core-map` — Dev 1 Lead (`src/api/`, `stage/`, `OverviewMinimap.tsx`, `SnapshotTimeline.tsx`, `App.tsx`)
-   - `feat/ui-components` — Dev 2 UI (`EventSelect.tsx`, `EventDetailsCard.tsx`, `SpillOpacitySlider.tsx`)
-   - `feat/api-integration` — Connecting `frontend` to live endpoints later
-3. **Contract-first changes:** Any change to mock/API data structures or shared TypeScript interfaces must update `docs/API_CONTRACT.md`, `docs/FRONTEND_WORK_PLAN.md`, and `src/types/location.ts` together.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+To create a production build:
+
+```bash
+cd frontend
+npm run build
+```
+
+---
+
+## NASA Data Sources & Citations
+
+- **NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (`L2 GCOV`)** — L-band $\gamma^0_{HH}$ and $\gamma^0_{HV}$ calibrated backscatter products accessed via NASA Earthdata / Alaska Satellite Facility (ASF DAAC).
+- **Basemap & Reference Layers:** OpenStreetMap / CARTO basemap tiles for geographic context.
+
+---
+
+## License
+
+This project is open source and licensed under the [MIT License](./LICENSE).

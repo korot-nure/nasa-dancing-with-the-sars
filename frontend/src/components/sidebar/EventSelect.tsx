@@ -1,4 +1,5 @@
 import type { LocationSummary } from "../../types/location";
+import { formatArea, localizeTitle, useI18n } from "../../i18n";
 
 export interface EventSelectProps {
   locations: LocationSummary[];
@@ -50,10 +51,11 @@ export function EventSelect({
   activeLocationId,
   onSelectLocation,
 }: EventSelectProps) {
+  const { lang } = useI18n();
   const isEmpty = locations.length === 0;
   const activeLoc = locations.find((loc) => loc.id === activeLocationId) ?? null;
   const activeHint = activeLoc
-    ? `${activeLoc.title} · ${activeLoc.area_km2.toFixed(1)} км² · ${activeLoc.latest_date}`
+    ? `${localizeTitle(activeLoc.id, activeLoc.title, lang)} · ${formatArea(activeLoc.area_km2, lang)} · ${activeLoc.latest_date}`
     : undefined;
 
   return (
@@ -79,12 +81,16 @@ export function EventSelect({
         }}
       >
         <label htmlFor={SELECT_ID} className="section-title">
-          Активна подія
+          {lang === "uk" ? "Активна подія" : "Active Event"}
         </label>
         <span
           className="mono"
           style={{ fontSize: "10px", color: "var(--text-muted)" }}
-          aria-label={`Доступно подій: ${locations.length}`}
+          aria-label={
+            lang === "uk"
+              ? `Доступно подій: ${locations.length}`
+              : `Available events: ${locations.length}`
+          }
         >
           {locations.length}
         </span>
@@ -100,17 +106,17 @@ export function EventSelect({
           onChange={(e) => onSelectLocation(e.target.value)}
         >
           {isEmpty ? (
-            <option value="">Завантаження подій...</option>
+            <option value="">{lang === "uk" ? "Завантаження подій..." : "Loading events..."}</option>
           ) : (
             <>
               {activeLocationId === null && (
                 <option value="" disabled>
-                  Оберіть подію
+                  {lang === "uk" ? "Оберіть подію" : "Select an event"}
                 </option>
               )}
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>
-                  {loc.title} · {loc.area_km2.toFixed(1)} км² · {loc.latest_date}
+                  {localizeTitle(loc.id, loc.title, lang)} · {formatArea(loc.area_km2, lang)} · {loc.latest_date}
                 </option>
               ))}
             </>

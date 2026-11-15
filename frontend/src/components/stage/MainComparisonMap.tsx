@@ -15,6 +15,7 @@ import type {
   TargetProperties
 } from "../../types/location";
 import { SplitCurtainControl } from "./SplitCurtainControl";
+import { formatArea, useI18n, type Lang } from "../../i18n";
 
 export interface MainComparisonMapProps {
   detail: LocationDetail | null;
@@ -29,7 +30,7 @@ export interface MainComparisonMapProps {
 type BaseMapStyle = "dark" | "osm" | "sat";
 
 interface BaseTileConfig {
-  label: string;
+  label: { en: string; uk: string };
   url: string;
   options: L.TileLayerOptions;
 }
@@ -41,7 +42,7 @@ const WORLD_BOUNDS: L.LatLngBoundsLiteral = [
 
 const BASE_TILE_CONFIGS: Record<BaseMapStyle, BaseTileConfig> = {
   dark: {
-    label: "Темна",
+    label: { en: "Dark", uk: "Темна" },
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     options: {
       maxZoom: 16,
@@ -49,7 +50,7 @@ const BASE_TILE_CONFIGS: Record<BaseMapStyle, BaseTileConfig> = {
     }
   },
   osm: {
-    label: "OSM",
+    label: { en: "OSM", uk: "OSM" },
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     options: {
       maxZoom: 19,
@@ -57,7 +58,7 @@ const BASE_TILE_CONFIGS: Record<BaseMapStyle, BaseTileConfig> = {
     }
   },
   sat: {
-    label: "Супутник",
+    label: { en: "Satellite", uk: "Супутник" },
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     options: {
       maxZoom: 18,
@@ -150,37 +151,53 @@ const TARGET_STYLE_MAP: Record<
   coastal: { label: "Берегова споруда", color: "#94a3b8", radius: 3 }
 };
 
-const FLAG_LABELS: Record<SlickFlag, string> = {
-  near_coast: "біля берега (< 2 км)",
-  low_wind: "слабкий вітер (< 3 м/с)",
-  near_noise: "слабкий контраст",
-  rain: "опади",
-  small: "мала площа (< 2 км²)",
-  static: "повторювана область"
+const FLAG_LABELS: Record<SlickFlag, { en: string; uk: string }> = {
+  near_coast: { en: "near coast (< 2 km)", uk: "біля берега (< 2 км)" },
+  low_wind: { en: "low wind (< 3 m/s)", uk: "слабкий вітер (< 3 м/с)" },
+  near_noise: { en: "low contrast", uk: "слабкий контраст" },
+  rain: { en: "rain", uk: "опади" },
+  small: { en: "small area (< 2 km²)", uk: "мала площа (< 2 км²)" },
+  static: { en: "recurring region", uk: "повторювана область" }
 };
 
-function buildContourTooltipNode(props: SpillContourProperties | undefined): HTMLElement {
+function buildContourTooltipNode(props: SpillContourProperties | undefined, lang: Lang): HTMLElement {
   const wrap = document.createElement("div");
   if (!props) {
-    wrap.textContent = "Пляма";
+    wrap.textContent = lang === "uk" ? "Пляма" : "Slick";
     return wrap;
   }
 
-  const classLabel = props.class === "possible" ? "Можлива пляма" : "Схоже на нафту";
-  const originSuffix = props.origin === "reference" ? " · еталонна розмітка" : "";
+  const classLabel =
+    props.class === "possible"
+      ? lang === "uk"
+        ? "Можлива пляма"
+        : "Possible slick"
+      : lang === "uk"
+        ? "Схоже на нафту"
+        : "Probable oil";
+  const originSuffix =
+    props.origin === "reference"
+      ? lang === "uk"
+        ? " · еталонна розмітка"
+        : " · reference annotation"
+      : "";
 
   const title = document.createElement("div");
   title.textContent = `${classLabel}${originSuffix}`;
   wrap.appendChild(title);
 
   const metrics = document.createElement("div");
-  metrics.textContent = `Площа: ${props.area_km2.toFixed(1)} км² · Оцінка: ${props.score.toFixed(2)}`;
+  metrics.textContent =
+    lang === "uk"
+      ? `Площа: ${props.area_km2.toFixed(1)} км² · Оцінка: ${props.score.toFixed(2)}`
+      : `Area: ${props.area_km2.toFixed(1)} km² · Score: ${props.score.toFixed(2)}`;
   wrap.appendChild(metrics);
 
   if (props.flags && props.flags.length > 0) {
     const flagsLine = document.createElement("div");
-    const labels = props.flags.map((flag) => FLAG_LABELS[flag] ?? flag).join(", ");
-    flagsLine.textContent = `Фактори сумніву: ${labels}`;
+    const labels = props.flags.map((flag) => FLAG_LABELS[flag]?.[lang] ?? flag).join(", ");
+    flagsLine.textContent =
+      lang === "uk" ? `Фактори сумніву: ${labels}` : `Uncertainty flags: ${labels}`;
     wrap.appendChild(flagsLine);
   }
 
@@ -226,6 +243,7 @@ export function MainComparisonMap({
   splitRatio,
   onSplitChange
 }: MainComparisonMapProps) {
+  const { lang } = useI18n();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const sarLeftPaneRef = useRef<HTMLElement | null>(null);
@@ -640,7 +658,7 @@ export function MainComparisonMap({
               ),
             onEachFeature: (feature, layer) => {
               const props = feature.properties as SpillContourProperties | undefined;
-              layer.bindTooltip(buildContourTooltipNode(props), {
+              layer.bindTooltip(buildContourTooltipNode(props, lang), {
                 sticky: true,
                 direction: "top",
                 opacity: 0.95
@@ -766,13 +784,20 @@ export function MainComparisonMap({
   const handleZoomIn = () => mapRef.current?.zoomIn();
   const handleZoomOut = () => mapRef.current?.zoomOut();
 
-  const scaleLabel = scaleKm >= 1 ? `${Math.round(scaleKm)} км` : `${Math.round(scaleKm * 1000)} м`;
+  const scaleLabel =
+    scaleKm >= 1
+      ? `${Math.round(scaleKm)} ${lang === "uk" ? "км" : "km"}`
+      : `${Math.round(scaleKm * 1000)} ${lang === "uk" ? "м" : "m"}`;
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", background: "#070709" }}>
       <div
         ref={containerRef}
-        aria-label="Інтерактивна карта порівняння SAR-знімків"
+        aria-label={
+          lang === "uk"
+            ? "Інтерактивна карта порівняння SAR-знімків"
+            : "Interactive SAR imagery comparison map"
+        }
         style={{ position: "absolute", inset: 0 }}
       />
 
@@ -804,13 +829,13 @@ export function MainComparisonMap({
             color: "var(--accent-signal)"
           }}
         >
-          SAR ДО
+          {lang === "uk" ? "SAR ДО" : "SAR BEFORE"}
         </span>
         {detail && (
           <span className="mono" style={{ fontSize: 10, color: "var(--text-secondary)" }}>
             {activeSnap
               ? `${activeSnap.before_date} · ${activeSnap.track} · ${activeSnap.polarization}`
-              : `${detail.baseline_date} · БАЗА`}
+              : `${detail.baseline_date} · ${lang === "uk" ? "БАЗА" : "BASELINE"}`}
           </span>
         )}
         <span style={{ color: "var(--border-strong)", fontSize: 10 }}>|</span>
@@ -832,7 +857,7 @@ export function MainComparisonMap({
                 color: isActive ? "var(--text-primary)" : "var(--text-muted)"
               }}
             >
-              {BASE_TILE_CONFIGS[styleKey].label}
+              {BASE_TILE_CONFIGS[styleKey].label[lang]}
             </button>
           );
         })}
@@ -858,7 +883,9 @@ export function MainComparisonMap({
           pointerEvents: "none"
         }}
       >
-        <span style={{ color: "var(--accent-spill)", fontWeight: 600 }}>SAR ПІСЛЯ</span>
+        <span style={{ color: "var(--accent-spill)", fontWeight: 600 }}>
+          {lang === "uk" ? "SAR ПІСЛЯ" : "SAR AFTER"}
+        </span>
         <span style={{ color: "var(--border-strong)" }}>|</span>
         {detail ? (
           activeSnap ? (
@@ -868,23 +895,27 @@ export function MainComparisonMap({
               <span style={{ color: "var(--text-muted)" }}>
                 {activeSnap.track} · {activeSnap.polarization}
               </span>
-              <span style={{ color: "var(--text-secondary)" }}>{activeSnap.area_km2.toFixed(1)} км²</span>
+              <span style={{ color: "var(--text-secondary)" }}>
+                {formatArea(activeSnap.area_km2, lang)}
+              </span>
             </>
           ) : (
             <>
-              <span>T0 БАЗА</span>
+              <span>{lang === "uk" ? "T0 БАЗА" : "T0 BASELINE"}</span>
               <span>{detail.baseline_date}</span>
-              <span style={{ color: "var(--text-secondary)" }}>0.0 км²</span>
+              <span style={{ color: "var(--text-secondary)" }}>{formatArea(0, lang)}</span>
             </>
           )
         ) : (
-          <span style={{ color: "var(--text-muted)" }}>Очікування...</span>
+          <span style={{ color: "var(--text-muted)" }}>
+            {lang === "uk" ? "Очікування..." : "Waiting..."}
+          </span>
         )}
       </div>
 
       {/* Кнопки масштабу праворуч */}
       <div
-        aria-label="Масштаб карти"
+        aria-label={lang === "uk" ? "Масштаб карти" : "Map zoom"}
         style={{
           position: "absolute",
           top: 52,
@@ -895,12 +926,24 @@ export function MainComparisonMap({
           gap: 4
         }}
       >
-        <button type="button" className="btn" onClick={handleZoomIn} title="Наблизити" style={{ width: 28, height: 28, padding: 0 }}>
+        <button
+          type="button"
+          className="btn"
+          onClick={handleZoomIn}
+          title={lang === "uk" ? "Наблизити" : "Zoom in"}
+          style={{ width: 28, height: 28, padding: 0 }}
+        >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
-        <button type="button" className="btn" onClick={handleZoomOut} title="Віддалити" style={{ width: 28, height: 28, padding: 0 }}>
+        <button
+          type="button"
+          className="btn"
+          onClick={handleZoomOut}
+          title={lang === "uk" ? "Віддалити" : "Zoom out"}
+          style={{ width: 28, height: 28, padding: 0 }}
+        >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M3 8H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -910,7 +953,7 @@ export function MainComparisonMap({
           className="btn"
           disabled={!detail}
           onClick={fitToDetailBounds}
-          title="Повернути камеру до меж події"
+          title={lang === "uk" ? "Повернути камеру до меж події" : "Reset view to event bounds"}
           style={{ width: 28, height: 28, padding: 0 }}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -947,10 +990,10 @@ export function MainComparisonMap({
       >
         <span>
           {cursorCoords
-            ? `Курсор: ${formatDeg(cursorCoords.lat, "N", "S")}, ${formatDeg(cursorCoords.lon, "E", "W")}`
+            ? `${lang === "uk" ? "Курсор" : "Cursor"}: ${formatDeg(cursorCoords.lat, "N", "S")}, ${formatDeg(cursorCoords.lon, "E", "W")}`
             : detail
-              ? `Центр: ${formatDeg(detail.coords[1], "N", "S")}, ${formatDeg(detail.coords[0], "E", "W")}`
-              : "Курсор: —"}
+              ? `${lang === "uk" ? "Центр" : "Center"}: ${formatDeg(detail.coords[1], "N", "S")}, ${formatDeg(detail.coords[0], "E", "W")}`
+              : `${lang === "uk" ? "Курсор" : "Cursor"}: —`}
         </span>
         {detail && (
           <>

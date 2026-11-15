@@ -7,11 +7,12 @@ import { OverviewMinimap } from "./components/sidebar/OverviewMinimap";
 import { MainComparisonMap } from "./components/stage/MainComparisonMap";
 import { SnapshotTimeline } from "./components/timeline/SnapshotTimeline";
 import type { AppState } from "./types/location";
-import { pluralUk } from "./utils/format";
+import { formatEventsCount, useI18n } from "./i18n";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
 
 export function App() {
+  const { lang, setLang } = useI18n();
   const [state, setState] = useState<AppState>({
     locations: [],
     activeLocationId: null,
@@ -154,7 +155,9 @@ export function App() {
           </div>
           <div className="topbar-sep" />
           <span className="topbar-sub">
-            Моніторинг дрейфу нафтових розливів · NISAR / Sentinel-1 SAR
+            {lang === "uk"
+              ? "Моніторинг дрейфу нафтових розливів · NISAR / Sentinel-1 SAR"
+              : "Oil Spill Drift Monitor · NISAR / Sentinel-1 SAR"}
           </span>
         </div>
 
@@ -168,9 +171,56 @@ export function App() {
               }}
               title={state.error}
             >
-              Помилка API
+              {lang === "uk" ? "Помилка API" : "API Error"}
             </span>
           )}
+          <div
+            role="group"
+            aria-label="Language switch"
+            style={{
+              display: "inline-flex",
+              border: "1px solid var(--border)",
+              borderRadius: "4px",
+              overflow: "hidden",
+              background: "var(--bg-surface)",
+            }}
+          >
+            <button
+              type="button"
+              className="mono"
+              onClick={() => setLang("en")}
+              aria-pressed={lang === "en"}
+              style={{
+                border: "none",
+                padding: "3px 7px",
+                fontSize: "10px",
+                fontWeight: 600,
+                cursor: "pointer",
+                background: lang === "en" ? "var(--bg-hover)" : "transparent",
+                color: lang === "en" ? "var(--text-primary)" : "var(--text-muted)",
+              }}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              className="mono"
+              onClick={() => setLang("uk")}
+              aria-pressed={lang === "uk"}
+              style={{
+                border: "none",
+                borderLeft: "1px solid var(--border)",
+                padding: "3px 7px",
+                fontSize: "10px",
+                fontWeight: 600,
+                cursor: "pointer",
+                background: lang === "uk" ? "var(--bg-hover)" : "transparent",
+                color: lang === "uk" ? "var(--text-primary)" : "var(--text-muted)",
+              }}
+            >
+              UA
+            </button>
+          </div>
           <div className="status-chip mono">
             <span
               className="status-dot"
@@ -186,9 +236,11 @@ export function App() {
       <main className="workspace">
         <aside className="sidebar">
           <div className="section-head">
-            <span className="section-title">Глобальний огляд</span>
+            <span className="section-title">
+              {lang === "uk" ? "Глобальний огляд" : "Global Overview"}
+            </span>
             <span className="mono" style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-              {state.locations.length} {pluralUk(state.locations.length, ["подія", "події", "подій"])}
+              {formatEventsCount(state.locations.length, lang)}
             </span>
           </div>
 

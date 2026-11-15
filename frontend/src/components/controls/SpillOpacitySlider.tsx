@@ -1,3 +1,5 @@
+import { useI18n } from "../../i18n";
+
 export interface SpillOpacitySliderProps {
   spillOpacity: number; // 0.0 .. 1.0
   showContour: boolean;
@@ -139,6 +141,7 @@ export function SpillOpacitySlider({
   onToggleContour,
   onToggleTrajectory,
 }: SpillOpacitySliderProps) {
+  const { lang } = useI18n();
   const opacityPercent = Math.round(spillOpacity * 100);
 
   return (
@@ -164,7 +167,7 @@ export function SpillOpacitySlider({
         }}
       >
         <label htmlFor={RANGE_ID} className="section-title">
-          Прозорість маски розливу
+          {lang === "uk" ? "Прозорість маски розливу" : "Spill Mask Opacity"}
         </label>
         <span
           className="mono"
@@ -196,7 +199,7 @@ export function SpillOpacitySlider({
 
         <div
           role="group"
-          aria-label="Швидкі значення прозорості"
+          aria-label={lang === "uk" ? "Швидкі значення прозорості" : "Quick opacity presets"}
           style={{ display: "flex", gap: "4px", flexShrink: 0 }}
         >
           {PRESETS.map((preset) => {
@@ -219,14 +222,14 @@ export function SpillOpacitySlider({
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         <LayerToggle
           id="toggle-contour-layer"
-          label="Векторний контур плями"
+          label={lang === "uk" ? "Векторний контур плями" : "Vector Slick Contour"}
           color="var(--accent-spill)"
           checked={showContour}
           onChange={onToggleContour}
         />
         <LayerToggle
           id="toggle-trajectory-layer"
-          label="Траєкторія руху (дрейф)"
+          label={lang === "uk" ? "Траєкторія руху (дрейф)" : "Drift Trajectory"}
           color="var(--accent-drift)"
           dashed
           checked={showTrajectory}

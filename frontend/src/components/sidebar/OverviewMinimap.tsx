@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { LocationSummary } from "../../types/location";
-import { formatLatLon, pluralUk } from "../../utils/format";
+import { formatLatLon } from "../../utils/format";
+import { formatArea, localizeTitle, useI18n } from "../../i18n";
 
 export interface OverviewMinimapProps {
   locations: LocationSummary[];
@@ -35,6 +36,7 @@ export function OverviewMinimap({
   activeLocationId,
   onSelectLocation
 }: OverviewMinimapProps) {
+  const { lang } = useI18n();
   const [regionZoom, setRegionZoom] = useState(false);
 
   const continentPaths = useMemo(
@@ -92,7 +94,9 @@ export function OverviewMinimap({
           height="100%"
           preserveAspectRatio="xMidYMid meet"
           role="img"
-          aria-label="Оглядова міні-карта подій розливів"
+          aria-label={
+            lang === "uk" ? "Оглядова міні-карта подій розливів" : "Global oil spill overview minimap"
+          }
           style={{ display: "block" }}
         >
           <rect x="0" y="0" width="320" height="150" fill="#09090b" />
@@ -123,12 +127,13 @@ export function OverviewMinimap({
               const [px, py] = lonLatToMini(lon, lat);
               const isActive = loc.id === activeLocationId;
 
+              const localizedTitle = localizeTitle(loc.id, loc.title, lang);
               return (
                 <g
                   key={loc.id}
                   role="button"
                   tabIndex={0}
-                  aria-label={loc.title}
+                  aria-label={localizedTitle}
                   onClick={() => onSelectLocation(loc.id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -138,7 +143,7 @@ export function OverviewMinimap({
                   }}
                   style={{ cursor: "pointer" }}
                 >
-                  <title>{`${loc.title} (${loc.area_km2.toFixed(1)} км²)`}</title>
+                  <title>{`${localizedTitle} (${formatArea(loc.area_km2, lang)})`}</title>
                   <circle
                     cx={px.toFixed(1)}
                     cy={py.toFixed(1)}
@@ -194,7 +199,15 @@ export function OverviewMinimap({
           className="btn mono"
           disabled={!activeLocation}
           onClick={() => setRegionZoom((prev) => !prev)}
-          title={isRegionMode ? "Показати всю карту світу" : "Наблизити активну локацію"}
+          title={
+            isRegionMode
+              ? lang === "uk"
+                ? "Показати всю карту світу"
+                : "Show full world map"
+              : lang === "uk"
+                ? "Наблизити активну локацію"
+                : "Zoom to active location"
+          }
           style={{
             position: "absolute",
             top: 8,
@@ -215,7 +228,15 @@ export function OverviewMinimap({
               strokeLinejoin="round"
             />
           </svg>
-          <span>{isRegionMode ? "Світ" : "Регіон"}</span>
+          <span>
+            {isRegionMode
+              ? lang === "uk"
+                ? "Світ"
+                : "World"
+              : lang === "uk"
+                ? "Регіон"
+                : "Region"}
+          </span>
         </button>
 
         <div
@@ -234,8 +255,18 @@ export function OverviewMinimap({
           }}
         >
           {isRegionMode && activeLocation
-            ? `РЕГІОН · ${formatLatLon(activeLocation.coords, 1, " ")}`
-            : `СВІТ · ${locations.length} ${pluralUk(locations.length, ["ПОДІЯ", "ПОДІЇ", "ПОДІЙ"])}`}
+            ? `${lang === "uk" ? "РЕГІОН" : "REGION"} · ${formatLatLon(activeLocation.coords, 1, " ")}`
+            : `${lang === "uk" ? "СВІТ" : "WORLD"} · ${locations.length} ${
+                lang === "uk"
+                  ? locations.length === 1
+                    ? "ПОДІЯ"
+                    : locations.length >= 2 && locations.length <= 4
+                      ? "ПОДІЇ"
+                      : "ПОДІЙ"
+                  : locations.length === 1
+                    ? "EVENT"
+                    : "EVENTS"
+              }`}
         </div>
       </div>
 
@@ -267,7 +298,7 @@ export function OverviewMinimap({
                   color: isActive ? "var(--text-primary)" : "var(--text-secondary)"
                 }}
               >
-                {loc.title.split(":")[0].split(",")[0]}
+                {localizeTitle(loc.id, loc.title, lang).split(":")[0].split(",")[0]}
               </button>
             );
           })}

@@ -33,6 +33,7 @@ node_modules/
 dist/
 frontend/node_modules/
 frontend/dist/
+*.tsbuildinfo
 
 # Environment variables and secrets / SSH keys
 .env

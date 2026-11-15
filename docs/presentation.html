@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dancing with the SARs — NASA Space Apps 7-Slide Deck</title>
+  <style>
+    :root {
+      --bg-canvas: #09090b;
+      --bg-panel: #111114;
+      --bg-surface: #18181b;
+      --border: #27272a;
+      --border-strong: #3f3f46;
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent-spill: #ef4444;
+      --accent-drift: #f97316;
+      --accent-signal: #38bdf8;
+      --accent-ok: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #040406;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    /* Toolbar (hidden in print/PDF) */
+    .deck-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      background: rgba(9, 9, 11, 0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #27272a;
+    }
+
+    .btn-primary {
+      border-color: var(--accent-signal);
+      color: var(--accent-signal);
+    }
+
+    /* Slide container */
+    .deck {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      padding: 28px 16px 64px;
+    }
+
+    .slide {
+      width: 1280px;
+      height: 720px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 48px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 28px;
+    }
+
+    .slide-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-signal);
+    }
+
+    .slide-num {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .slide-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    h1 {
+      font-size: 54px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      color: var(--text-primary);
+    }
+
+    h2 {
+      font-size: 34px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.18;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-accent-red { border-top: 2px solid var(--accent-spill); }
+    .card-accent-orange { border-top: 2px solid var(--accent-drift); }
+    .card-accent-blue { border-top: 2px solid var(--accent-signal); }
+    .card-accent-green { border-top: 2px solid var(--accent-ok); }
+
+    .stat-val {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
+      font-size: 12px;
+      color: var(--text-secondary);
+      width: fit-content;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    ul.clean {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    ul.clean li {
+      position: relative;
+      padding-left: 18px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    ul.clean li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 6px;
+      height: 6px;
+      border-radius: 1px;
+      background: var(--accent-signal);
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .pipe-step {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pipe-step .step-id {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-signal);
+    }
+
+    .pipe-step strong {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .pipe-step span {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .code-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    @media screen and (max-width: 1320px) {
+      .slide {
+        width: 100%;
+        height: auto;
+        min-height: 540px;
+      }
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      @page {
+        size: 1280px 720px;
+        margin: 0;
+      }
+      body {
+        background: var(--bg-canvas);
+      }
+      .deck-toolbar {
+        display: none !important;
+      }
+      .deck {
+        padding: 0;
+        gap: 0;
+      }
+      .slide {
+        width: 1280px;
+        height: 720px;
+        border: none;
+        border-radius: 0;
+        page-break-after: always;
+        break-after: page;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck-toolbar">
+    <div class="toolbar-left">
+      <strong style="color: var(--text-primary);">Dancing with the SARs</strong>
+      <span>·</span>
+      <span class="mono">7-Slide NASA Space Apps Deck</span>
+    </div>
+    <div class="toolbar-actions">
+      <button type="button" class="btn" id="prev-btn">← Prev</button>
+      <span class="mono" id="slide-indicator" style="font-size: 12px; color: var(--text-secondary); padding: 0 6px;">1 / 7</span>
+      <button type="button" class="btn" id="next-btn">Next →</button>
+      <button type="button" class="btn btn-primary" onclick="window.print()">Export PDF (Ctrl+P)</button>
+    </div>
+  </div>
+
+  <main class="deck">
+    <!-- SLIDE 1: TITLE -->
+    <section class="slide" id="slide-1">
+      <div class="slide-header">
+        <span class="slide-tag mono">NASA INTERNATIONAL SPACE APPS CHALLENGE</span>
+        <span class="slide-num mono">01 / 07</span>
+      </div>
+      <div class="slide-body" style="gap: 24px;">
+        <div class="badge mono">
+          <span class="dot" style="background: var(--accent-spill);"></span>
+          NISAR L2 GCOV · ALL-WEATHER SAR INTELLIGENCE
+        </div>
+        <h1>Dancing with the SARs</h1>
+        <p style="font-size: 21px; max-width: 820px; color: var(--text-secondary);">
+          All-weather, day-and-night marine oil spill detection, drift trajectory tracking, and multi-temporal area analytics powered by NASA-ISRO Synthetic Aperture Radar.
+        </p>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px;">
+          <div class="badge mono">Live Demo: korot-nure.github.io/nasa-dancing-with-the-sars</div>
+          <div class="badge mono">GitHub: korot-nure/nasa-dancing-with-the-sars</div>
+          <div class="badge mono">License: MIT Open Source</div>
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>DANCING WITH THE SARS TEAM</span>
+        <span>EARTH OBSERVATION · MARITIME RESPONSE</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: THE PROBLEM -->
+    <section class="slide" id="slide-2">
+      <div class="slide-header">
+        <span class="slide-tag mono">01 · THE PROBLEM</span>
+        <span class="slide-num mono">02 / 07</span>
+      </div>
+      <div class="slide-body">
+        <h2>When Oil Spills Strike, Clouds &amp; Darkness Blind Optical Satellites</h2>
+        <div class="grid-3">
+          <div class="card card-accent-red">
+            <div class="stat-val mono">~70%</div>
+            <h3>Cloud-Obscured Oceans</h3>
+            <p>Optical Earth observation cannot penetrate thick cloud cover, smoke plumes, or polar/tropical night—leaving critical early spill hours unobserved.</p>
+          </div>
+          <div class="card card-accent-orange">
+            <div class="stat-val mono">GBs</div>
+            <h3>Heavy Raw SAR Products</h3>
+            <p>Raw HDF5 radar datasets require specialized desktop GIS tools and radiometric calibration before responders can read a single slick boundary.</p>
+          </div>
+          <div class="card card-accent-blue">
+            <div class="stat-val mono">0 → T<sub>n</sub></div>
+            <h3>Missing Drift Context</h3>
+            <p>Static single-frame images fail to show where a spill is moving, how fast its area is changing (Δ km²), or where the pre-event baseline stood.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>WHY SYNTHETIC APERTURE RADAR MATTERS</span>
+        <span>02 / 07</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: OUR SOLUTION -->
+    <section class="slide" id="slide-3">
+      <div class="slide-header">
+        <span class="slide-tag mono">02 · OUR SOLUTION</span>
+        <span class="slide-num mono">03 / 07</span>
+      </div>
+      <div class="slide-body">
+        <h2>Instant Browser Intelligence from Calibrated NISAR Imagery</h2>
+        <div class="grid-2" style="align-items: stretch;">
+          <div class="card card-accent-blue" style="justify-content: space-between;">
+            <div>
+              <h3>Core Interactive Capabilities</h3>
+              <ul class="clean" style="margin-top: 14px;">
+                <li><strong style="color: var(--text-primary);">Basemap ↔ SAR Split Curtain:</strong> Drag across any event to compare geographic context against calibrated SAR backscatter and segmented <span class="mono">#ef4444</span> oil masks.</li>
+                <li><strong style="color: var(--text-primary);">Multi-Temporal Timeline (T0..Tn):</strong> Step or auto-play from pre-event baseline (<span class="mono">T0</span>) through consecutive satellite passes (<span class="mono">+N days</span>).</li>
+                <li><strong style="color: var(--text-primary);">Drift &amp; Area Telemetry:</strong> Automated GeoJSON centroids, directional drift arrows, previous-step dashed outlines, and <span class="mono">Δ km²</span> readouts.</li>
+                <li><strong style="color: var(--text-primary);">Bilingual EN / UA Interface:</strong> Instant language switching for both international judges and local responders.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card" style="background: #070709; justify-content: center; align-items: center; text-align: center; border-style: dashed; border-color: var(--border-strong);">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5" style="margin-bottom: 12px;">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="4" />
+              <line x1="12" y1="12" x2="19" y2="5" />
+            </svg>
+            <h3 class="mono">LIVE APP PREVIEW</h3>
+            <p style="max-width: 340px; font-size: 13px;">
+              Interactive Split-Curtain Map + Drift Timeline<br/>
+              <span class="mono" style="color: var(--accent-signal);">korot-nure.github.io/nasa-dancing-with-the-sars/</span>
+            </p>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+              (Replace this box with a live app screenshot before PDF export if desired)
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>DANCING WITH THE SARS · WEB PLATFORM</span>
+        <span>03 / 07</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: NASA DATA & METHODOLOGY -->
+    <section class="slide" id="slide-4">
+      <div class="slide-header">
+        <span class="slide-tag mono">03 · NASA DATA &amp; SCIENCE</span>
+        <span class="slide-num mono">04 / 07</span>
+      </div>
+      <div class="slide-body">
+        <h2>Powered by NASA-ISRO SAR (<span class="mono">NISAR L2 GCOV</span>)</h2>
+        <p style="max-width: 960px;">
+          Oil films dampen sea-surface capillary waves, causing specular reflection away from the radar antenna. This produces sharp dark backscatter anomalies in L-band <span class="mono">γ⁰<sub>HH</sub></span> (open water) and <span class="mono">γ⁰<sub>HV</sub></span> (coastal/mangrove zones), day or night, through clouds.
+        </p>
+        <div class="pipeline">
+          <div class="pipe-step">
+            <span class="step-id mono">STEP 1</span>
+            <strong>HDF5 Ingest</strong>
+            <span>Read <span class="mono">HHHH / HVHV</span>, validity mask, UTM grid &amp; <span class="mono">zeroDopplerStartTime</span>.</span>
+          </div>
+          <div class="pipe-step">
+            <span class="step-id mono">STEP 2</span>
+            <strong>dB Calibration</strong>
+            <span>Convert linear power to logarithmic scale: <span class="mono">P<sub>dB</sub> = 10·log₁₀(P)</span>.</span>
+          </div>
+          <div class="pipe-step">
+            <span class="step-id mono">STEP 3</span>
+            <strong>Grid Alignment</strong>
+            <span>Crop to event ROI &amp; co-register pre/post passes on identical orbit tracks.</span>
+          </div>
+          <div class="pipe-step">
+            <span class="step-id mono">STEP 4</span>
+            <strong>Slick Segmentation</strong>
+            <span>Compensate background wind offset, apply speckle filter &amp; threshold <span class="mono">ΔdB</span>.</span>
+          </div>
+          <div class="pipe-step">
+            <span class="step-id mono">STEP 5</span>
+            <strong>Web Export</strong>
+            <span>Output georeferenced <span class="mono">WebP</span> rasters, <span class="mono">GeoJSON</span> contours &amp; <span class="mono">v1.0</span> JSON.</span>
+          </div>
+        </div>
+        <div class="code-box mono">
+          Data Source: NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (L2 GCOV) via NASA Earthdata / ASF DAAC
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>RADAR PHYSICS &amp; DATA PIPELINE</span>
+        <span>04 / 07</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: CASE STUDIES -->
+    <section class="slide" id="slide-5">
+      <div class="slide-header">
+        <span class="slide-tag mono">04 · VALIDATED CASE STUDIES</span>
+        <span class="slide-num mono">05 / 07</span>
+      </div>
+      <div class="slide-body">
+        <h2>Tested Across 3 Real Marine Spill &amp; Seep Events</h2>
+        <div class="grid-3">
+          <div class="card card-accent-red">
+            <span class="badge mono">ARABIAN SEA · OMAN</span>
+            <h3>Al Hallaniyat Islands</h3>
+            <div class="stat-val mono" style="font-size: 28px; color: var(--accent-spill);">138.2 km²</div>
+            <p>Major oil spill following the grounding of tanker <em>Caroline Bezengi</em>. Multi-pass NISAR acquisitions track slick expansion near Al-Qibliyah Island.</p>
+            <span class="mono" style="font-size: 11px; color: var(--text-muted);">2026-06-18 → 2026-09-16</span>
+          </div>
+          <div class="card card-accent-orange">
+            <span class="badge mono">GULF OF MEXICO</span>
+            <h3>Green Canyon 600</h3>
+            <div class="stat-val mono" style="font-size: 28px; color: var(--accent-drift);">Natural Seeps</div>
+            <p>Persistent natural hydrocarbon seeps producing recurring surface films—ideal for validating multi-date SAR contrast stability and contour extraction.</p>
+            <span class="mono" style="font-size: 11px; color: var(--text-muted);">2026-10-19 → 2026-10-31</span>
+          </div>
+          <div class="card card-accent-blue">
+            <span class="badge mono">GULF OF MEXICO</span>
+            <h3>Eugene Island 316</h3>
+            <div class="stat-val mono" style="font-size: 28px; color: var(--accent-signal);">Offshore Zone</div>
+            <p>Monitoring surface slick behavior around dense offshore energy infrastructure using calibrated L-band backscatter pairs.</p>
+            <span class="mono" style="font-size: 11px; color: var(--text-muted);">2026-01-20 → 2026-10-14</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>MULTI-REGION SAR VALIDATION</span>
+        <span>05 / 07</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: ARCHITECTURE & OPEN SOURCE -->
+    <section class="slide" id="slide-6">
+      <div class="slide-header">
+        <span class="slide-tag mono">05 · ARCHITECTURE &amp; STACK</span>
+        <span class="slide-num mono">06 / 07</span>
+      </div>
+      <div class="slide-body">
+        <h2>Lightweight, Contract-First &amp; Open Source</h2>
+        <div class="grid-2">
+          <div class="card card-accent-blue">
+            <h3>Frontend Web Application</h3>
+            <ul class="clean">
+              <li><strong style="color: var(--text-primary);">React 18 + TypeScript + Vite:</strong> Fast, modular UI with strict <span class="mono">v1.0/v1.2</span> schema contracts.</li>
+              <li><strong style="color: var(--text-primary);">Leaflet Custom Panes:</strong> Synchronized dual-pane clipping for zero-lag split-curtain dragging.</li>
+              <li><strong style="color: var(--text-primary);">Static + API Ready:</strong> Runs purely on static assets (GitHub Pages) or connects seamlessly to a FastAPI backend.</li>
+            </ul>
+          </div>
+          <div class="card card-accent-green">
+            <h3>Data Pipeline &amp; Deployment</h3>
+            <ul class="clean">
+              <li><strong style="color: var(--text-primary);">Python SAR CLI:</strong> Transforms heavy <span class="mono">.h5</span> scenes into sub-megabyte WebP + GeoJSON packages.</li>
+              <li><strong style="color: var(--text-primary);">GitHub Actions CI/CD:</strong> Automated build &amp; deployment to GitHub Pages on every push to <span class="mono">main</span>.</li>
+              <li><strong style="color: var(--text-primary);">MIT Licensed:</strong> 100% OSI-compliant open-source codebase ready for community extension.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>CLEAN SEPARATION OF CONCERNS</span>
+        <span>06 / 07</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: IMPACT & NEXT STEPS -->
+    <section class="slide" id="slide-7">
+      <div class="slide-header">
+        <span class="slide-tag mono">06 · IMPACT &amp; ROADMAP</span>
+        <span class="slide-num mono">07 / 07</span>
+      </div>
+      <div class="slide-body" style="gap: 24px;">
+        <h2>Faster Response. Cleaner Oceans.</h2>
+        <div class="grid-2">
+          <div class="card card-accent-green">
+            <h3>Real-World Impact</h3>
+            <p>Empowers coast guards, environmental agencies, and maritime researchers to inspect SAR-verified spill boundaries and drift vectors in seconds—with zero GIS setup.</p>
+          </div>
+          <div class="card card-accent-orange">
+            <h3>Next-Phase Roadmap</h3>
+            <p>Automated Earthdata/ASF webhook ingestion, AIS vessel track correlation to identify polluters, and wind/current drift forecasting.</p>
+          </div>
+        </div>
+        <div class="code-box mono" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <span>Live App: https://korot-nure.github.io/nasa-dancing-with-the-sars/</span>
+          <span>Code: https://github.com/korot-nure/nasa-dancing-with-the-sars</span>
+        </div>
+      </div>
+      <div class="slide-footer mono">
+        <span>THANK YOU · DANCING WITH THE SARS</span>
+        <span>07 / 07</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const indicator = document.getElementById("slide-indicator");
+    let current = 0;
+
+    function goTo(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides[current].scrollIntoView({ behavior: "smooth", block: "center" });
+      indicator.textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    document.getElementById("prev-btn").addEventListener("click", () => goTo(current - 1));
+    document.getElementById("next-btn").addEventListener("click", () => goTo(current + 1));
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown") goTo(current + 1);
+      if (e.key === "ArrowLeft" || e.key === "PageUp") goTo(current - 1);
+    });
+  </script>
+</body>
+</html>

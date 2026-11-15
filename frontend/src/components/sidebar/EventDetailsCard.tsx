@@ -1,5 +1,12 @@
 import type { LocationDetail } from "../../types/location";
-import { formatLatLon, pluralUk } from "../../utils/format";
+import { formatLatLon } from "../../utils/format";
+import {
+  formatArea,
+  formatSnapshotsCount,
+  localizeDescription,
+  localizeTitle,
+  useI18n,
+} from "../../i18n";
 
 export interface EventDetailsCardProps {
   detail: LocationDetail | null;
@@ -74,7 +81,7 @@ const scopedCss = `
 .d2-sar-hint[open] .d2-chevron { transform: rotate(90deg); }
 `;
 
-function SkeletonCard() {
+function SkeletonCard({ lang }: { lang: "en" | "uk" }) {
   return (
     <div
       aria-busy="true"
@@ -82,9 +89,11 @@ function SkeletonCard() {
       style={{ display: "flex", flexDirection: "column", borderBottom: "1px solid var(--border)" }}
     >
       <div className="section-head">
-        <span className="section-title">Телеметрія знімка</span>
+        <span className="section-title">
+          {lang === "uk" ? "Телеметрія знімка" : "Scene Telemetry"}
+        </span>
         <span className="mono" style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-          ЗАВАНТАЖЕННЯ
+          {lang === "uk" ? "ЗАВАНТАЖЕННЯ" : "LOADING"}
         </span>
       </div>
       <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border)" }}>
@@ -105,7 +114,7 @@ function SkeletonCard() {
         <span className="d2-skel" style={{ width: "64%" }} />
       </div>
       <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
-        Завантаження деталей події...
+        {lang === "uk" ? "Завантаження деталей події..." : "Loading event details..."}
       </span>
     </div>
   );
@@ -120,11 +129,13 @@ export function EventDetailsCard({
   activeStepIdx,
   loading = false,
 }: EventDetailsCardProps) {
+  const { lang } = useI18n();
+
   if (loading && !detail) {
     return (
       <>
         <style>{scopedCss}</style>
-        <SkeletonCard />
+        <SkeletonCard lang={lang} />
       </>
     );
   }
@@ -132,7 +143,9 @@ export function EventDetailsCard({
   if (!detail) {
     return (
       <div className="panel-placeholder">
-        Оберіть подію зі списку або на оглядовій карті.
+        {lang === "uk"
+          ? "Оберіть подію зі списку або на оглядовій карті."
+          : "Select an event from the list or the overview map."}
       </div>
     );
   }
@@ -145,24 +158,31 @@ export function EventDetailsCard({
 
   // --- Етап і дата ---
   const stageBadge = activeSnap ? `T${activeStepIdx + 1}` : "T0";
-  const stageLabel = activeSnap ? activeSnap.label : "T0 · До аварії (база)";
+  const stageLabel = activeSnap
+    ? activeSnap.label
+    : lang === "uk"
+      ? "T0 · До аварії (база)"
+      : "T0 · Pre-event (baseline)";
   const stageDate = (activeSnap ? activeSnap.date : detail.baseline_date) || "—";
 
-  let offsetText = "До початку інциденту";
+  let offsetText = lang === "uk" ? "До початку інциденту" : "Before incident";
   if (activeSnap && firstSnap) {
     const days = daysBetween(firstSnap.date, activeSnap.date);
     if (activeStepIdx === 0) {
-      offsetText = "+0 дн. (Старт)";
+      offsetText = lang === "uk" ? "+0 дн. (Старт)" : "+0 d (Start)";
     } else if (days !== null) {
-      offsetText = `${days >= 0 ? "+" : ""}${days} дн. від T1`;
+      offsetText =
+        lang === "uk"
+          ? `${days >= 0 ? "+" : ""}${days} дн. від T1`
+          : `${days >= 0 ? "+" : ""}${days} d from T1`;
     } else {
-      offsetText = `Старт T1: ${firstSnap.date}`;
+      offsetText = `${lang === "uk" ? "Старт" : "Start"} T1: ${firstSnap.date}`;
     }
   }
 
   // --- Площа і дельта ---
   const areaKm2 = activeSnap ? activeSnap.area_km2 : 0;
-  let deltaValue = "Базовий фон";
+  let deltaValue = lang === "uk" ? "Базовий фон" : "Baseline";
   let deltaCaption = "";
   let deltaClass = "is-neutral";
 
@@ -170,15 +190,15 @@ export function EventDetailsCard({
     if (prevSnap) {
       const diff = activeSnap.area_km2 - prevSnap.area_km2;
       if (Math.abs(diff) < 0.05) {
-        deltaValue = "без змін";
+        deltaValue = lang === "uk" ? "без змін" : "no change";
         deltaClass = "is-neutral";
       } else {
-        deltaValue = `${diff > 0 ? "+" : "-"}${Math.abs(diff).toFixed(1)} км²`;
-        deltaCaption = "від попереднього";
+        deltaValue = `${diff > 0 ? "+" : "-"}${formatArea(Math.abs(diff), lang)}`;
+        deltaCaption = lang === "uk" ? "від попереднього" : "vs previous";
         deltaClass = diff > 0 ? "is-up" : "is-down";
       }
     } else {
-      deltaValue = "Початкова фіксація";
+      deltaValue = lang === "uk" ? "Початкова фіксація" : "Initial detection";
       deltaClass = "is-up";
     }
   }
@@ -192,7 +212,8 @@ export function EventDetailsCard({
       : "—";
   const pairBeforeDate = (activeSnap ? activeSnap.before_date : detail.baseline_date) || "—";
   const activeNote = activeSnap?.note?.trim() ?? "";
-  const description = detail.description?.trim() ?? "";
+  const description = localizeDescription(detail.id, detail.description?.trim() ?? "", lang);
+  const localizedTitle = localizeTitle(detail.id, detail.title, lang);
   const sourceUrl = detail.source_url?.trim() ?? "";
 
   return (
@@ -208,14 +229,16 @@ export function EventDetailsCard({
       <style>{scopedCss}</style>
 
       <div className="section-head">
-        <span className="section-title">Телеметрія знімка</span>
+        <span className="section-title">
+          {lang === "uk" ? "Телеметрія знімка" : "Scene Telemetry"}
+        </span>
         {loading && (
           <span
             className="mono"
             style={{ fontSize: "10px", color: "var(--text-muted)" }}
             aria-live="polite"
           >
-            ОНОВЛЕННЯ
+            {lang === "uk" ? "ОНОВЛЕННЯ" : "UPDATING"}
           </span>
         )}
       </div>
@@ -254,11 +277,19 @@ export function EventDetailsCard({
               flexShrink: 0,
             }}
           />
-          <span style={{ overflowWrap: "anywhere" }}>{detail.title}</span>
+          <span style={{ overflowWrap: "anywhere" }}>{localizedTitle}</span>
         </h2>
         <span
           className="mono"
-          title={activeSnap ? "Поточний знімок" : "Базовий знімок до аварії"}
+          title={
+            activeSnap
+              ? lang === "uk"
+                ? "Поточний знімок"
+                : "Current snapshot"
+              : lang === "uk"
+                ? "Базовий знімок до аварії"
+                : "Pre-event baseline"
+          }
           style={{
             flexShrink: 0,
             height: "20px",
@@ -279,21 +310,21 @@ export function EventDetailsCard({
 
       <div className="kv-grid">
         <div className="kv-cell">
-          <div className="kv-label">Етап і дата</div>
+          <div className="kv-label">{lang === "uk" ? "Етап і дата" : "Stage & Date"}</div>
           <div className="kv-val" style={{ fontSize: "12px" }}>{stageLabel}</div>
           <div className="kv-sub mono">{stageDate}</div>
           <div className="kv-sub mono">{offsetText}</div>
         </div>
 
         <div className="kv-cell">
-          <div className="kv-label">Площа розливу</div>
-          <div className="kv-val mono">{areaKm2.toFixed(1)} км²</div>
+          <div className="kv-label">{lang === "uk" ? "Площа розливу" : "Spill Area"}</div>
+          <div className="kv-val mono">{formatArea(areaKm2, lang)}</div>
           <div className={`kv-sub mono kv-delta ${deltaClass}`}>{deltaValue}</div>
           {deltaCaption && <div className="kv-sub">{deltaCaption}</div>}
         </div>
 
         <div className="kv-cell">
-          <div className="kv-label">Координати центру</div>
+          <div className="kv-label">{lang === "uk" ? "Координати центру" : "Center Coords"}</div>
           <div className="kv-val mono" style={{ fontSize: "12px" }}>
             {formatLatLon(detail.coords)}
           </div>
@@ -301,13 +332,14 @@ export function EventDetailsCard({
         </div>
 
         <div className="kv-cell">
-          <div className="kv-label">Трек і серія</div>
+          <div className="kv-label">{lang === "uk" ? "Трек і серія" : "Track & Series"}</div>
           <div className="kv-val mono" style={{ fontSize: "12px" }}>{trackPolText}</div>
           <div className="kv-sub">
-            Пара «До»: <span className="mono">{pairBeforeDate}</span>
+            {lang === "uk" ? "Пара «До»:" : "Before pair:"}{" "}
+            <span className="mono">{pairBeforeDate}</span>
           </div>
           <div className="kv-sub">
-            Серія: <span className="mono">{snapCount}</span> {pluralUk(snapCount, ["знімок", "знімки", "знімків"])}
+            {lang === "uk" ? "Серія:" : "Series:"} <span className="mono">{formatSnapshotsCount(snapCount, lang)}</span>
           </div>
         </div>
       </div>
@@ -379,7 +411,7 @@ export function EventDetailsCard({
               rel="noopener noreferrer"
               className="btn"
             >
-              Джерело звіту
+              {lang === "uk" ? "Джерело звіту" : "Incident Report"}
               <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path
                   d="M6 3H3V13H13V10M9 3H13V7M13 3L7 9"
@@ -411,7 +443,7 @@ export function EventDetailsCard({
                 strokeLinejoin="round"
               />
             </svg>
-            Чому це бачить саме SAR?
+            {lang === "uk" ? "Чому це бачить саме SAR?" : "Why does SAR see this?"}
           </summary>
           <p
             style={{
@@ -422,9 +454,9 @@ export function EventDetailsCard({
               color: "var(--text-secondary)",
             }}
           >
-            Нафтова плівка гасить дрібні капілярні хвилі на воді, і поверхня відбиває
-            радарний сигнал дзеркально — убік від антени. Тому SAR фіксує пляму як темну
-            зону падіння сигналу вдень, уночі та навіть крізь щільні хмари.
+            {lang === "uk"
+              ? "Нафтова плівка гасить дрібні капілярні хвилі на воді, і поверхня відбиває радарний сигнал дзеркально — убік від антени. Тому SAR фіксує пляму як темну зону падіння сигналу вдень, уночі та навіть крізь щільні хмари."
+              : "Oil films dampen sea-surface capillary waves, causing specular reflection of the radar pulse away from the sensor. As a result, SAR detects slicks as sharp dark backscatter anomalies day or night—even through thick clouds."}
           </p>
         </details>
       </div>

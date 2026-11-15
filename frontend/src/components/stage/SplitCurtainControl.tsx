@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
+import { useI18n } from "../../i18n";
 
 export interface SplitCurtainControlProps {
   splitRatio: number; // 0.05 .. 0.95
@@ -14,6 +15,7 @@ function clampRatio(value: number): number {
  * [Dev 1 — Lead] Інтерактивна вертикальна шторка порівняння "Звичайна карта ↔ SAR-накладення".
  */
 export function SplitCurtainControl({ splitRatio, onSplitChange }: SplitCurtainControlProps) {
+  const { lang } = useI18n();
   const draggingRef = useRef(false);
 
   const updateFromClientX = (target: HTMLDivElement, clientX: number) => {
@@ -65,7 +67,11 @@ export function SplitCurtainControl({ splitRatio, onSplitChange }: SplitCurtainC
     <div
       role="slider"
       tabIndex={0}
-      aria-label="Шторка порівняння Звичайна карта та SAR Радар"
+      aria-label={
+        lang === "uk"
+          ? "Шторка порівняння Звичайна карта та SAR Радар"
+          : "Comparison curtain: Basemap vs SAR Radar"
+      }
       aria-valuemin={5}
       aria-valuemax={95}
       aria-valuenow={Math.round(splitRatio * 100)}
@@ -99,7 +105,11 @@ export function SplitCurtainControl({ splitRatio, onSplitChange }: SplitCurtainC
       />
 
       <div
-        title="Перетягніть ліворуч/праворуч (або клавіші ← →)"
+        title={
+          lang === "uk"
+            ? "Перетягніть ліворуч/праворуч (або клавіші ← →)"
+            : "Drag left/right (or use ← → arrow keys)"
+        }
         style={{
           position: "absolute",
           top: "50%",

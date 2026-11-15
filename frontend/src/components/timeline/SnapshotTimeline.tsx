@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import type { LocationDetail } from "../../types/location";
+import { formatArea, useI18n } from "../../i18n";
 
 export interface SnapshotTimelineProps {
   detail: LocationDetail | null;
@@ -27,6 +28,7 @@ export function SnapshotTimeline({
   onSelectStep,
   onTogglePlay
 }: SnapshotTimelineProps) {
+  const { lang } = useI18n();
   const activeBtnRef = useRef<HTMLButtonElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{
@@ -161,7 +163,7 @@ export function SnapshotTimeline({
           color: "var(--text-muted)"
         }}
       >
-        Завантаження таймлайну...
+        {lang === "uk" ? "Завантаження таймлайну..." : "Loading timeline..."}
       </div>
     );
   }
@@ -193,7 +195,9 @@ export function SnapshotTimeline({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span className="section-title">Таймлайн дрейфу</span>
+          <span className="section-title">
+            {lang === "uk" ? "Таймлайн дрейфу" : "Drift Timeline"}
+          </span>
           <span className="mono" style={{ fontSize: 11, color: "var(--text-secondary)" }}>
             {currentStepNumber} / {totalSteps}
           </span>
@@ -203,8 +207,8 @@ export function SnapshotTimeline({
           <button
             type="button"
             className="btn"
-            aria-label="Попередній знімок"
-            title="Попередній знімок (←)"
+            aria-label={lang === "uk" ? "Попередній знімок" : "Previous snapshot"}
+            title={lang === "uk" ? "Попередній знімок (←)" : "Previous snapshot (←)"}
             disabled={activeStepIdx <= -1}
             onClick={() => onSelectStep(activeStepIdx - 1)}
             style={{ width: 28, height: 24, padding: 0 }}
@@ -224,7 +228,11 @@ export function SnapshotTimeline({
             type="button"
             className="btn mono"
             onClick={onTogglePlay}
-            title="Автопрогравання динаміки (T0 → Tn)"
+            title={
+              lang === "uk"
+                ? "Автопрогравання динаміки (T0 → Tn)"
+                : "Auto-play timeline (T0 → Tn)"
+            }
             style={{
               flex: 1,
               height: 24,
@@ -243,14 +251,14 @@ export function SnapshotTimeline({
                 <path d="M4 3L13 8L4 13V3Z" />
               </svg>
             )}
-            <span>{isPlaying ? "Пауза" : "Старт"}</span>
+            <span>{isPlaying ? (lang === "uk" ? "Пауза" : "Pause") : lang === "uk" ? "Старт" : "Play"}</span>
           </button>
 
           <button
             type="button"
             className="btn"
-            aria-label="Наступний знімок"
-            title="Наступний знімок (→)"
+            aria-label={lang === "uk" ? "Наступний знімок" : "Next snapshot"}
+            title={lang === "uk" ? "Наступний знімок (→)" : "Next snapshot (→)"}
             disabled={activeStepIdx >= detail.snapshots.length - 1}
             onClick={() => onSelectStep(activeStepIdx + 1)}
             style={{ width: 28, height: 24, padding: 0 }}
@@ -318,7 +326,7 @@ export function SnapshotTimeline({
               T0 · {detail.baseline_date}
             </span>
             <span className="mono" style={{ fontSize: 11, color: "var(--text-secondary)" }}>
-              0.0 км²
+              {formatArea(0, lang)}
             </span>
           </div>
           <span
@@ -331,7 +339,7 @@ export function SnapshotTimeline({
               maxWidth: "100%"
             }}
           >
-            База (до аварії)
+            {lang === "uk" ? "База (до аварії)" : "Baseline (pre-event)"}
           </span>
         </button>
 
@@ -340,7 +348,12 @@ export function SnapshotTimeline({
           const isActive = idx === activeStepIdx;
           const isPassed = activeStepIdx > idx;
           const daysOffset = diffDaysFromIso(t1Date, snap.date);
-          const stepTag = idx === 0 ? "Старт" : `+${daysOffset} дн.`;
+          const stepTag =
+            idx === 0
+              ? lang === "uk"
+                ? "Старт"
+                : "Start"
+              : `+${daysOffset} ${lang === "uk" ? "дн." : "d"}`;
 
           const dotColor = isActive
             ? "var(--accent-spill)"
@@ -383,7 +396,7 @@ export function SnapshotTimeline({
                     fontWeight: isActive ? 600 : 400
                   }}
                 >
-                  {snap.area_km2.toFixed(1)} км²
+                  {formatArea(snap.area_km2, lang)}
                 </span>
               </div>
               <div
