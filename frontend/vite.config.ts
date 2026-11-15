@@ -4,8 +4,10 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "VITE_");
   const useMock = env.VITE_USE_MOCK !== "false";
+  const base = env.VITE_BASE_PATH || "/";
 
   return {
+    base,
     plugins: [react()],
     server: {
       port: 5173,

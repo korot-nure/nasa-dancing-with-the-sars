@@ -8,6 +8,15 @@ import type {
 } from "../types/location";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
+const BASE_URL = import.meta.env.BASE_URL || "/";
+
+export function withBase(url: string): string {
+  if (!url.startsWith("/") || url.startsWith("//")) {
+    return url;
+  }
+  const prefix = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
+  return `${prefix}${url}`;
+}
 
 const detailCache = new Map<string, Promise<LocationDetail>>();
 const geoJsonCache = new Map<string, Promise<SpillContourFeatureCollection>>();
@@ -38,43 +47,45 @@ function fetchCachedJson<T>(cache: Map<string, Promise<T>>, key: string, url: st
 }
 
 export async function fetchLocations(): Promise<LocationSummary[]> {
-  const url = USE_MOCK ? "/mock/locations.json" : "/api/v1/locations";
+  const url = withBase(USE_MOCK ? "/mock/locations.json" : "/api/v1/locations");
   const data = await fetchJson<LocationsListResponse>(url);
   return data.locations;
 }
 
 export function fetchLocationDetail(id: string): Promise<LocationDetail> {
-  const url = USE_MOCK
-    ? `/mock/locations/${encodeURIComponent(id)}.json`
-    : `/api/v1/locations/${encodeURIComponent(id)}`;
+  const url = withBase(
+    USE_MOCK
+      ? `/mock/locations/${encodeURIComponent(id)}.json`
+      : `/api/v1/locations/${encodeURIComponent(id)}`
+  );
   return fetchCachedJson(detailCache, id, url);
 }
 
 export function resolveGeoJsonUrl(url: string): string {
   if (!USE_MOCK) {
-    return url;
+    return withBase(url);
   }
 
   const sourcesMatch = url.match(/^\/api\/v1\/locations\/([^/]+)\/sources\.geojson$/);
   if (sourcesMatch) {
-    return `/mock/${sourcesMatch[1]}/sources.geojson`;
+    return withBase(`/mock/${sourcesMatch[1]}/sources.geojson`);
   }
 
   const contourMatch = url.match(
     /^\/api\/v1\/locations\/([^/]+)\/snapshots\/([^/]+)\/contour\.geojson$/
   );
   if (contourMatch) {
-    return `/mock/${contourMatch[1]}/contour_${contourMatch[2]}.geojson`;
+    return withBase(`/mock/${contourMatch[1]}/contour_${contourMatch[2]}.geojson`);
   }
 
   const targetsMatch = url.match(
     /^\/api\/v1\/locations\/([^/]+)\/snapshots\/([^/]+)\/targets\.geojson$/
   );
   if (targetsMatch) {
-    return `/mock/${targetsMatch[1]}/targets_${targetsMatch[2]}.geojson`;
+    return withBase(`/mock/${targetsMatch[1]}/targets_${targetsMatch[2]}.geojson`);
   }
 
-  return url;
+  return withBase(url);
 }
 
 export function fetchGeoJson(url: string): Promise<SpillContourFeatureCollection> {

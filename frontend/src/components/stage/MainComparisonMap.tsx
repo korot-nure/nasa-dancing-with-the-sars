@@ -3,7 +3,8 @@ import L from "leaflet";
 import {
   fetchGeoJson,
   fetchSourcesGeoJson,
-  fetchTargetsGeoJson
+  fetchTargetsGeoJson,
+  withBase
 } from "../../api/locationsApi";
 import type {
   LocationDetail,
@@ -528,8 +529,8 @@ export function MainComparisonMap({
 
     const bounds = bboxToLeafletBounds(detail.bbox);
     const snap = activeStepIdx >= 0 ? detail.snapshots[activeStepIdx] ?? null : null;
-    const beforeUrl = snap ? snap.before_url : detail.baseline_before_url;
-    const afterUrl = snap ? snap.after_url : detail.baseline_before_url;
+    const beforeUrl = withBase(snap ? snap.before_url : detail.baseline_before_url);
+    const afterUrl = withBase(snap ? snap.after_url : detail.baseline_before_url);
 
     beforeImageLayerRef.current = L.imageOverlay(beforeUrl, bounds, {
       pane: "sarLeftPane",
@@ -544,7 +545,7 @@ export function MainComparisonMap({
     }).addTo(map);
 
     if (snap && snap.mask_url) {
-      maskImageLayerRef.current = L.imageOverlay(snap.mask_url, bounds, {
+      maskImageLayerRef.current = L.imageOverlay(withBase(snap.mask_url), bounds, {
         pane: "sarRightPane",
         opacity: spillOpacityRef.current,
         interactive: false
