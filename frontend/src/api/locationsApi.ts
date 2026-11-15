@@ -50,14 +50,44 @@ export function fetchLocationDetail(id: string): Promise<LocationDetail> {
   return fetchCachedJson(detailCache, id, url);
 }
 
+export function resolveGeoJsonUrl(url: string): string {
+  if (!USE_MOCK) {
+    return url;
+  }
+
+  const sourcesMatch = url.match(/^\/api\/v1\/locations\/([^/]+)\/sources\.geojson$/);
+  if (sourcesMatch) {
+    return `/mock/${sourcesMatch[1]}/sources.geojson`;
+  }
+
+  const contourMatch = url.match(
+    /^\/api\/v1\/locations\/([^/]+)\/snapshots\/([^/]+)\/contour\.geojson$/
+  );
+  if (contourMatch) {
+    return `/mock/${contourMatch[1]}/contour_${contourMatch[2]}.geojson`;
+  }
+
+  const targetsMatch = url.match(
+    /^\/api\/v1\/locations\/([^/]+)\/snapshots\/([^/]+)\/targets\.geojson$/
+  );
+  if (targetsMatch) {
+    return `/mock/${targetsMatch[1]}/targets_${targetsMatch[2]}.geojson`;
+  }
+
+  return url;
+}
+
 export function fetchGeoJson(url: string): Promise<SpillContourFeatureCollection> {
-  return fetchCachedJson(geoJsonCache, url, url);
+  const resolved = resolveGeoJsonUrl(url);
+  return fetchCachedJson(geoJsonCache, resolved, resolved);
 }
 
 export function fetchSourcesGeoJson(url: string): Promise<SourceFeatureCollection> {
-  return fetchCachedJson(sourcesCache, url, url);
+  const resolved = resolveGeoJsonUrl(url);
+  return fetchCachedJson(sourcesCache, resolved, resolved);
 }
 
 export function fetchTargetsGeoJson(url: string): Promise<TargetFeatureCollection> {
-  return fetchCachedJson(targetsCache, url, url);
+  const resolved = resolveGeoJsonUrl(url);
+  return fetchCachedJson(targetsCache, resolved, resolved);
 }

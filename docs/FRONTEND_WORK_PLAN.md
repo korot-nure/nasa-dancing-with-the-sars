@@ -1,23 +1,26 @@
-# План роботи над фронтендом для 2 розробників (v1.1)
+# План роботи над фронтендом для 2 розробників (v1.2)
 
 **Проєкт:** Dancing with the SARs — Карта моніторингу розливів нафти (`NISAR L2 GCOV`)  
 **Стек:** React + Vite + TypeScript + Leaflet (`L.imageOverlay` + `L.geoJSON`)  
-**Версія документа:** `1.1` (синхронізовано з [API_CONTRACT.md](./API_CONTRACT.md) v1.1)  
+**Версія документа:** `1.2` (синхронізовано з [API_CONTRACT.md](./API_CONTRACT.md) v1.2)  
 **Дата:** 15 листопада 2026 р.
 
 ---
 
-## 0. Що змінилося у фронтенді під контракт `v1.1`
+## 0. Що змінилося у фронтенді під контракт `v1.2`
 
-1. **Парне порівняння «До / Після» в межах одного треку й поляризації:**
+1. **Поле походження плями `origin?: "pipeline" | "reference"` (`v1.2`) і реальний набір Оману (`t1..t12`):**
+   - Локація `oman-caroline-bezengi-2026` підключена на реальних `12` зрізах `NISAR L2 GCOV` (`t1..t12`, з `2026-06-30` по `2026-09-16`, треки `056A VV` та `150D HH`) із растрами `.webp` (`1200x770` у `EPSG:3857`), контурами `contour_t*.geojson`, цілями `targets_t*.geojson` і джерелами `sources.geojson`.
+   - У `SpillContourProperties` додано `origin?: "pipeline" | "reference"`. Для `t1..t4` та `t6` ранні плями біля танкера мають `"origin": "reference"` — спливаючі підказки контурів показують «еталонна розмітка».
+2. **Парне порівняння «До / Після» в межах одного треку й поляризації:**
    - У кожного `SnapshotStep` тепер є власні `before_url`, `before_date`, `track` (`056A`, `150D`) та `polarization` (`HH` / `VV`).
    - При перемиканні кроку на таймлайні (`T0..Tn`) на карті **оновлюються обидві сторони шторки**: ліворуч — `before_url` (`sarLeftPane`), праворуч — `after_url` + маска (`sarRightPane`).
-2. **Контури за класами достовірності (`contour.geojson`):**
-   - Одна пляма = одна `Feature` з полями `slick_id`, `class` (`"probable" | "possible"`), `score` (`0..1`) та `flags` (`near_coast`, `low_wind`, `near_noise`, `rain`, `small`, `static`).
+3. **Контури за класами достовірності (`contour.geojson`):**
+   - Одна пляма = одна `Feature` з полями `slick_id`, `class` (`"probable" | "possible"`), `score` (`0..1`), `flags` (`near_coast`, `low_wind`, `near_noise`, `rain`, `small`, `static`) та `origin`.
    - `probable`: суцільний `#ef4444` контур + заливка (керується `spillOpacity`); `possible`: пунктирний `#fbbf24` контур без заливки.
-3. **Примітки до зрізів (`note`, `label_source`):**
-   - Якщо `note` заповнено (наприклад, штиль або часткове покриття), картка події та кнопка кроку на таймлайні виводять попередження.
-4. **Опціональні контекстні шари:**
+4. **Примітки до зрізів (`note`, `label_source`):**
+   - Якщо `note` заповнено (наприклад, штиль, слабкий контраст у VV на `t5`, еталонна розмітка або вихід на берег за межами кадру), картка події та кнопка кроку на таймлайні виводять попередження.
+5. **Опціональні контекстні шари:**
    - `sources.geojson` — відоме та знайдене алгоритмом джерело розливу (`detected` / `known`).
    - `targets_<step_id>.geojson` — точкові радарні цілі на дату знімка (`ship` / `platform` / `coastal`).
 
@@ -58,12 +61,12 @@
 
 ## 2. Єдиний контракт даних та стану (`src/types/location.ts`)
 
-Типи повністю синхронізовано з розділом `4.1` документа [API_CONTRACT.md](./API_CONTRACT.md) v1.1:
+Типи повністю синхронізовано з розділом `4.1` документа [API_CONTRACT.md](./API_CONTRACT.md) v1.2:
 - `LocationSummary`, `LocationsListResponse`
 - `Polarization = "HH" | "VV"`, `LabelSource = "manual" | "auto"`
 - `SnapshotStep` (`track`, `polarization`, `before_url`, `before_date`, `label_source`, `note?`, `targets_geojson_url?` + `after_url`, `mask_url`, `contour_geojson_url`, `area_km2`)
 - `LocationDetail` (`sources_geojson_url?`, `baseline_date`, `baseline_before_url`, `bbox`, `coords`, `snapshots`)
-- `SlickClass`, `SlickFlag`, `SpillContourProperties`, `SpillContourFeatureCollection`
+- `SlickClass`, `SlickFlag`, `SpillContourProperties` (додано `origin?: "pipeline" | "reference"`), `SpillContourFeatureCollection`
 - `SourceProperties`, `SourceFeatureCollection`, `TargetProperties`, `TargetFeatureCollection`
 - `AppState`
 
@@ -71,14 +74,16 @@
 
 ## 3. Асиметричний розподіл завдань (Lead + UI, Zero Merge Conflicts)
 
-Після оновлення контракту до `v1.1` розробники продовжують працювати у своїх зонах відповідальності, щоб уникати конфліктів при паралельній роботі:
+Після оновлення контракту до `v1.2` розробники продовжують працювати у своїх зонах відповідальності, щоб уникати конфліктів при паралельній роботі:
 
 ```text
 frontend/
-├── public/mock/                    # [Dev 1] Mock-дані v1.1 (локації, SVG, GeoJSON, sources, targets)
+├── public/
+│   ├── data/locations/oman-caroline-bezengi-2026/ # [Dev 1] Реальні WebP-растри й GeoJSON (12 зрізів t1..t12)
+│   └── mock/                       # [Dev 1] Mock-дані v1.2 (локації, GeoJSON, sources, targets)
 └── src/
-    ├── api/locationsApi.ts         # [Dev 1] REST + GeoJSON клієнт (fetchLocations, fetchDetail, fetchGeoJson, fetchSourcesGeoJson, fetchTargetsGeoJson)
-    ├── types/location.ts           # [Dev 1] Єдиний контракт типів v1.1
+    ├── api/locationsApi.ts         # [Dev 1] REST + GeoJSON клієнт і resolveGeoJsonUrl для /api/v1/... у mock-режимі
+    ├── types/location.ts           # [Dev 1] Єдиний контракт типів v1.2
     ├── utils/format.ts             # [Dev 2 / Shared] pluralUk, formatLatLon
     ├── components/
     │   ├── stage/                  # [Dev 1] MainComparisonMap.tsx, SplitCurtainControl.tsx

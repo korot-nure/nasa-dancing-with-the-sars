@@ -1,7 +1,7 @@
 # API-контракт (Data & API Contract): Dancing with the SARs
 
 **Проєкт:** Карта радарного моніторингу розливів нафти (`NISAR L2 GCOV`)  
-**Версія контракту:** `1.1`  
+**Версія контракту:** `1.2`  
 **Статус:** Єдине джерело істини (Single Source of Truth) між Backend (`FastAPI`) та Frontend (`React + TypeScript + Leaflet`)  
 **Дата:** 15 листопада 2026 р.  
 **Суміжні документи:** `BACKEND_TECHNICAL_SPEC.md` · `FRONTEND_WORK_PLAN.md`
@@ -11,7 +11,11 @@
 
 ---
 
-## 0. Що змінилося у версії 1.1 (порівняно з 1.0)
+## 0. Що змінилося
+
+**Версія 1.2** (порівняно з 1.1): у `properties` контурів додано опціональне поле `origin` (`"pipeline"` | `"reference"`). `reference` — пляма взята з еталонної розмітки відомої події, а не знайдена автоматичним конвеєром. Такі плями входять у маску й площу зрізу. Рекомендація для UI: окремий підпис у спливаючій підказці («еталонна розмітка»).
+
+**Версія 1.1** (порівняно з 1.0):
 
 | Що | Зміна | Чому |
 | :--- | :--- | :--- |
@@ -231,6 +235,7 @@
 - `slick_id` (`string`, **нове**): ідентифікатор плями в межах зрізу (`"t1-07"`).
 - `class` (`"probable" | "possible"`, **нове**): `probable` — ймовірно нафта, `possible` — можливо. Рекомендація: `probable` — суцільна заливка `#ef4444`, `possible` — пунктирний контур без заливки.
 - `score` (`number`, **нове**): оцінка «схоже на нафту», `0.0 .. 1.0`.
+- `origin` (`"pipeline" | "reference"`, **нове в 1.2, опціональне**, за замовчуванням `pipeline`): `pipeline` — пляму знайшов автоматичний конвеєр; `reference` — пляму взято з еталонної розмітки відомої події (для дат, на яких конвеєр подію не бачить). Для `reference` оцінка й прапорці пораховані тією самою формулою.
 - `flags` (`string[]`, **нове**): чому оцінку знижено; порожній масив, якщо сумнівів немає:
   - `near_coast` — ближче 2 км до берега;
   - `low_wind` — вітер < 3 м/с (штиль виглядає як нафта);
@@ -254,7 +259,8 @@
         "area_km2": 40.4,
         "class": "probable",
         "score": 0.74,
-        "flags": []
+        "flags": [],
+        "origin": "pipeline"
       },
       "geometry": {
         "type": "Polygon",
@@ -270,7 +276,8 @@
         "area_km2": 3.1,
         "class": "possible",
         "score": 0.45,
-        "flags": ["near_coast"]
+        "flags": ["near_coast"],
+        "origin": "pipeline"
       },
       "geometry": {
         "type": "Polygon",
@@ -397,7 +404,7 @@
 | :--- | :--- | :--- |
 | `before_<track>_<pol>.webp` | RGBA WebP | **Змінено (1.1):** «До» для кожної пари трек + поляризація (наприклад, `before_056A_VV.webp`). Радіолокаційна яскравість у градаціях сірого (`0..255`), шкала — див. гарантію 3; `NaN`-пікселі (немає зйомки, суша) мають `alpha = 0` |
 | `after_<step_id>.webp` | RGBA WebP | Яскравість «Після» у тій самій шкалі, що й відповідний `before_<track>_<pol>.webp`; `NaN`-пікселі мають `alpha = 0` |
-| `mask_<step_id>.webp` | RGBA WebP | Пікселі плям класу `probable` — **суцільний `#ef4444`** (`rgba(239, 68, 68, 255)`, `alpha = 255`); усі інші пікселі — **повністю прозорі** (`rgba(0, 0, 0, 0)`, `alpha = 0`) |
+| `mask_<step_id>.webp` | RGBA WebP | Пікселі плям класу `probable` (включно з `origin: reference`) — **суцільний `#ef4444`** (`rgba(239, 68, 68, 255)`, `alpha = 255`); усі інші пікселі — **повністю прозорі** (`rgba(0, 0, 0, 0)`, `alpha = 0`) |
 | `contour_<step_id>.geojson` | GeoJSON (`EPSG:4326`) | `FeatureCollection`, одна пляма = одна `Feature` (`Polygon`), властивості — див. 2.3 |
 | `sources.geojson` | GeoJSON (`EPSG:4326`) | **Нове (1.1), опціональне.** Див. 2.4 |
 | `targets_<step_id>.geojson` | GeoJSON (`EPSG:4326`) | **Нове (1.1), опціональне.** Див. 2.5 |
@@ -494,6 +501,8 @@ export interface SpillContourProperties {
   score: number;
   /** 1.1: чому оцінку знижено */
   flags: SlickFlag[];
+  /** 1.2: pipeline — знайдено конвеєром, reference — еталонна розмітка відомої події */
+  origin?: "pipeline" | "reference";
 }
 
 export interface SpillContourFeature {
@@ -622,6 +631,7 @@ class SpillContourProperties(BaseModel):
     class_: Literal["probable", "possible"] = Field(..., alias="class")
     score: float = Field(..., ge=0.0, le=1.0)
     flags: list[Literal["near_coast", "low_wind", "near_noise", "rain", "small", "static"]] = []
+    origin: Literal["pipeline", "reference"] = "pipeline"
 
     model_config = {"populate_by_name": True}
 
@@ -659,4 +669,4 @@ class ErrorResponse(BaseModel):
 2. **Інтеграція (Етап 3):**
    - Фронтенд перемикає `VITE_USE_MOCK=false`, і реальні дані з `http://localhost:8000` лягають у UI без переписування жодного компонента.
 3. **Правило внесення змін:**
-   - Будь-яка зміна імені поля, типу, структури URL або порядку координат **спочатку фіксується в `docs/API_CONTRACT.md`** (зі збільшенням версії, наприклад `1.1` -> `1.2`) і узгоджується між бекендом і фронтендом. Змінювати JSON «тишком» на одній зі сторін заборонено.
+   - Будь-яка зміна імені поля, типу, структури URL або порядку координат **спочатку фіксується в `docs/API_CONTRACT.md`** (зі збільшенням версії, наприклад `1.2` -> `1.3`) і узгоджується між бекендом і фронтендом. Змінювати JSON «тишком» на одній зі сторін заборонено.

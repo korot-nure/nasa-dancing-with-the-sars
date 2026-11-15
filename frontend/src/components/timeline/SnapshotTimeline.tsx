@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { LocationDetail } from "../../types/location";
 
 export interface SnapshotTimelineProps {
@@ -26,6 +26,16 @@ export function SnapshotTimeline({
   onSelectStep,
   onTogglePlay
 }: SnapshotTimelineProps) {
+  const activeBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    activeBtnRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
+  }, [activeStepIdx, detail?.id]);
+
   useEffect(() => {
     if (!detail) return;
     const maxStep = detail.snapshots.length - 1;
@@ -172,6 +182,7 @@ export function SnapshotTimeline({
       <div style={{ display: "flex", gap: 8, flex: 1, overflowX: "auto", minWidth: 0 }}>
         {/* T0: База до аварії */}
         <button
+          ref={activeStepIdx === -1 ? activeBtnRef : undefined}
           type="button"
           className="btn"
           onClick={() => onSelectStep(-1)}
@@ -233,6 +244,7 @@ export function SnapshotTimeline({
 
           return (
             <button
+              ref={isActive ? activeBtnRef : undefined}
               key={snap.step_id}
               type="button"
               className="btn"

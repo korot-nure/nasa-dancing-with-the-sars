@@ -7,6 +7,7 @@ import {
 } from "../../api/locationsApi";
 import type {
   LocationDetail,
+  SlickFlag,
   SpillContourFeature,
   SpillContourFeatureCollection,
   SpillContourProperties,
@@ -148,6 +149,43 @@ const TARGET_STYLE_MAP: Record<
   coastal: { label: "Берегова споруда", color: "#94a3b8", radius: 3 }
 };
 
+const FLAG_LABELS: Record<SlickFlag, string> = {
+  near_coast: "біля берега (< 2 км)",
+  low_wind: "слабкий вітер (< 3 м/с)",
+  near_noise: "слабкий контраст",
+  rain: "опади",
+  small: "мала площа (< 2 км²)",
+  static: "повторювана область"
+};
+
+function buildContourTooltipNode(props: SpillContourProperties | undefined): HTMLElement {
+  const wrap = document.createElement("div");
+  if (!props) {
+    wrap.textContent = "Пляма";
+    return wrap;
+  }
+
+  const classLabel = props.class === "possible" ? "Можлива пляма" : "Схоже на нафту";
+  const originSuffix = props.origin === "reference" ? " · еталонна розмітка" : "";
+
+  const title = document.createElement("div");
+  title.textContent = `${classLabel}${originSuffix}`;
+  wrap.appendChild(title);
+
+  const metrics = document.createElement("div");
+  metrics.textContent = `Площа: ${props.area_km2.toFixed(1)} км² · Оцінка: ${props.score.toFixed(2)}`;
+  wrap.appendChild(metrics);
+
+  if (props.flags && props.flags.length > 0) {
+    const flagsLine = document.createElement("div");
+    const labels = props.flags.map((flag) => FLAG_LABELS[flag] ?? flag).join(", ");
+    flagsLine.textContent = `Фактори сумніву: ${labels}`;
+    wrap.appendChild(flagsLine);
+  }
+
+  return wrap;
+}
+
 function contourStyleForFeature(
   renderer: L.SVG,
   props: SpillContourProperties | undefined,
@@ -160,7 +198,7 @@ function contourStyleForFeature(
       weight: 1.6,
       dashArray: "4 4",
       fillColor: "#fbbf24",
-      fillOpacity: 0
+      fillOpacity: 0.01
     };
   }
   return {
@@ -290,6 +328,10 @@ export function MainComparisonMap({
     sarPane.style.zIndex = "410";
     sarPane.style.pointerEvents = "none";
 
+    const markersPane = map.createPane("markersPane");
+    markersPane.style.zIndex = "420";
+    markersPane.style.pointerEvents = "none";
+
     const sarRenderer = L.svg({ pane: "sarRightPane" });
     const referenceGroup = L.layerGroup().addTo(map);
     const sourcesGroup = L.layerGroup().addTo(map);
@@ -399,6 +441,7 @@ export function MainComparisonMap({
 
     const bounds = bboxToLeafletBounds(detail.bbox);
     L.rectangle(bounds, {
+      pane: "markersPane",
       color: "#3f3f46",
       weight: 1,
       dashArray: "4 4",
@@ -408,6 +451,7 @@ export function MainComparisonMap({
 
     const [epLon, epLat] = detail.coords;
     L.circleMarker([epLat, epLon], {
+      pane: "markersPane",
       radius: 5,
       color: "#09090b",
       weight: 1.5,
@@ -441,6 +485,7 @@ export function MainComparisonMap({
           const [lon, lat] = feat.geometry.coordinates;
           const isDetected = feat.properties.kind === "detected";
           L.circleMarker([lat, lon], {
+            pane: "markersPane",
             radius: isDetected ? 5.5 : 5,
             color: "#09090b",
             weight: 1.5,
@@ -519,7 +564,7 @@ export function MainComparisonMap({
         const isPossible =
           (feature?.properties as SpillContourProperties | undefined)?.class === "possible";
         return {
-          fillOpacity: isPossible ? 0 : Math.min(0.45, spillOpacity * 0.35)
+          fillOpacity: isPossible ? 0.01 : Math.min(0.45, spillOpacity * 0.35)
         };
       });
     }
@@ -585,13 +630,21 @@ export function MainComparisonMap({
           const currentFc = collections[collections.length - 1];
           const contourLayer = L.geoJSON(currentFc as unknown as Parameters<typeof L.geoJSON>[0], {
             pane: "sarRightPane",
-            interactive: false,
+            interactive: true,
             style: (feature) =>
               contourStyleForFeature(
                 renderer,
                 feature?.properties as SpillContourProperties | undefined,
                 spillOpacityRef.current
-              )
+              ),
+            onEachFeature: (feature, layer) => {
+              const props = feature.properties as SpillContourProperties | undefined;
+              layer.bindTooltip(buildContourTooltipNode(props), {
+                sticky: true,
+                direction: "top",
+                opacity: 0.95
+              });
+            }
           }).addTo(group);
           activeContourLayerRef.current = contourLayer;
         }
@@ -685,6 +738,7 @@ export function MainComparisonMap({
           const [lon, lat] = feat.geometry.coordinates;
           const cfg = TARGET_STYLE_MAP[feat.properties.kind] ?? TARGET_STYLE_MAP.ship;
           L.circleMarker([lat, lon], {
+            pane: "markersPane",
             radius: cfg.radius,
             color: "#09090b",
             weight: 1,

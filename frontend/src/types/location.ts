@@ -1,5 +1,5 @@
 /**
- * Єдиний TypeScript-контракт даних (API_CONTRACT.md v1.1 + FRONTEND_WORK_PLAN.md).
+ * Єдиний TypeScript-контракт даних (API_CONTRACT.md v1.2 + FRONTEND_WORK_PLAN.md).
  * Спільне джерело правди для обох розробників.
  */
 
@@ -80,6 +80,8 @@ export interface SpillContourProperties {
   score: number;
   /** 1.1: чому оцінку знижено */
   flags: SlickFlag[];
+  /** 1.2: pipeline — знайдено конвеєром, reference — еталонна розмітка відомої події */
+  origin?: "pipeline" | "reference";
 }
 
 export interface SpillContourFeature {
