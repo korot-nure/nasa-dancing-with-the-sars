@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import type { LocationDetail } from "../../types/location";
 
 export interface SnapshotTimelineProps {
@@ -27,6 +28,94 @@ export function SnapshotTimeline({
   onTogglePlay
 }: SnapshotTimelineProps) {
   const activeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const dragStateRef = useRef<{
+    active: boolean;
+    startX: number;
+    startScrollLeft: number;
+    moved: boolean;
+    pointerId: number | null;
+  }>({
+    active: false,
+    startX: 0,
+    startScrollLeft: 0,
+    moved: false,
+    pointerId: null
+  });
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch" || e.button !== 0) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    dragStateRef.current = {
+      active: true,
+      startX: e.clientX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+      pointerId: e.pointerId
+    };
+    suppressClickRef.current = false;
+  };
+
+  const handlePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragStateRef.current;
+    const el = scrollContainerRef.current;
+    if (!drag.active || !el) return;
+
+    const dx = e.clientX - drag.startX;
+    if (!drag.moved && Math.abs(dx) > 4) {
+      drag.moved = true;
+      suppressClickRef.current = true;
+      setIsDragging(true);
+      if (drag.pointerId !== null && !el.hasPointerCapture(drag.pointerId)) {
+        el.setPointerCapture(drag.pointerId);
+      }
+    }
+
+    if (drag.moved) {
+      el.scrollLeft = drag.startScrollLeft - dx;
+    }
+  };
+
+  const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragStateRef.current;
+    const el = scrollContainerRef.current;
+    if (!drag.active) return;
+
+    if (el && drag.pointerId !== null && el.hasPointerCapture(drag.pointerId)) {
+      el.releasePointerCapture(drag.pointerId);
+    }
+    dragStateRef.current.active = false;
+    dragStateRef.current.pointerId = null;
+    setIsDragging(false);
+
+    if (drag.moved) {
+      // Запобігаємо випадковому кліку по картці одразу після перетягування
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
+    void e;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (suppressClickRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      suppressClickRef.current = false;
+    }
+  };
+
+  const handleWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (e.deltaY !== 0 && Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+      el.scrollLeft += e.deltaY;
+    }
+  };
 
   useEffect(() => {
     activeBtnRef.current?.scrollIntoView({
@@ -179,7 +268,24 @@ export function SnapshotTimeline({
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, flex: 1, overflowX: "auto", minWidth: 0 }}>
+      <div
+        ref={scrollContainerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={handleClickCapture}
+        onWheel={handleWheel}
+        style={{
+          display: "flex",
+          gap: 8,
+          flex: 1,
+          overflowX: "auto",
+          minWidth: 0,
+          cursor: isDragging ? "grabbing" : "grab",
+          userSelect: "none"
+        }}
+      >
         {/* T0: База до аварії */}
         <button
           ref={activeStepIdx === -1 ? activeBtnRef : undefined}
@@ -253,7 +359,7 @@ export function SnapshotTimeline({
               style={{
                 height: 52,
                 flex: "1 1 0",
-                minWidth: 195,
+                minWidth: 210,
                 padding: "6px 10px",
                 flexDirection: "column",
                 alignItems: "flex-start",
@@ -264,7 +370,7 @@ export function SnapshotTimeline({
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: 6 }}>
-                <span className="mono" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600 }}>
+                <span className="mono" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: dotColor }} />
                   {snap.step_id.toUpperCase()} · {snap.date}
                 </span>
@@ -272,6 +378,7 @@ export function SnapshotTimeline({
                   className="mono"
                   style={{
                     fontSize: 11,
+                    whiteSpace: "nowrap",
                     color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
                     fontWeight: isActive ? 600 : 400
                   }}
