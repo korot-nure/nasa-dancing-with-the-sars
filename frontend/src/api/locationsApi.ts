@@ -28,6 +28,10 @@ async function fetchJson<T>(url: string): Promise<T> {
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}: не вдалося завантажити ${url}`);
   }
+  const contentType = res.headers.get("content-type") ?? "";
+  if (contentType.includes("text/html")) {
+    throw new Error(`Очікувався JSON, але отримано HTML (${url}). Оновіть сторінку (Ctrl+Shift+R).`);
+  }
   return (await res.json()) as T;
 }
 
