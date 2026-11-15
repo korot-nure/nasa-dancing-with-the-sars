@@ -12,7 +12,7 @@
 
 Optical satellites are blind through thick clouds, smoke, and polar or tropical night—precisely when maritime disasters and illegal bilge dumping often go unnoticed. **Dancing with the SARs** transforms **NASA NISAR Level 2 Geocoded Covariance (L2 GCOV)** Synthetic Aperture Radar products into an interactive, browser-based geospatial intelligence tool for rapid oil spill response.
 
-Because oil dampens sea-surface capillary waves, it produces a distinct dark backscatter signature ($\gamma^0_{HH}$ / $\gamma^0_{HV}$) in L-band SAR imagery. Our platform pairs this radar physics with an intuitive **Split-Curtain Map**, **Multi-Temporal Snapshot Timeline**, and **Drift Trajectory Overlay** so responders, researchers, and environmental agencies can inspect spills in seconds.
+Because oil dampens sea-surface capillary waves, it produces a distinct dark backscatter signature ($\gamma^0_{HH}$ / $\gamma^0_{VV}$) in L-band SAR imagery. Our platform pairs this radar physics with an intuitive **Split-Curtain Map**, **Multi-Temporal Snapshot Timeline**, and **Drift Trajectory Overlay** so responders, researchers, and environmental agencies can inspect spills in seconds.
 
 ---
 
@@ -27,16 +27,29 @@ Because oil dampens sea-surface capillary waves, it produces a distinct dark bac
 
 ## Included NISAR Case Studies
 
-1. **Al Hallaniyat Islands, Oman (`oman-caroline-bezengi-2026`)** — Major oil spill following the grounding of the tanker *Caroline Bezengi* in the Arabian Sea (138.2 km² peak tracked area).
-2. **Green Canyon 600, Gulf of Mexico (`green-canyon-600-seeps-2026`)** — Natural hydrocarbon seeps and surface slick dynamics monitored across multi-pass NISAR acquisitions.
-3. **Eugene Island 316, Gulf of Mexico (`eugene-island-316-2026`)** — Persistent offshore infrastructure and surface slick monitoring.
+Nine known events: seven with oil and two oil-free look-alike controls. All were processed with the same pipeline and checked against independent evidence (see [`processing/docs/METHODOLOGY.md`](./processing/docs/METHODOLOGY.md)).
+
+1. **Al Hallaniyat Islands, Oman (`oman-caroline-bezengi-2026`)** — grounding of the tanker *Caroline Bezengi*. The top-ranked detected source lies 3.6 km from the tanker.
+2. **Green Canyon 600, Gulf of Mexico (`green-canyon-600-seeps-2026`)** — natural deep-sea seeps. A detected source lies 4.3 km from the Mega Plume vent.
+3. **Eugene Island 316, Gulf of Mexico (`eugene-island-316-2026`)** — recurring leak, suspected pipeline. A plume from the leak point is visible on NISAR ~4 weeks before the first NOAA report.
+4. **Wreck 1487, south of Nantucket (`wreck-1487-nantucket-2026`)** — chronic leak from a shipwreck. Its slicks (≤ 6.5 km²) are at the resolution limit.
+5. **Neft Daşları, Caspian Sea (`neft-dashlari-caspian-2026`)** — offshore oil field. The #1 detected source lies 2.5 km from the complex.
+6. **Coal Oil Point, Santa Barbara Channel (`coal-oil-point-seeps-2026`)** — natural seep field next to the coast.
+7. **Umm Al Quwain, UAE (`uae-gem2-umm-al-quwain-2026`)** — tanker leak during near-calm wind, with Sentinel-1 cross-check.
+8. **Tenerife – La Gomera (`canary-lee-twin-2026`)** — oil-free control: island wind shadow.
+9. **Gotland Basin, Baltic Sea (`baltic-bloom-twin-2026`)** — oil-free control: cyanobacteria bloom.
 
 ---
 
 ## Tech Stack & Architecture
 
 - **Frontend:** React 18, TypeScript, Vite, Leaflet (`frontend/`)
-- **Data Pipeline & Spec:** Python / HDF5 (`NISAR L2 GCOV`) → dB radiometric calibration, background offset compensation, speckle filtering, slick segmentation → georeferenced WebP rasters + GeoJSON contours + `v1.0` JSON contract (`docs/API_CONTRACT.md`, `docs/BACKEND_TECHNICAL_SPEC.md`)
+- **Data Pipeline & Spec:** Python (`processing/`):
+  - remote range reads of `NISAR L2 GCOV` HDF5;
+  - self-calibrated slick detectors;
+  - multi-feature oil-likeness score;
+  - ship/platform detection and source clustering;
+  - output: georeferenced WebP rasters + GeoJSON contours + `v1.2` JSON contract (`docs/API_CONTRACT.md`).
 - **Deployment:** Automated static build & deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`)
 
 ```text
@@ -87,7 +100,7 @@ npm run build
 
 ## NASA Data Sources & Citations
 
-- **NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (`L2 GCOV`)** — L-band $\gamma^0_{HH}$ and $\gamma^0_{HV}$ calibrated backscatter products accessed via NASA Earthdata / Alaska Satellite Facility (ASF DAAC).
+- **NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (`L2 GCOV`)** — L-band co- and cross-polarised (HH/VV, HV/VH) $\gamma^0$ backscatter products accessed via NASA Earthdata / Alaska Satellite Facility (ASF DAAC).
 - **Basemap & Reference Layers:** OpenStreetMap / CARTO basemap tiles for geographic context.
 
 ---

@@ -475,39 +475,39 @@
         <span class="slide-num mono">04 / 07</span>
       </div>
       <div class="slide-body">
-        <h2>Powered by NASA-ISRO SAR (<span class="mono">NISAR L2 GCOV</span>)</h2>
-        <p style="max-width: 960px;">
-          Oil films dampen sea-surface capillary waves, causing specular reflection away from the radar antenna. This produces sharp dark backscatter anomalies in L-band <span class="mono">γ⁰<sub>HH</sub></span> (open water) and <span class="mono">γ⁰<sub>HV</sub></span> (coastal/mangrove zones), day or night, through clouds.
+        <h2>How the Pipeline Finds Oil, and Where It Comes From</h2>
+        <p style="max-width: 1100px;">
+          L-band radar (24 cm) is scattered back by short wind waves. An oil film damps them, so the slick is <strong style="color: var(--text-primary);">dark</strong> in <span class="mono">γ⁰<sub>HH</sub></span> / <span class="mono">γ⁰<sub>VV</sub></span>, day or night, through clouds, at roughly 3–10 m/s wind. Calm water, rain cells, algal films and island wind shadows damp waves too, so no single feature decides: every dark object is scored on many.
         </p>
         <div class="pipeline">
           <div class="pipe-step">
             <span class="step-id mono">STEP 1</span>
-            <strong>HDF5 Ingest</strong>
-            <span>Read <span class="mono">HHHH / HVHV</span>, validity mask, UTM grid &amp; <span class="mono">zeroDopplerStartTime</span>.</span>
+            <strong>Remote Ingest</strong>
+            <span>ASF search for <span class="mono">NISAR L2 GCOV</span>; HTTP range reads of only the area (<span class="mono">HH/VV</span>, cross-pol, noise floor); per-pass mosaics on a 60 m grid.</span>
           </div>
           <div class="pipe-step">
             <span class="step-id mono">STEP 2</span>
-            <strong>dB Calibration</strong>
-            <span>Convert linear power to logarithmic scale: <span class="mono">P<sub>dB</sub> = 10·log₁₀(P)</span>.</span>
+            <strong>Self-Calibrated Detection</strong>
+            <span>Local contrast, CFAR with bright-target censoring, thin dark lines, anomaly forest. Thresholds come from all dates of the track: no clean reference date needed.</span>
           </div>
           <div class="pipe-step">
             <span class="step-id mono">STEP 3</span>
-            <strong>Grid Alignment</strong>
-            <span>Crop to event ROI &amp; co-register pre/post passes on identical orbit tracks.</span>
+            <strong>Object Features</strong>
+            <span>Shape, contrast, texture &amp; edge sharpness, HV, ERA5 wind &amp; rain, drift (current + 3 % wind), recurrence of the same outline across dates.</span>
           </div>
           <div class="pipe-step">
             <span class="step-id mono">STEP 4</span>
-            <strong>Slick Segmentation</strong>
-            <span>Compensate background wind offset, apply speckle filter &amp; threshold <span class="mono">ΔdB</span>.</span>
+            <strong>Oil-Likeness Score</strong>
+            <span>Weighted evidence calibrated on the Oman spill, lowered near the coast, in calm wind, near the noise floor, in rain and for static outlines → <span class="mono">probable / possible</span>.</span>
           </div>
           <div class="pipe-step">
             <span class="step-id mono">STEP 5</span>
-            <strong>Web Export</strong>
-            <span>Output georeferenced <span class="mono">WebP</span> rasters, <span class="mono">GeoJSON</span> contours &amp; <span class="mono">v1.0</span> JSON.</span>
+            <strong>Sources &amp; Export</strong>
+            <span>Ships &amp; platforms by CFAR; slick start points clustered over dates → ranked source candidates; <span class="mono">WebP</span> + <span class="mono">GeoJSON</span> (contract <span class="mono">v1.2</span>).</span>
           </div>
         </div>
-        <div class="code-box mono">
-          Data Source: NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (L2 GCOV) via NASA Earthdata / ASF DAAC
+        <div class="code-box mono" style="padding: 12px 18px; font-size: 12px;">
+          Data: NISAR L2 GCOV (NASA-ISRO, ASF DAAC) · ERA5 wind &amp; SMOC currents (Open-Meteo) · Independent checks: NOAA/NESDIS analyst reports, Sentinel-1 slicks (Cerulean) · Method &amp; code: processing/docs
         </div>
       </div>
       <div class="slide-footer mono">
@@ -516,14 +516,14 @@
       </div>
     </section>
 
-    <!-- SLIDE 5: CASE STUDIES -->
+    <!-- SLIDE 5: VALIDATION ON KNOWN EVENTS -->
     <section class="slide" id="slide-5">
       <div class="slide-header">
-        <span class="slide-tag mono">04 · VALIDATED CASE STUDIES</span>
+        <span class="slide-tag mono">04 · VALIDATION ON KNOWN EVENTS</span>
         <span class="slide-num mono">05 / 07</span>
       </div>
       <div class="slide-body">
-        <h2 style="margin-bottom: 16px;">Tested Across 9 Global SAR Regions (7 Oil Events + 2 Lookalike Controls)</h2>
+        <h2 style="margin-bottom: 16px;">Checked on 9 Known Events (7 Oil + 2 Look-alike Controls)</h2>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
           <div class="card card-accent-red" style="padding: 14px; gap: 6px;">
             <img
@@ -532,44 +532,45 @@
               style="width: 100%; height: 112px; object-fit: cover; object-position: 62% 52%; border-radius: 4px; border: 1px solid var(--border);"
             />
             <span class="badge mono" style="font-size: 10px;">ARABIAN SEA · OMAN</span>
-            <h3 style="font-size: 14px; margin-bottom: 0;">Al Hallaniyat Islands</h3>
-            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-spill);">138.2–919.4 km²</div>
-            <p style="font-size: 11.5px; line-height: 1.4;">Tanker <em>Caroline Bezengi</em> grounding; 12 NISAR passes tracking drift toward shoreline.</p>
+            <h3 style="font-size: 14px; margin-bottom: 0;">Tanker Grounding</h3>
+            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-spill);">Source at 3.6 km</div>
+            <p style="font-size: 11.5px; line-height: 1.4;"><em>Caroline Bezengi</em>: the top-ranked source lies 3.6 km from the tanker, found with no position given (28 passes, HH + VV).</p>
           </div>
           <div class="card card-accent-orange" style="padding: 14px; gap: 6px;">
+            <div style="width: 100%; height: 112px; border-radius: 4px; border: 1px solid var(--border); background: #070709; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
+              <span class="mono" style="font-size: 11.5px; color: var(--accent-drift);">40.24°N, 50.86°E</span>
+              <span class="mono" style="font-size: 10px; color: var(--text-muted);">NISAR HH · 47 passes</span>
+            </div>
+            <span class="badge mono" style="font-size: 10px;">CASPIAN SEA</span>
+            <h3 style="font-size: 14px; margin-bottom: 0;">Neft Daşları Oil Field</h3>
+            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-drift);">Source at 2.5 km</div>
+            <p style="font-size: 11.5px; line-height: 1.4;">Offshore production on stilts: the #1 source cluster lies 2.5 km from the complex, recurring on 6 dates.</p>
+          </div>
+          <div class="card card-accent-blue" style="padding: 14px; gap: 6px;">
             <img
               src="./assets/slide-greencanyon-seeps.jpg"
               alt="Green Canyon 600 Natural Seeps SAR"
               style="width: 100%; height: 112px; object-fit: cover; object-position: 78% 50%; border-radius: 4px; border: 1px solid var(--border);"
             />
             <span class="badge mono" style="font-size: 10px;">GULF OF MEXICO</span>
-            <h3 style="font-size: 14px; margin-bottom: 0;">Green Canyon 600</h3>
-            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-drift);">Natural Seeps</div>
-            <p style="font-size: 11.5px; line-height: 1.4;">Deep-sea hydrocarbon vents (23 passes) validating multi-date SAR contrast stability.</p>
-          </div>
-          <div class="card card-accent-blue" style="padding: 14px; gap: 6px;">
-            <div style="width: 100%; height: 112px; border-radius: 4px; border: 1px solid var(--border); background: #070709; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
-              <span class="mono" style="font-size: 11.5px; color: var(--accent-signal);">40.10°N, 69.92°W</span>
-              <span class="mono" style="font-size: 10px; color: var(--text-muted);">NISAR VV 5 MHz · NOAA Ref</span>
-            </div>
-            <span class="badge mono" style="font-size: 10px;">NW ATLANTIC · USA</span>
-            <h3 style="font-size: 14px; margin-bottom: 0;">Wreck 1487</h3>
-            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-signal);">0.02–6.5 km²</div>
-            <p style="font-size: 11.5px; line-height: 1.4;">Chronic small slicks off Nantucket (19 passes) testing point-source detection limits.</p>
+            <h3 style="font-size: 14px; margin-bottom: 0;">Green Canyon 600 Seeps</h3>
+            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-signal);">Vent at 4.3 km</div>
+            <p style="font-size: 11.5px; line-height: 1.4;">Natural seeps at ~1180 m depth: source #3 at 4.3 km from the vent; #1–2 are likely neighbouring seeps (51 passes, VV 5 MHz).</p>
           </div>
           <div class="card card-accent-green" style="padding: 14px; gap: 6px;">
             <div style="width: 100%; height: 112px; border-radius: 4px; border: 1px solid var(--border); background: #070709; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
               <span class="mono" style="font-size: 11.5px; color: var(--accent-ok);">FALSE-ALARM BENCHMARK</span>
-              <span class="mono" style="font-size: 10px; color: var(--text-muted);">Baltic &amp; Canary Twins</span>
+              <span class="mono" style="font-size: 10px; color: var(--text-muted);">Baltic bloom · Tenerife wind shadow</span>
             </div>
-            <span class="badge mono" style="font-size: 10px;">NON-OIL CONTROLS</span>
-            <h3 style="font-size: 14px; margin-bottom: 0;">2 Lookalike Twins</h3>
-            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-ok);">Scientific Rigor</div>
-            <p style="font-size: 11.5px; line-height: 1.4;">Baltic cyanobacteria bloom &amp; Tenerife wind-shadow lee to benchmark false positives.</p>
+            <span class="badge mono" style="font-size: 10px;">OIL-FREE CONTROLS</span>
+            <h3 style="font-size: 14px; margin-bottom: 0;">2 Look-alike Twins</h3>
+            <div class="stat-val mono" style="font-size: 18px; color: var(--accent-ok);">≤ 0.06 / 1000 km²</div>
+            <p style="font-size: 11.5px; line-height: 1.4;">"Probable" false slicks per 1000 km² per pass: 0.02 over the cyanobacteria bloom, 0.06 in the island wind shadow.</p>
           </div>
         </div>
-        <div class="code-box mono" style="margin-top: 14px; padding: 10px 16px; font-size: 12px;">
-          +4 Additional Validated Oil/Seep Sites: Eugene Island 316 (Gulf of Mexico) · Neft Dashlari (Caspian Sea) · Coal Oil Point (California) · Umm Al Quwain / GEM No. 2 (UAE)
+        <div class="code-box mono" style="margin-top: 14px; padding: 10px 16px; font-size: 11.5px; line-height: 1.55;">
+          Early warning: at Eugene Island 316 a thin plume from the leak point is visible on NISAR on 7 and 19 July 2026, ~4 weeks before the first NOAA report (3 Aug).<br/>
+          Limits: Wreck 1487 slicks (≤ 6.5 km²) are below 5 MHz resolution · UAE leak in 2–3 m/s calm · Coal Oil Point next to the coast — sources not found there.
         </div>
       </div>
       <div class="slide-footer mono">
@@ -590,7 +591,7 @@
           <div class="card card-accent-blue">
             <h3>Frontend Web Application</h3>
             <ul class="clean">
-              <li><strong style="color: var(--text-primary);">React 18 + TypeScript + Vite:</strong> Fast, modular UI with strict <span class="mono">v1.0/v1.2</span> schema contracts.</li>
+              <li><strong style="color: var(--text-primary);">React 18 + TypeScript + Vite:</strong> Fast, modular UI on a strict <span class="mono">v1.2</span> data contract.</li>
               <li><strong style="color: var(--text-primary);">Leaflet Custom Panes:</strong> Synchronized dual-pane clipping for zero-lag split-curtain dragging.</li>
               <li><strong style="color: var(--text-primary);">Static + API Ready:</strong> Runs purely on static assets (GitHub Pages) or connects seamlessly to a FastAPI backend.</li>
             </ul>
@@ -598,7 +599,7 @@
           <div class="card card-accent-green">
             <h3>Data Pipeline &amp; Deployment</h3>
             <ul class="clean">
-              <li><strong style="color: var(--text-primary);">Python SAR CLI:</strong> Transforms heavy <span class="mono">.h5</span> scenes into sub-megabyte WebP + GeoJSON packages.</li>
+              <li><strong style="color: var(--text-primary);">Python SAR Pipeline (<span class="mono">processing/</span>):</strong> Reads only the area from remote <span class="mono">.h5</span> granules, detects and scores slicks, finds sources and exports sub-megabyte WebP + GeoJSON.</li>
               <li><strong style="color: var(--text-primary);">GitHub Actions CI/CD:</strong> Automated build &amp; deployment to GitHub Pages on every push to <span class="mono">main</span>.</li>
               <li><strong style="color: var(--text-primary);">MIT Licensed:</strong> 100% OSI-compliant open-source codebase ready for community extension.</li>
             </ul>
@@ -622,11 +623,11 @@
         <div class="grid-2">
           <div class="card card-accent-green">
             <h3>Real-World Impact</h3>
-            <p>Empowers coast guards, environmental agencies, and maritime researchers to inspect SAR-verified spill boundaries and drift vectors in seconds—with zero GIS setup.</p>
+            <p>Empowers coast guards, environmental agencies, and maritime researchers to inspect SAR-detected slicks, their likely sources and drift in seconds—with zero GIS setup. Chronic leaks can be flagged before they are reported.</p>
           </div>
           <div class="card card-accent-orange">
             <h3>Next-Phase Roadmap</h3>
-            <p>Automated Earthdata/ASF webhook ingestion, AIS vessel track correlation to identify polluters, and wind/current drift forecasting.</p>
+            <p>L + S dual-frequency NISAR to tell oil from natural films (S-band already obtained for Oman), a thin-plume detector for early leaks, AIS vessel tracks to identify polluters, and drift forecasting.</p>
           </div>
         </div>
         <div class="code-box mono" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;">

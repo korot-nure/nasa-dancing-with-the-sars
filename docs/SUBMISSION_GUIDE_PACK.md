@@ -31,16 +31,25 @@ Marine oil spills and illegal bilge discharges threaten coastal ecosystems, fish
 - **Interactive Controls & Multi-Event Minimap:** Supports live slick opacity adjustment (`0%–100%`), contour toggles, coordinate HUD readouts, and instant switching between global spill and natural seep events.
 
 **How We Built It**  
-1. **SAR Processing Pipeline:** Reads NASA **NISAR L2 GCOV** (`.h5`) grids (`HHHH` / `HVHV` covariance layers, validity masks, UTM coordinates, and `zeroDopplerStartTime`), converts linear power to decibels ($\gamma^0_{\text{dB}} = 10 \log_{10} P$), applies background offset compensation and speckle filtering, segments oil slicks, and exports lightweight georeferenced **WebP** rasters, **GeoJSON** contours, and `v1.0` JSON metadata.
+1. **SAR Processing Pipeline (`processing/`):**
+   - Reads only the area of interest from remote NASA **NISAR L2 GCOV** (`.h5`) granules (HH/VV and cross-pol backscatter, noise floor, validity mask).
+   - Detects dark slicks with self-calibrated detectors: local contrast, CFAR with bright-target censoring, thin dark lines, anomaly forest. No clean reference date is needed.
+   - Scores every slick on shape, contrast, texture, polarisation, ERA5 wind and rain, drift and recurrence across dates.
+   - Detects ships and platforms, and clusters slick start points over time into ranked source candidates.
+   - Exports lightweight georeferenced **WebP** rasters, **GeoJSON** contours and `v1.2` JSON.
+   - Validated on 9 known events, including 2 oil-free look-alike controls.
 2. **Frontend Web App:** Built with **React 18**, **TypeScript**, **Vite**, and **Leaflet**, featuring a custom split-curtain map stage, synchronized minimap, and responsive telemetry sidebar, deployed statically via **GitHub Actions** to **GitHub Pages**.
 
 **Case Studies Included**  
-- **Al Hallaniyat Islands, Oman** (*Caroline Bezengi* tanker grounding, 138.2 km² peak tracked slick)
-- **Green Canyon 600, Gulf of Mexico** (natural hydrocarbon seeps)
-- **Eugene Island 316, Gulf of Mexico** (offshore slick monitoring)
+- **Al Hallaniyat Islands, Oman** (*Caroline Bezengi* tanker grounding; detected source 3.6 km from the tanker)
+- **Neft Daşları, Caspian Sea** (offshore oil field; detected source 2.5 km from the complex)
+- **Green Canyon 600, Gulf of Mexico** (natural seeps; detected source 4.3 km from the vent)
+- **Eugene Island 316, Gulf of Mexico** (recurring leak; plume visible ~4 weeks before the first NOAA report)
+- **Wreck 1487, Coal Oil Point, Umm Al Quwain** (detection limits: tiny slicks, coastal seeps, near-calm wind)
+- **Tenerife wind shadow and Baltic cyanobacteria bloom** (oil-free controls: ≤ 0.06 false "probable" slicks per 1000 km² per pass)
 
 ### NASA Data & Citations
-- **NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (`L2 GCOV`)** — L-band $\gamma^0_{HH}$ and $\gamma^0_{HV}$ backscatter grids, pixel validity masks, and orbit/time metadata accessed via NASA Earthdata / Alaska Satellite Facility (ASF DAAC).
+- **NASA-ISRO Synthetic Aperture Radar (NISAR) Level 2 Geocoded Covariance (`L2 GCOV`)** — L-band co- and cross-polarised (HH/VV, HV/VH) $\gamma^0$ backscatter grids, pixel validity masks, and orbit/time metadata accessed via NASA Earthdata / Alaska Satellite Facility (ASF DAAC).
 - **OpenStreetMap / CARTO** — Cartographic reference basemap tiles.
 - **Open-Source Libraries:** React, TypeScript, Vite, Leaflet (all MIT/BSD/ISC-compatible).
 
@@ -85,26 +94,33 @@ Marine oil spills and illegal bilge discharges threaten coastal ecosystems, fish
   - Automated **Drift Vectors** and **Area Delta (`Δ km²`)** telemetry.
 
 ### Slide 4 — NASA Data & Scientific Methodology
-- **Headline:** Powered by NASA-ISRO SAR (`NISAR L2 GCOV`)
-- **Pipeline Diagram:** `NISAR L2 GCOV (.h5)` → `dB Calibration (10·log10 γ⁰)` → `Background Offset & Speckle Filter` → `Slick Segmentation` → `WebP + GeoJSON + JSON v1.0`
-- **Why L-Band SAR Works:** Oil dampens sea-surface capillary waves, creating sharp dark backscatter drops in $\gamma^0_{HH}$ (open water) and $\gamma^0_{HV}$ (coastal/vegetated zones).
+- **Headline:** How the Pipeline Finds Oil, and Where It Comes From
+- **Pipeline Diagram:** `Remote Ingest (NISAR L2 GCOV)` → `Self-Calibrated Detection` → `Object Features` → `Oil-Likeness Score` → `Sources & Export (WebP + GeoJSON, v1.2)`
+- **Why L-Band SAR Works:**
+  - Oil films damp the short wind waves that scatter L-band radar back, so slicks are dark in $\gamma^0_{HH}$ / $\gamma^0_{VV}$ at roughly 3–10 m/s wind.
+  - Calm water, rain cells, algal films and wind shadows look similar, so slicks are scored on many features.
 
 ### Slide 5 — Real-World Case Studies
-- **Headline:** Validated Across 3 Diverse Marine Events
-- **3-Column Comparison:**
-  1. **Al Hallaniyat Islands, Oman:** *Caroline Bezengi* tanker grounding — tracked up to **138.2 km²** across multi-pass acquisitions.
-  2. **Green Canyon 600, Gulf of Mexico:** Natural hydrocarbon seeps — recurring surface slick monitoring.
-  3. **Eugene Island 316, Gulf of Mexico:** Offshore infrastructure zone monitoring.
+- **Headline:** Checked on 9 Known Events (7 Oil + 2 Look-alike Controls)
+- **4 Cards:**
+  1. **Oman tanker:** source found 3.6 km away.
+  2. **Neft Daşları:** source found 2.5 km away.
+  3. **Green Canyon 600 seeps:** vent found 4.3 km away.
+  4. **Look-alike twins:** ≤ 0.06 false "probable" slicks per 1000 km² per pass.
+- **Footer:**
+  - Early warning: the Eugene Island 316 plume is visible ~4 weeks before the first NOAA report.
+  - Limits: Wreck 1487 (tiny slicks), UAE (near-calm wind), Coal Oil Point (coastal).
 
 ### Slide 6 — Technical Architecture & Open Source
 - **Headline:** Lightweight, Contract-First & Ready to Scale
 - **Stack:**
-  - **Frontend:** React 18, TypeScript, Vite, Leaflet (zero-backend static mode + live FastAPI-ready `v1.0` contract).
+  - **Frontend:** React 18, TypeScript, Vite, Leaflet (zero-backend static mode + live FastAPI-ready `v1.2` contract).
+  - **Data Pipeline:** Python (`processing/`): remote NISAR GCOV reads, slick detection and scoring, source finding, WebP + GeoJSON export.
   - **CI/CD:** Automated GitHub Actions deployment to GitHub Pages.
   - **License:** 100% Open Source (**MIT License**).
 
 ### Slide 7 — Impact & Next Steps
 - **Headline:** Faster Response. Cleaner Oceans.
-- **Impact:** Enables coast guards, researchers, and NGOs to inspect SAR-verified spill boundaries and drift direction in seconds without GIS software.
-- **Next Steps:** Live ASF/Earthdata webhook ingestion, automated AIS vessel correlation, and wind/current drift forecasting.
+- **Impact:** Enables coast guards, researchers, and NGOs to inspect SAR-detected slicks, their likely sources and drift in seconds without GIS software; chronic leaks can be flagged before they are reported.
+- **Next Steps:** L + S dual-frequency NISAR to tell oil from natural films, a thin-plume detector for early leaks, AIS vessel correlation, and drift forecasting.
 - **Links:** Live Demo (`https://korot-nure.github.io/nasa-dancing-with-the-sars/`) · GitHub Repo
