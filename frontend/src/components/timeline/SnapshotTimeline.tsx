@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import type { LocationDetail } from "../../types/location";
-import { formatArea, useI18n } from "../../i18n";
+import {
+  formatArea,
+  localizeSnapshotLabel,
+  localizeSnapshotNote,
+  useI18n,
+} from "../../i18n";
 
 export interface SnapshotTimelineProps {
   detail: LocationDetail | null;
@@ -367,7 +372,7 @@ export function SnapshotTimeline({
               key={snap.step_id}
               type="button"
               className="btn"
-              title={snap.note ?? undefined}
+              title={snap.note ? localizeSnapshotNote(snap.note, lang) : undefined}
               onClick={() => onSelectStep(idx)}
               style={{
                 height: 52,
@@ -417,7 +422,7 @@ export function SnapshotTimeline({
                       height="11"
                       viewBox="0 0 16 16"
                       fill="none"
-                      aria-label={snap.note}
+                      aria-label={localizeSnapshotNote(snap.note, lang)}
                       style={{ flexShrink: 0, color: "#fbbf24" }}
                     >
                       <path
@@ -431,7 +436,7 @@ export function SnapshotTimeline({
                     </svg>
                   )}
                   <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {snap.label}
+                    {localizeSnapshotLabel(snap.label, lang)}
                   </span>
                 </span>
                 <span

@@ -4,6 +4,8 @@ import {
   formatArea,
   formatSnapshotsCount,
   localizeDescription,
+  localizeSnapshotLabel,
+  localizeSnapshotNote,
   localizeTitle,
   useI18n,
 } from "../../i18n";
@@ -159,7 +161,7 @@ export function EventDetailsCard({
   // --- Етап і дата ---
   const stageBadge = activeSnap ? `T${activeStepIdx + 1}` : "T0";
   const stageLabel = activeSnap
-    ? activeSnap.label
+    ? localizeSnapshotLabel(activeSnap.label, lang)
     : lang === "uk"
       ? "T0 · До аварії (база)"
       : "T0 · Pre-event (baseline)";
@@ -211,7 +213,7 @@ export function EventDetailsCard({
       ? `${firstSnap.track} · ${firstSnap.polarization}`
       : "—";
   const pairBeforeDate = (activeSnap ? activeSnap.before_date : detail.baseline_date) || "—";
-  const activeNote = activeSnap?.note?.trim() ?? "";
+  const activeNote = localizeSnapshotNote(activeSnap?.note?.trim() ?? "", lang);
   const description = localizeDescription(detail.id, detail.description?.trim() ?? "", lang);
   const localizedTitle = localizeTitle(detail.id, detail.title, lang);
   const sourceUrl = detail.source_url?.trim() ?? "";
