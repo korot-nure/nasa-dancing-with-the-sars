@@ -145,6 +145,12 @@ input {
   min-height: 0;
 }
 
+.sidebar-details-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
 .section-head {
   display: flex;
   align-items: center;
@@ -284,5 +290,15 @@ input:focus-visible {
     overflow-y: auto;
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar > * {
+    flex-shrink: 0;
+  }
+
+  .sidebar-details-scroll {
+    flex: none;
+    overflow-y: visible;
+    min-height: auto;
   }
 }
