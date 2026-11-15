@@ -1,4 +1,5 @@
 import type { LocationDetail } from "../../types/location";
+import { formatLatLon, pluralUk } from "../../utils/format";
 
 export interface EventDetailsCardProps {
   detail: LocationDetail | null;
@@ -19,23 +20,6 @@ function daysBetween(fromIso: string, toIso: string): number | null {
   const to = parse(toIso);
   if (from === null || to === null) return null;
   return Math.round((to - from) / MS_PER_DAY);
-}
-
-/** coords у форматі [lon, lat] -> "17.50°N, 56.02°E" (спочатку широта). */
-function formatLatLon(coords: [number, number]): string {
-  const [lon, lat] = coords;
-  const latStr = `${Math.abs(lat).toFixed(2)}°${lat >= 0 ? "N" : "S"}`;
-  const lonStr = `${Math.abs(lon).toFixed(2)}°${lon >= 0 ? "E" : "W"}`;
-  return `${latStr}, ${lonStr}`;
-}
-
-/** Українська множина: 1 знімок, 2 знімки, 5 знімків. */
-function pluralSnapshots(n: number): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return "знімок";
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "знімки";
-  return "знімків";
 }
 
 const scopedCss = `
@@ -312,7 +296,7 @@ export function EventDetailsCard({
         <div className="kv-cell">
           <div className="kv-label">Динаміка серії</div>
           <div className="kv-val">
-            <span className="mono">{snapCount}</span> {pluralSnapshots(snapCount)}
+            <span className="mono">{snapCount}</span> {pluralUk(snapCount, ["знімок", "знімки", "знімків"])}
           </div>
           <div className="kv-sub">
             Старт T1: <span className="mono">{firstSnap?.date ?? "—"}</span>

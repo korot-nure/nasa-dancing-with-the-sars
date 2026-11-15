@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { LocationSummary } from "../../types/location";
+import { formatLatLon, pluralUk } from "../../utils/format";
 
 export interface OverviewMinimapProps {
   locations: LocationSummary[];
@@ -233,8 +234,8 @@ export function OverviewMinimap({
           }}
         >
           {isRegionMode && activeLocation
-            ? `РЕГІОН · ${activeLocation.coords[1].toFixed(1)}°N ${activeLocation.coords[0].toFixed(1)}°E`
-            : `СВІТ · ${locations.length} ПОДІЇ`}
+            ? `РЕГІОН · ${formatLatLon(activeLocation.coords, 1, " ")}`
+            : `СВІТ · ${locations.length} ${pluralUk(locations.length, ["ПОДІЯ", "ПОДІЇ", "ПОДІЙ"])}`}
         </div>
       </div>
 

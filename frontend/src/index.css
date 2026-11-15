@@ -145,6 +145,12 @@ input {
   min-height: 0;
 }
 
+.sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .section-head {
   display: flex;
   align-items: center;
@@ -284,5 +290,11 @@ input:focus-visible {
     overflow-y: auto;
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  /* На вузьких екранах прокручується весь сайдбар, тож картка не стискається до 0 */
+  .sidebar-scroll {
+    flex: none;
+    overflow: visible;
   }
 }
