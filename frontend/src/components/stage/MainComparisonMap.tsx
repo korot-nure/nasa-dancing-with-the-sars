@@ -144,11 +144,11 @@ function buildArrowHead(
 
 const TARGET_STYLE_MAP: Record<
   TargetProperties["kind"],
-  { label: string; color: string; radius: number }
+  { label: { en: string; uk: string }; color: string; radius: number }
 > = {
-  ship: { label: "Судно", color: "#38bdf8", radius: 3.5 },
-  platform: { label: "Платформа / об'єкт", color: "#f59e0b", radius: 4 },
-  coastal: { label: "Берегова споруда", color: "#94a3b8", radius: 3 }
+  ship: { label: { en: "Ship", uk: "Судно" }, color: "#38bdf8", radius: 3.5 },
+  platform: { label: { en: "Platform / structure", uk: "Платформа / об'єкт" }, color: "#f59e0b", radius: 4 },
+  coastal: { label: { en: "Coastal structure", uk: "Берегова споруда" }, color: "#94a3b8", radius: 3 }
 };
 
 const FLAG_LABELS: Record<SlickFlag, { en: string; uk: string }> = {
@@ -229,10 +229,10 @@ function contourStyleForFeature(
 }
 
 /**
- * [Dev 1 — Lead] Головна карта Leaflet:
- * - Ліворуч від шторки (`sarLeftPane`): базова підкладка + парний SAR «До» (`before_url`)
- * - Праворуч від шторки (`sarRightPane` із `clip: rect(...)`):
- *   SAR «Після» (`after_url`) + маска розливу + GeoJSON-контури (`probable`/`possible`) + траєкторія дрейфу
+ * [Dev 1 — Lead] Main Leaflet map:
+ * - Left of the curtain (`sarLeftPane`): base map + paired SAR "Before" (`before_url`)
+ * - Right of the curtain (`sarRightPane` with `clip: rect(...)`):
+ *   SAR "After" (`after_url`) + spill mask + GeoJSON contours (`probable`/`possible`) + drift trajectory
  */
 export function MainComparisonMap({
   detail,
@@ -320,7 +320,7 @@ export function MainComparisonMap({
     updateScaleBar();
   }, [detail, updateClip, updateScaleBar]);
 
-  // 1. Ініціалізація екземпляра Leaflet, панелі sarRightPane та обробників подій
+  // 1. Initialise the Leaflet instance, the sarRightPane pane and event handlers
   useEffect(() => {
     const container = containerRef.current;
     if (!container || mapRef.current) return;
@@ -419,7 +419,7 @@ export function MainComparisonMap({
     };
   }, [updateClip, updateScaleBar]);
 
-  // 2. Перемикання базової тайлової підкладки
+  // 2. Switch the base tile layer
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -438,12 +438,12 @@ export function MainComparisonMap({
     baseLayerRef.current = layer;
   }, [baseStyle]);
 
-  // 3. Оновлення кліпінгу шторки без перестворення шарів
+  // 3. Update the curtain clipping without recreating layers
   useEffect(() => {
     updateClip();
   }, [splitRatio, updateClip]);
 
-  // 4. Позиціонування камери, маркер епіцентру та опціональний шар джерел (sources.geojson)
+  // 4. Camera positioning, epicentre marker and the optional sources layer (sources.geojson)
   useEffect(() => {
     const map = mapRef.current;
     const referenceGroup = referenceGroupRef.current;
@@ -515,7 +515,7 @@ export function MainComparisonMap({
             .addTo(targetGroup);
         }
       } catch {
-        // Опціональний шар джерел не має блокувати карту
+        // The optional sources layer must not block the map
       }
     }
 
@@ -525,7 +525,7 @@ export function MainComparisonMap({
     };
   }, [detail, updateClip, updateScaleBar]);
 
-  // 5. Растрові шари SAR «До» (ліворуч), SAR «Після» (праворуч) і маски розливу
+  // 5. Raster layers: SAR "Before" (left), SAR "After" (right) and the spill mask
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -573,7 +573,7 @@ export function MainComparisonMap({
     updateClip();
   }, [detail, activeStepIdx, updateClip]);
 
-  // 6. Плавне оновлення прозорості маски та заливки контуру (без заливки для possible)
+  // 6. Smooth update of mask opacity and contour fill (no fill for possible)
   useEffect(() => {
     if (maskImageLayerRef.current) {
       maskImageLayerRef.current.setOpacity(spillOpacity);
@@ -589,7 +589,7 @@ export function MainComparisonMap({
     }
   }, [spillOpacity]);
 
-  // 7. Векторний GeoJSON-контур і траєкторія руху (дрейф)
+  // 7. Vector GeoJSON contour and drift trajectory
   useEffect(() => {
     const vectorGroup = vectorGroupRef.current;
     const sarRenderer = sarRendererRef.current;
@@ -619,7 +619,7 @@ export function MainComparisonMap({
         group.clearLayers();
         activeContourLayerRef.current = null;
 
-        // Попередні пунктирні контури (клас probable) для відображення історії розтікання
+        // Previous dashed contours (probable class) to show the spreading history
         if (showTrajectory && collections.length > 1) {
           for (let i = 0; i < collections.length - 1; i += 1) {
             const histFc = collections[i];
@@ -644,7 +644,7 @@ export function MainComparisonMap({
           }
         }
 
-        // Активний векторний контур поточного кроку (probable = суцільний #ef4444, possible = пунктир без заливки)
+        // Active vector contour of the current step (probable = solid #ef4444, possible = dashed, no fill)
         if (showContour && collections.length > 0) {
           const currentFc = collections[collections.length - 1];
           const contourLayer = L.geoJSON(currentFc as unknown as Parameters<typeof L.geoJSON>[0], {
@@ -668,7 +668,7 @@ export function MainComparisonMap({
           activeContourLayerRef.current = contourLayer;
         }
 
-        // Лінія та стрілка дрейфу центроїдів T1 -> ... -> Tk
+        // Centroid drift line and arrow T1 -> ... -> Tk
         if (showTrajectory && detail) {
           const centroids = collections
             .map(extractCentroid)
@@ -722,7 +722,7 @@ export function MainComparisonMap({
 
         updateClip();
       } catch {
-        // Окремі збої GeoJSON не мають ламати базову карту
+        // Individual GeoJSON failures must not break the base map
       }
     }
 
@@ -732,7 +732,7 @@ export function MainComparisonMap({
     };
   }, [detail, activeStepIdx, showContour, showTrajectory, updateClip]);
 
-  // 8. Опціональні точкові цілі на дату знімка (targets_<step_id>.geojson)
+  // 8. Optional point targets for the pass date (targets_<step_id>.geojson)
   useEffect(() => {
     const targetsGroup = targetsGroupRef.current;
     if (!targetsGroup) return;
@@ -764,14 +764,14 @@ export function MainComparisonMap({
             fillColor: cfg.color,
             fillOpacity: 0.9
           })
-            .bindTooltip(`${cfg.label} · +${feat.properties.snr_db.toFixed(1)} dB (${feat.properties.date})`, {
+            .bindTooltip(`${cfg.label[lang]} · +${feat.properties.snr_db.toFixed(1)} dB (${feat.properties.date})`, {
               direction: "top",
               opacity: 0.95
             })
             .addTo(targetLayerGroup);
         }
       } catch {
-        // Опціональний шар цілей не має блокувати карту
+        // The optional targets layer must not block the map
       }
     }
 
@@ -779,7 +779,7 @@ export function MainComparisonMap({
     return () => {
       cancelled = true;
     };
-  }, [activeSnap]);
+  }, [activeSnap, lang]);
 
   const handleZoomIn = () => mapRef.current?.zoomIn();
   const handleZoomOut = () => mapRef.current?.zoomOut();
@@ -803,7 +803,7 @@ export function MainComparisonMap({
 
       <SplitCurtainControl splitRatio={splitRatio} onSplitChange={onSplitChange} />
 
-      {/* Лівий верхній бейдж SAR «До» + перемикач підкладки */}
+      {/* Top-left SAR "Before" badge + base map switcher */}
       <div
         style={{
           position: "absolute",
@@ -863,7 +863,7 @@ export function MainComparisonMap({
         })}
       </div>
 
-      {/* Правий верхній бейдж SAR «Після» */}
+      {/* Top-right SAR "After" badge */}
       <div
         className="mono"
         style={{
@@ -913,7 +913,7 @@ export function MainComparisonMap({
         )}
       </div>
 
-      {/* Кнопки масштабу праворуч */}
+      {/* Zoom buttons on the right */}
       <div
         aria-label={lang === "uk" ? "Масштаб карти" : "Map zoom"}
         style={{
@@ -968,7 +968,7 @@ export function MainComparisonMap({
         </button>
       </div>
 
-      {/* Нижній лівий HUD (курсор + bbox) */}
+      {/* Bottom-left HUD (cursor + bbox) */}
       <div
         className="mono"
         style={{
@@ -1003,7 +1003,7 @@ export function MainComparisonMap({
         )}
       </div>
 
-      {/* Нижній правий HUD (радарна шкала + масштаб) */}
+      {/* Bottom-right HUD (radar scale + map scale) */}
       <div
         className="mono"
         style={{

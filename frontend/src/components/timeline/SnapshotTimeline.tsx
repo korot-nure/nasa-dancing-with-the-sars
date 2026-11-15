@@ -10,7 +10,7 @@ import {
 
 export interface SnapshotTimelineProps {
   detail: LocationDetail | null;
-  activeStepIdx: number; // -1 = T0 ("До аварії"), 0..N-1 = індекс у snapshots[]
+  activeStepIdx: number; // -1 = T0 ("Pre-event"), 0..N-1 = index into snapshots[]
   isPlaying: boolean;
   onSelectStep: (idx: number) => void;
   onTogglePlay: () => void;
@@ -24,7 +24,7 @@ function diffDaysFromIso(startIso: string, endIso: string): number {
 }
 
 /**
- * [Dev 1 — Lead] Нижній таймлайн знімків (T0 + T1..Tn) із автопрограванням та навігацією ← / →.
+ * [Dev 1 — Lead] Bottom snapshot timeline (T0 + T1..Tn) with autoplay and ← / → navigation.
  */
 export function SnapshotTimeline({
   detail,
@@ -100,7 +100,7 @@ export function SnapshotTimeline({
     setIsDragging(false);
 
     if (drag.moved) {
-      // Запобігаємо випадковому кліку по картці одразу після перетягування
+      // Prevent an accidental click on a card right after dragging
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 0);
@@ -299,7 +299,7 @@ export function SnapshotTimeline({
           userSelect: "none"
         }}
       >
-        {/* T0: База до аварії */}
+        {/* T0: pre-event baseline */}
         <button
           ref={activeStepIdx === -1 ? activeBtnRef : undefined}
           type="button"
@@ -348,7 +348,7 @@ export function SnapshotTimeline({
           </span>
         </button>
 
-        {/* T1..Tn: Кроки дрейфу */}
+        {/* T1..Tn: drift steps */}
         {detail.snapshots.map((snap, idx) => {
           const isActive = idx === activeStepIdx;
           const isPassed = activeStepIdx > idx;

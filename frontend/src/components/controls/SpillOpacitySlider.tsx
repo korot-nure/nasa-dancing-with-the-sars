@@ -12,7 +12,7 @@ export interface SpillOpacitySliderProps {
 const RANGE_ID = "spill-opacity-range";
 const PRESETS = [0, 0.5, 1] as const;
 
-/** Локальні стилі повзунка, пресетів і перемикачів (плаский темний стиль, без тіней). */
+/** Local styles for the slider, presets and toggles (flat dark style, no shadows). */
 const scopedCss = `
 .d2-range {
   flex: 1;
@@ -131,7 +131,7 @@ function LayerToggle({
 }
 
 /**
- * Панель керування шарами маски розливу: прозорість, пресети, контур і траєкторія.
+ * Control panel for the spill mask layers: opacity, presets, contour and trajectory.
  */
 export function SpillOpacitySlider({
   spillOpacity,

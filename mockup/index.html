@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dancing with the SARs — MVP Моніторинг розливів (NISAR L2 GCOV)</title>
+  <title>Dancing with the SARs — MVP Oil Spill Monitor (NISAR L2 GCOV)</title>
   <style>
     :root {
       --bg-canvas: #09090b;
@@ -1005,33 +1005,33 @@
           <span>DANCING WITH THE SARs</span>
         </div>
         <span class="topbar-sep" aria-hidden="true"></span>
-        <span class="topbar-sub">Інтерактивний макет MVP · NISAR L2 GCOV · Контракт API v1.0</span>
+        <span class="topbar-sub">Interactive MVP mockup · NISAR L2 GCOV · API Contract v1.0</span>
       </div>
       <div class="topbar-right">
         <span class="status-chip mono">
           <span class="status-dot" aria-hidden="true"></span>
-          EPSG:4326 · 3 події
+          EPSG:4326 · 3 events
         </span>
         <button type="button" id="openContractBtn" class="btn">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M5 4L2 8L5 12M11 4L14 8L11 12M9 3L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          JSON Контракт
+          JSON Contract
         </button>
       </div>
     </header>
 
     <main class="workspace">
       <!-- LEFT SIDEBAR -->
-      <aside class="sidebar" aria-label="Навігація та деталі події">
+      <aside class="sidebar" aria-label="Navigation and event details">
         <div class="section-head">
-          <span class="section-title">Список подій · Координати</span>
+          <span class="section-title">Event List · Coordinates</span>
           <span class="mono" style="font-size:11px;color:var(--text-secondary);" id="sidebarCount">3 / 3</span>
         </div>
 
         <!-- [1] OverviewMinimap -->
         <div class="minimap-wrap">
-          <svg id="overviewMinimap" class="minimap-svg" viewBox="0 0 320 150" role="img" aria-label="Оглядова міні-карта подій розливів">
+          <svg id="overviewMinimap" class="minimap-svg" viewBox="0 0 320 150" role="img" aria-label="Global oil spill overview minimap">
             <rect x="0" y="0" width="320" height="150" fill="#09090b" />
             <!-- Graticule lines -->
             <g stroke="#18181b" stroke-width="0.7">
@@ -1045,17 +1045,17 @@
             <g id="minimapContinents" fill="#18181b" stroke="#27272a" stroke-width="0.8" stroke-linejoin="round"></g>
             <g id="minimapPins"></g>
           </svg>
-          <button type="button" id="minimapResetBtn" class="minimap-reset-btn" title="Скинути огляд до карти світу">
+          <button type="button" id="minimapResetBtn" class="minimap-reset-btn" title="Reset view to world map">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
-          <div class="minimap-caption mono" id="minimapModeLabel">ОГЛЯД: ВСІ ЛОКАЦІЇ</div>
+          <div class="minimap-caption mono" id="minimapModeLabel">OVERVIEW: ALL LOCATIONS</div>
         </div>
 
         <!-- [2] EventSelect -->
         <div class="event-select-wrap">
-          <label class="select-label" for="eventSelect">Випадаючий список подій</label>
+          <label class="select-label" for="eventSelect">Event dropdown</label>
           <div class="select-box">
             <select id="eventSelect" class="event-select"></select>
             <svg class="select-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1073,12 +1073,12 @@
 
           <div class="kv-grid">
             <div class="kv-cell">
-              <div class="kv-label">Координати</div>
+              <div class="kv-label">Coordinates</div>
               <div class="kv-val mono" id="detailCoordsDeg">—</div>
               <div class="kv-sub mono" id="detailCoordsRaw">—</div>
             </div>
             <div class="kv-cell">
-              <div class="kv-label">Площа розливу</div>
+              <div class="kv-label">Spill Area</div>
               <div class="area-highlight mono">
                 <span class="spill-swatch" aria-hidden="true"></span>
                 <span id="detailAreaKm2">—</span>
@@ -1087,12 +1087,12 @@
               <div class="kv-sub mono kv-delta" id="detailAreaDelta">—</div>
             </div>
             <div class="kv-cell">
-              <div class="kv-label">Опорна база (T0 «До»)</div>
+              <div class="kv-label">Baseline (T0 "Before")</div>
               <div class="kv-val mono" id="detailBaselineDate">—</div>
               <div class="kv-sub mono" id="detailTrackingStart">—</div>
             </div>
             <div class="kv-cell">
-              <div class="kv-label">Активний знімок</div>
+              <div class="kv-label">Active Snapshot</div>
               <div class="kv-val mono" id="detailSnapshotDate">—</div>
               <div class="kv-sub" id="detailSnapshotLabel">—</div>
               <div class="kv-sub mono" id="detailSnapshotDelta">—</div>
@@ -1100,7 +1100,7 @@
           </div>
 
           <div class="details-body">
-            <div class="desc-label">Опис події та SAR-контекст</div>
+            <div class="desc-label">Event Description &amp; SAR Context</div>
             <p class="event-desc" id="detailDescription">—</p>
           </div>
 
@@ -1109,7 +1109,7 @@
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M9 3H13V7M13 3L7 9M6 4H3V13H12V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              Першоджерело
+              Primary Source
             </a>
             <button type="button" id="inspectJsonBtn" class="btn mono">
               meta.json
@@ -1119,45 +1119,45 @@
       </aside>
 
       <!-- RIGHT STAGE -->
-      <section class="stage" aria-label="Карта порівняння SAR-знімків та таймлайн">
+      <section class="stage" aria-label="SAR imagery comparison map and timeline">
         <!-- [4] MainComparisonMap -->
         <div class="map-stage" id="mapStage">
           <canvas id="sarCanvas" class="map-canvas"></canvas>
 
           <div class="stage-badge stage-badge-left mono" id="badgeBefore">
-            <span class="badge-tag">ЗВИЧАЙНА КАРТА</span>
-            <span style="color:var(--text-secondary);font-family:var(--font-sans);">Акваторія та береги</span>
+            <span class="badge-tag">BASE MAP</span>
+            <span style="color:var(--text-secondary);font-family:var(--font-sans);">Waters &amp; coastline</span>
           </div>
 
           <div class="stage-badge stage-badge-right mono" id="badgeAfter">
-            <span class="badge-tag" id="badgeAfterTag">SAR РАДАР</span>
+            <span class="badge-tag" id="badgeAfterTag">SAR RADAR</span>
             <span id="badgeAfterDate">—</span>
             <span style="color:var(--text-muted)">·</span>
             <span id="badgeAfterLabel" style="font-family:var(--font-sans);">—</span>
           </div>
 
           <!-- Draggable split curtain -->
-          <div class="curtain-line" id="curtainLine" role="slider" tabindex="0" aria-label="Шторка порівняння Звичайна карта та SAR Радар" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50">
+          <div class="curtain-line" id="curtainLine" role="slider" tabindex="0" aria-label="Comparison curtain: Base map vs SAR Radar" aria-valuemin="5" aria-valuemax="95" aria-valuenow="50">
             <div class="curtain-hit" id="curtainHit"></div>
-            <div class="curtain-handle" title="Перетягніть ліворуч/праворуч">
+            <div class="curtain-handle" title="Drag left/right">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M5 5L2 8L5 11M11 5L14 8L11 11M8 2V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
           </div>
 
-          <div class="map-zoom-stack" aria-label="Масштаб карти">
-            <button type="button" class="zoom-btn" id="zoomInBtn" title="Наблизити">
+          <div class="map-zoom-stack" aria-label="Map zoom">
+            <button type="button" class="zoom-btn" id="zoomInBtn" title="Zoom in">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
             </button>
-            <button type="button" class="zoom-btn" id="zoomOutBtn" title="Віддалити">
+            <button type="button" class="zoom-btn" id="zoomOutBtn" title="Zoom out">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
               </svg>
             </button>
-            <button type="button" class="zoom-btn" id="zoomResetBtn" title="Скинути камеру до bbox">
+            <button type="button" class="zoom-btn" id="zoomResetBtn" title="Reset camera to bbox">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
@@ -1165,7 +1165,7 @@
           </div>
 
           <div class="hud-bottom-left mono">
-            <span id="hudCursorCoords">Курсор: —</span>
+            <span id="hudCursorCoords">Cursor: —</span>
             <span style="color:var(--border-strong)">|</span>
             <span id="hudBbox">bbox: —</span>
           </div>
@@ -1179,19 +1179,19 @@
             <span id="colorbarSep" style="color:var(--border-strong)">|</span>
             <div class="scale-bar">
               <span class="scale-tick" aria-hidden="true"></span>
-              <span id="hudScaleKm">25 км</span>
+              <span id="hudScaleKm">25 km</span>
             </div>
           </div>
         </div>
 
         <!-- [5] SpillOpacitySlider -->
         <div class="opacity-panel">
-          <label class="control-label" for="opacitySlider">Підсвітка розливу</label>
+          <label class="control-label" for="opacitySlider">Spill Highlight</label>
           <div class="slider-track-wrap">
             <input id="opacitySlider" class="sar-slider" type="range" min="0" max="100" value="65" />
             <span id="opacityReadout" class="opacity-readout mono">65%</span>
           </div>
-          <div class="preset-group" aria-label="Швидкі значення прозорості">
+          <div class="preset-group" aria-label="Quick opacity presets">
             <button type="button" class="chip-btn mono" data-opacity="0">0%</button>
             <button type="button" class="chip-btn mono" data-opacity="50">50%</button>
             <button type="button" class="chip-btn mono" data-opacity="100">100%</button>
@@ -1199,40 +1199,40 @@
           <span class="topbar-sep" aria-hidden="true"></span>
           <label class="contour-toggle">
             <input type="checkbox" id="contourToggle" checked />
-            <span>GeoJSON контур</span>
+            <span>GeoJSON Contour</span>
           </label>
-          <label class="contour-toggle trajectory-toggle" title="Показати контури попередніх етапів та вектор дрейфу плями">
+          <label class="contour-toggle trajectory-toggle" title="Show contours of previous steps and the slick drift vector">
             <input type="checkbox" id="trajectoryToggle" checked />
-            <span>Траєкторія руху</span>
+            <span>Drift Trajectory</span>
           </label>
         </div>
 
         <!-- [6] SnapshotTimeline -->
         <div class="timeline-panel">
           <div class="timeline-meta">
-            <span class="control-label">Таймлайн знімків зі змінами</span>
+            <span class="control-label">Snapshot Change Timeline</span>
             <div class="timeline-nav">
-              <button type="button" id="prevStepBtn" class="btn btn-icon" title="Попередній знімок (←)">
+              <button type="button" id="prevStepBtn" class="btn btn-icon" title="Previous snapshot (←)">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
               <span class="mono" id="stepCounter" style="font-size:11px;color:var(--text-secondary);">2 / 3</span>
-              <button type="button" id="nextStepBtn" class="btn btn-icon" title="Наступний знімок (→)">
+              <button type="button" id="nextStepBtn" class="btn btn-icon" title="Next snapshot (→)">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
-              <button type="button" id="playTimelineBtn" class="btn btn-play mono" title="Автопрогравання динаміки (T0 → Tn)">
+              <button type="button" id="playTimelineBtn" class="btn btn-play mono" title="Auto-play timeline (T0 → Tn)">
                 <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                   <path id="playIconPath" d="M4 3L13 8L4 13V3Z" />
                 </svg>
-                <span id="playTimelineLabel">Старт</span>
+                <span id="playTimelineLabel">Play</span>
               </button>
             </div>
           </div>
 
-          <div class="timeline-steps" id="timelineSteps" role="tablist" aria-label="Часові зрізи події"></div>
+          <div class="timeline-steps" id="timelineSteps" role="tablist" aria-label="Event time slices"></div>
         </div>
       </section>
     </main>
@@ -1247,7 +1247,7 @@
         <button type="button" class="chip-btn mono" data-tab="list">GET /locations</button>
         <button type="button" class="chip-btn mono" data-tab="geojson">contour.geojson</button>
       </div>
-      <button type="button" id="closeDialogBtn" class="btn">Закрити</button>
+      <button type="button" id="closeDialogBtn" class="btn">Close</button>
     </div>
     <div class="dialog-body">
       <pre id="dialogJsonPre" class="json-pre"></pre>
@@ -1264,20 +1264,20 @@
       const LOCATIONS_DETAILS = {
         "oman-caroline-bezengi-2026": {
           id: "oman-caroline-bezengi-2026",
-          title: "Острови Халланіят, Оман",
+          title: "Al Hallaniyat Islands, Oman",
           coords: [56.02, 17.50],
           bbox: [55.35, 16.90, 56.85, 18.10],
           baseline_date: "2026-06-01",
           baseline_before_url: "/data/locations/oman-caroline-bezengi-2026/before.webp",
           description:
-            "Посадка на мілину танкера Caroline Bezengi після вибуху призвела до масштабного розливу нафти в Аравійському морі. На радарних знімках NISAR чітко фіксується динаміка розширення гладкої темної плями біля заповідного острова Аль-Кіблія.",
+            "The grounding of the tanker Caroline Bezengi after an explosion caused a major oil spill in the Arabian Sea. NISAR radar imagery clearly captures the expansion of the smooth dark slick near the protected Al Qibliyah Island.",
           source_url:
             "https://www.cbsnews.com/news/abandoned-russian-tanker-leaking-oil-off-oman-coast-threatening-environmental-disaster/",
           snapshots: [
             {
               step_id: "t1",
               date: "2026-07-02",
-              label: "Початковий шлейф",
+              label: "Initial plume",
               area_km2: 420.0,
               after_url: "/data/locations/oman-caroline-bezengi-2026/after_t1.webp",
               mask_url: "/data/locations/oman-caroline-bezengi-2026/mask_t1.webp",
@@ -1286,7 +1286,7 @@
             {
               step_id: "t2",
               date: "2026-08-18",
-              label: "Максимум розливу",
+              label: "Peak spill extent",
               area_km2: 2040.5,
               after_url: "/data/locations/oman-caroline-bezengi-2026/after_t2.webp",
               mask_url: "/data/locations/oman-caroline-bezengi-2026/mask_t2.webp",
@@ -1295,7 +1295,7 @@
             {
               step_id: "t3",
               date: "2026-09-11",
-              label: "Дрейф та розсіювання",
+              label: "Drift and dispersion",
               area_km2: 1180.2,
               after_url: "/data/locations/oman-caroline-bezengi-2026/after_t3.webp",
               mask_url: "/data/locations/oman-caroline-bezengi-2026/mask_t3.webp",
@@ -1305,20 +1305,20 @@
         },
         "kerch-strait-2025": {
           id: "kerch-strait-2025",
-          title: "Керченська протока: аварія танкерів",
+          title: "Kerch Strait: tanker disaster",
           coords: [36.55, 45.12],
           bbox: [36.25, 44.90, 36.92, 45.36],
           baseline_date: "2024-12-03",
           baseline_before_url: "/data/locations/kerch-strait-2025/before.webp",
           description:
-            "Штормова аварія танкерів «Волгонефть-212» та «Волгонефть-239» у грудні 2024 року спричинила витік тисяч тонн важкого мазуту. Багаточасові SAR-сцени дозволяють відстежити міграцію плям уздовж берегової лінії навіть за зимової штормової хмарності.",
+            "The storm wreck of the tankers Volgoneft-212 and Volgoneft-239 in December 2024 released thousands of tonnes of heavy fuel oil. Multi-temporal SAR scenes make it possible to track slick migration along the coastline even under stormy winter cloud cover.",
           source_url:
             "https://ceobs.org/kerch-strait-oil-spill-highlights-environmental-risks-of-shadow-fleet-tankers/",
           snapshots: [
             {
               step_id: "t1",
               date: "2024-12-19",
-              label: "Перші витоки біля коси",
+              label: "First leaks near the spit",
               area_km2: 38.4,
               after_url: "/data/locations/kerch-strait-2025/after_t1.webp",
               mask_url: "/data/locations/kerch-strait-2025/mask_t1.webp",
@@ -1327,7 +1327,7 @@
             {
               step_id: "t2",
               date: "2025-01-12",
-              label: "Винос у Чорне море",
+              label: "Outflow into the Black Sea",
               area_km2: 142.8,
               after_url: "/data/locations/kerch-strait-2025/after_t2.webp",
               mask_url: "/data/locations/kerch-strait-2025/mask_t2.webp",
@@ -1336,7 +1336,7 @@
             {
               step_id: "t3",
               date: "2025-07-14",
-              label: "Вторинний шлейф від уламків",
+              label: "Secondary plume from the wreckage",
               area_km2: 86.5,
               after_url: "/data/locations/kerch-strait-2025/after_t3.webp",
               mask_url: "/data/locations/kerch-strait-2025/mask_t3.webp",
@@ -1346,19 +1346,19 @@
         },
         "maracaibo-chronic-2026": {
           id: "maracaibo-chronic-2026",
-          title: "Озеро Маракайбо: хронічні витоки",
+          title: "Lake Maracaibo: chronic leaks",
           coords: [-71.56, 9.82],
           bbox: [-71.95, 9.52, -71.15, 10.15],
           baseline_date: "2026-04-10",
           baseline_before_url: "/data/locations/maracaibo-chronic-2026/before.webp",
           description:
-            "Систематичні витоки з підводних трубопроводів та нафтовидобувних платформ в акваторії озера Маракайбо. У L-діапазоні чітко видно контраст між яскравими металевими буровими вежами та розтіканням поверхневої нафтової плівки.",
+            "Recurring leaks from subsea pipelines and oil production platforms across Lake Maracaibo. L-band imagery clearly shows the contrast between bright metal drilling rigs and the spreading surface oil film.",
           source_url: "https://earthobservatory.nasa.gov/images/148914/oil-slicks-on-lake-maracaibo",
           snapshots: [
             {
               step_id: "t1",
               date: "2026-05-04",
-              label: "Точковий викид на східному секторі",
+              label: "Point release in the eastern sector",
               area_km2: 95.0,
               after_url: "/data/locations/maracaibo-chronic-2026/after_t1.webp",
               mask_url: "/data/locations/maracaibo-chronic-2026/mask_t1.webp",
@@ -1367,7 +1367,7 @@
             {
               step_id: "t2",
               date: "2026-06-22",
-              label: "Злиття шлейфів вздовж течії",
+              label: "Plumes merging along the current",
               area_km2: 310.4,
               after_url: "/data/locations/maracaibo-chronic-2026/after_t2.webp",
               mask_url: "/data/locations/maracaibo-chronic-2026/mask_t2.webp",
@@ -1376,7 +1376,7 @@
             {
               step_id: "t3",
               date: "2026-08-03",
-              label: "Прибійний дрейф до берега",
+              label: "Surf-driven drift toward shore",
               area_km2: 264.0,
               after_url: "/data/locations/maracaibo-chronic-2026/after_t3.webp",
               mask_url: "/data/locations/maracaibo-chronic-2026/mask_t3.webp",
@@ -1421,14 +1421,14 @@
               [[0.04, 0.63], [0.48, 0.56], [0.95, 0.27]]
             ],
             settlements: [
-              { x: 0.22, y: 0.10, name: "Хасік", kind: "town" },
-              { x: 0.46, y: 0.14, name: "Шуваймія", kind: "town" },
-              { x: 0.34, y: 0.51, name: "о. Аль-Халланія", kind: "island" },
-              { x: 0.55, y: 0.44, name: "о. Аль-Кіблія (заповідник)", kind: "reserve" },
-              { x: 0.54, y: 0.50, name: "Танкер Caroline Bezengi", kind: "incident" }
+              { x: 0.22, y: 0.10, name: "Hasik", kind: "town" },
+              { x: 0.46, y: 0.14, name: "Shuwaymiyah", kind: "town" },
+              { x: 0.34, y: 0.51, name: "Al Hallaniyah Is.", kind: "island" },
+              { x: 0.55, y: 0.44, name: "Al Qibliyah Is. (reserve)", kind: "reserve" },
+              { x: 0.54, y: 0.50, name: "Tanker Caroline Bezengi", kind: "incident" }
             ],
             waterLabels: [
-              { x: 0.26, y: 0.80, name: "АРАВІЙСЬКЕ МОРЕ" }
+              { x: 0.26, y: 0.80, name: "ARABIAN SEA" }
             ]
           },
           spillByStep: {
@@ -1467,15 +1467,15 @@
               [[0.49, 0.04], [0.48, 0.32], [0.50, 0.55], [0.54, 0.94]]
             ],
             settlements: [
-              { x: 0.23, y: 0.25, name: "м. Керч", kind: "town" },
-              { x: 0.73, y: 0.36, name: "Тамань", kind: "town" },
-              { x: 0.35, y: 0.36, name: "коса Тузла", kind: "island" },
-              { x: 0.66, y: 0.42, name: "мис Панагія", kind: "island" },
-              { x: 0.51, y: 0.55, name: "Волгонефть-212 / 239", kind: "incident" }
+              { x: 0.23, y: 0.25, name: "Kerch", kind: "town" },
+              { x: 0.73, y: 0.36, name: "Taman", kind: "town" },
+              { x: 0.35, y: 0.36, name: "Tuzla Spit", kind: "island" },
+              { x: 0.66, y: 0.42, name: "Cape Panagia", kind: "island" },
+              { x: 0.51, y: 0.55, name: "Volgoneft-212 / 239", kind: "incident" }
             ],
             waterLabels: [
-              { x: 0.48, y: 0.10, name: "АЗОВСЬКЕ МОРЕ" },
-              { x: 0.24, y: 0.85, name: "ЧОРНЕ МОРЕ" }
+              { x: 0.48, y: 0.10, name: "SEA OF AZOV" },
+              { x: 0.24, y: 0.85, name: "BLACK SEA" }
             ]
           },
           spillByStep: {
@@ -1514,13 +1514,13 @@
               [[0.51, 0.04], [0.50, 0.50], [0.49, 0.96]]
             ],
             settlements: [
-              { x: 0.17, y: 0.25, name: "м. Маракайбо", kind: "town" },
-              { x: 0.86, y: 0.31, name: "м. Кабімас", kind: "town" },
-              { x: 0.83, y: 0.58, name: "Сьюдад-Охеда", kind: "town" },
-              { x: 0.66, y: 0.48, name: "Бурові платформи", kind: "incident" }
+              { x: 0.17, y: 0.25, name: "Maracaibo", kind: "town" },
+              { x: 0.86, y: 0.31, name: "Cabimas", kind: "town" },
+              { x: 0.83, y: 0.58, name: "Ciudad Ojeda", kind: "town" },
+              { x: 0.66, y: 0.48, name: "Drilling platforms", kind: "incident" }
             ],
             waterLabels: [
-              { x: 0.49, y: 0.21, name: "ОЗЕРО МАРАКАЙБО" }
+              { x: 0.49, y: 0.21, name: "LAKE MARACAIBO" }
             ]
           },
           spillByStep: {
@@ -1546,7 +1546,7 @@
          ============================================================ */
       const state = {
         activeLocationId: "oman-caroline-bezengi-2026",
-        activeStepIdx: 1,       // Start on t2 ("Максимум розливу") for vivid first look
+        activeStepIdx: 1,       // Start on t2 ("Peak spill extent") for vivid first look
         spillOpacity: 0.65,     // 0.0 .. 1.0
         showContour: true,
         showTrajectory: true,
@@ -1669,10 +1669,10 @@
           const x0 = Math.max(0, Math.min(320 - w, cx - w / 2));
           const y0 = Math.max(0, Math.min(150 - h, cy - h / 2));
           el.minimapSvg.setAttribute("viewBox", `${x0.toFixed(1)} ${y0.toFixed(1)} ${w} ${h}`);
-          el.minimapModeLabel.textContent = `РЕГІОН: ${activeLoc.id.toUpperCase()}`;
+          el.minimapModeLabel.textContent = `REGION: ${activeLoc.id.toUpperCase()}`;
         } else {
           el.minimapSvg.setAttribute("viewBox", "0 0 320 150");
-          el.minimapModeLabel.textContent = "ОГЛЯД: ВСІ ЛОКАЦІЇ";
+          el.minimapModeLabel.textContent = "OVERVIEW: ALL LOCATIONS";
         }
 
         el.minimapPins.innerHTML = "";
@@ -1710,7 +1710,7 @@
           g.appendChild(core);
 
           const titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
-          titleEl.textContent = `${loc.title} (${loc.area_km2} км²)`;
+          titleEl.textContent = `${loc.title} (${loc.area_km2} km²)`;
           g.appendChild(titleEl);
 
           g.addEventListener("click", () => selectLocation(loc.id));
@@ -2298,12 +2298,12 @@
             isBaseline: true,
             stepId: "t0",
             date: detail.baseline_date,
-            label: "До аварії (базовий SAR)",
+            label: "Pre-incident (baseline SAR)",
             areaKm2: 0,
             layerStepId: startSnap.step_id,
             trackingStartDate: startSnap.date,
-            daysText: `−${daysBeforeStart} дн. до старту T1`,
-            areaDeltaText: "опорна сцена до розливу",
+            daysText: `−${daysBeforeStart} d before T1 start`,
+            areaDeltaText: "reference scene before the spill",
             areaDeltaClass: "is-neutral"
           };
         }
@@ -2324,9 +2324,9 @@
           layerStepId: snap.step_id,
           trackingStartDate: startSnap.date,
           daysText: state.activeStepIdx === 0
-            ? `Старт відстеження (+${daysFromBaseline} дн. від T0)`
-            : `+${daysFromStart} дн. від T1`,
-          areaDeltaText: `${sign}${deltaArea.toFixed(1)} км² до ${prevStepLabel}`,
+            ? `Tracking start (+${daysFromBaseline} d from T0)`
+            : `+${daysFromStart} d from T1`,
+          areaDeltaText: `${sign}${deltaArea.toFixed(1)} km² vs ${prevStepLabel}`,
           areaDeltaClass: deltaArea > 0 ? "is-up" : deltaArea < 0 ? "is-down" : "is-neutral"
         };
       }
@@ -2403,7 +2403,7 @@
 
         // Scale readout
         const km = (profile.scaleKm / state.zoom).toFixed(state.zoom > 1.8 ? 1 : 0);
-        el.hudScaleKm.textContent = `${km} км`;
+        el.hudScaleKm.textContent = `${km} km`;
       }
 
       /* Draw scientific grayscale ramp once on colorbarCanvas */
@@ -2430,7 +2430,7 @@
         LOCATIONS_LIST.forEach((loc) => {
           const opt = document.createElement("option");
           opt.value = loc.id;
-          opt.textContent = `${loc.title} (${loc.area_km2} км²)`;
+          opt.textContent = `${loc.title} (${loc.area_km2} km²)`;
           el.eventSelect.appendChild(opt);
         });
         el.eventSelect.value = state.activeLocationId;
@@ -2446,13 +2446,13 @@
         el.detailCoordsDeg.textContent = formatDeg(detail.coords[0], detail.coords[1]);
         el.detailCoordsRaw.textContent = `[${detail.coords[0].toFixed(2)}, ${detail.coords[1].toFixed(2)}]`;
 
-        el.detailAreaKm2.textContent = `${meta.areaKm2.toFixed(1)} км²`;
-        el.detailStepId.textContent = meta.isBaseline ? "база t0" : `зріз ${meta.stepId}`;
+        el.detailAreaKm2.textContent = `${meta.areaKm2.toFixed(1)} km²`;
+        el.detailStepId.textContent = meta.isBaseline ? "baseline t0" : `slice ${meta.stepId}`;
         el.detailAreaDelta.textContent = meta.areaDeltaText;
         el.detailAreaDelta.className = `kv-sub mono kv-delta ${meta.areaDeltaClass}`;
 
         el.detailBaselineDate.textContent = detail.baseline_date;
-        el.detailTrackingStart.textContent = `Старт T1: ${meta.trackingStartDate}`;
+        el.detailTrackingStart.textContent = `Start T1: ${meta.trackingStartDate}`;
         el.detailSnapshotDate.textContent = meta.date;
         el.detailSnapshotLabel.textContent = meta.label;
         el.detailSnapshotDelta.textContent = meta.daysText;
@@ -2480,11 +2480,11 @@
             idx: -1,
             date: detail.baseline_date,
             area_km2: 0,
-            title: "T0 · База (до аварії)"
+            title: "T0 · Baseline (pre-incident)"
           },
           ...snaps.map((snap, idx) => {
             const dFromStart = diffDaysIso(startDate, snap.date);
-            const tag = idx === 0 ? "Старт" : `+${dFromStart}д`;
+            const tag = idx === 0 ? "Start" : `+${dFromStart}d`;
             return {
               idx,
               date: snap.date,
@@ -2511,7 +2511,7 @@
                 <span class="notch-dot" aria-hidden="true"></span>
                 ${item.date}
               </span>
-              <span class="step-area mono">${item.area_km2.toFixed(1)} км²</span>
+              <span class="step-area mono">${item.area_km2.toFixed(1)} km²</span>
             </div>
             <div class="step-label">${item.title}</div>
           `;
@@ -2530,7 +2530,7 @@
 
       function renderPlayButton() {
         el.playTimelineBtn.classList.toggle("is-playing", state.isPlaying);
-        el.playTimelineLabel.textContent = state.isPlaying ? "Пауза" : "Старт";
+        el.playTimelineLabel.textContent = state.isPlaying ? "Pause" : "Play";
         el.playIconPath.setAttribute(
           "d",
           state.isPlaying ? "M4 3H7V13H4V3ZM9 3H12V13H9V3Z" : "M4 3L13 8L4 13V3Z"
@@ -2741,7 +2741,7 @@
           const ny = Math.max(0, Math.min(1, (my - oy) / drawH));
           const lon = west + nx * (east - west);
           const lat = north - ny * (north - south);
-          el.hudCursorCoords.textContent = `Курсор: ${lon.toFixed(3)}, ${lat.toFixed(3)}`;
+          el.hudCursorCoords.textContent = `Cursor: ${lon.toFixed(3)}, ${lat.toFixed(3)}`;
         });
 
         const stopPan = () => {

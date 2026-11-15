@@ -12,13 +12,13 @@ import {
 
 export interface EventDetailsCardProps {
   detail: LocationDetail | null;
-  activeStepIdx: number; // -1 = T0 ("До аварії"), 0..N-1 = індекс у snapshots[]
+  activeStepIdx: number; // -1 = T0 ("Pre-event"), 0..N-1 = index into snapshots[]
   loading?: boolean;
 }
 
 const MS_PER_DAY = 86_400_000;
 
-/** Різниця в днях між двома датами YYYY-MM-DD (в UTC, без зсувів часового поясу). */
+/** Difference in days between two YYYY-MM-DD dates (in UTC, no time zone offsets). */
 function daysBetween(fromIso: string, toIso: string): number | null {
   const parse = (iso: string): number | null => {
     const [y, m, d] = iso.split("-").map(Number);
@@ -123,8 +123,8 @@ function SkeletonCard({ lang }: { lang: "en" | "uk" }) {
 }
 
 /**
- * Картка телеметрії та опису вибраного розливу нафти (ліва панель).
- * Працює виключно від вхідних props, без fetch і Leaflet.
+ * Telemetry and description card for the selected oil spill (left panel).
+ * Driven purely by input props, with no fetch and no Leaflet.
  */
 export function EventDetailsCard({
   detail,
@@ -158,7 +158,7 @@ export function EventDetailsCard({
     activeStepIdx >= 0 && activeStepIdx < snapshots.length ? snapshots[activeStepIdx] : null;
   const prevSnap = activeSnap && activeStepIdx > 0 ? snapshots[activeStepIdx - 1] : null;
 
-  // --- Етап і дата ---
+  // --- Stage and date ---
   const stageBadge = activeSnap ? `T${activeStepIdx + 1}` : "T0";
   const stageLabel = activeSnap
     ? localizeSnapshotLabel(activeSnap.label, lang)
@@ -182,7 +182,7 @@ export function EventDetailsCard({
     }
   }
 
-  // --- Площа і дельта ---
+  // --- Area and delta ---
   const areaKm2 = activeSnap ? activeSnap.area_km2 : 0;
   let deltaValue = lang === "uk" ? "Базовий фон" : "Baseline";
   let deltaCaption = "";
@@ -245,7 +245,7 @@ export function EventDetailsCard({
         )}
       </div>
 
-      {/* Назва інциденту + бейдж поточного зрізу */}
+      {/* Incident title + current snapshot badge */}
       <div
         style={{
           display: "flex",

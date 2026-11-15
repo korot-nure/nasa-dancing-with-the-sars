@@ -1,100 +1,100 @@
-# API-контракт (Data & API Contract): Dancing with the SARs
+# Data & API Contract: Dancing with the SARs
 
-**Проєкт:** Карта радарного моніторингу розливів нафти (`NISAR L2 GCOV`)  
-**Версія контракту:** `1.2`  
-**Статус:** Єдине джерело істини (Single Source of Truth) між Backend (`FastAPI`) та Frontend (`React + TypeScript + Leaflet`)  
-**Дата:** 15 листопада 2026 р.  
-**Суміжні документи:** `BACKEND_TECHNICAL_SPEC.md` · `FRONTEND_WORK_PLAN.md`
+**Project:** Radar oil-spill monitoring map (`NISAR L2 GCOV`)  
+**Contract version:** `1.2`  
+**Status:** Single Source of Truth between the Backend (`FastAPI`) and the Frontend (`React + TypeScript + Leaflet`)  
+**Date:** November 15, 2026  
+**Related documents:** `BACKEND_TECHNICAL_SPEC.md` · `FRONTEND_WORK_PLAN.md`
 
 > [!IMPORTANT]
-> Цей файл описує жорсткий формат обміну даними між сервером і браузером. Бекенд зобов'язаний повертати рівно ці поля, типи й одиниці вимірювання, а фронтенд (включно з моками у `frontend/public/mock/`) будується строго під цю структуру.
+> This file defines the strict data exchange format between the server and the browser. The backend must return exactly these fields, types, and units of measurement, and the frontend (including the mocks in `frontend/public/mock/`) is built strictly around this structure.
 
 ---
 
-## 0. Що змінилося
+## 0. What changed
 
-**Версія 1.2** (порівняно з 1.1): у `properties` контурів додано опціональне поле `origin` (`"pipeline"` | `"reference"`). `reference` — пляма взята з еталонної розмітки відомої події, а не знайдена автоматичним конвеєром. Такі плями входять у маску й площу зрізу. Рекомендація для UI: окремий підпис у спливаючій підказці («еталонна розмітка»).
+**Version 1.2** (compared to 1.1): an optional `origin` field (`"pipeline"` | `"reference"`) has been added to contour `properties`. `reference` means the slick was taken from the reference annotation of a known event rather than found by the automated pipeline. Such slicks are included in the snapshot's mask and area. UI recommendation: a separate label in the tooltip ("reference annotation").
 
-**Версія 1.1** (порівняно з 1.0):
+**Version 1.1** (compared to 1.0):
 
-| Що | Зміна | Чому |
+| What | Change | Why |
 | :--- | :--- | :--- |
-| `SnapshotStep.before_url`, `before_date`, `track`, `polarization` | **Нові обов'язкові поля.** У кожного зрізу «Після» своя пара «До» з **того самого треку й поляризації** | NISAR знімає район різними треками (вдень/вночі) і в різних поляризаціях (HH/VV). Над морем VV на кілька дБ яскравіший за HH, різні й кут огляду та покриття. Шторка «До/Після» між різними треками показує різницю режимів зйомки, а не нафту |
-| `baseline_date`, `baseline_before_url` | Залишаються для сумісності: дорівнюють «До» першого зрізу | — |
-| `SnapshotStep.label_source`, `note` | Нові поля: звідки підпис (`manual` / `auto`) і попередження (штиль, неповне покриття) | Для відомих подій підписи пишемо вручну за хронологією; автоматичні підписи — пізніше, для невідомих районів |
-| `contour.geojson` | **Одна пляма = одна `Feature`** із класом, оцінкою та прапорцями сумніву | Щоб фронтенд міг розфарбовувати плями за класом і показувати, чому пляма сумнівна |
-| `sources.geojson` (новий, опціональний) | Знайдене джерело розливу та відоме джерело (для перевірки) | Головний результат методу: звідки тече, а не лише де пляма |
-| `targets_<step_id>.geojson` (новий, опціональний) | Судна, платформи й берегові споруди на дату зрізу | Контекст: судно поруч зі свіжою плямою, платформа біля джерела |
-| Растри | Ресемплюються на сітку, рівномірну в `EPSG:3857`; шкала яскравості рахується на пару «До/Після» одного треку | Точне накладання через `L.imageOverlay`; коректне порівняння «До/Після» |
-| Приклади | Дати, треки, площі та джерела — реальні значення прогону по Оману; геометрії контурів і точки суден у прикладах — ілюстративні | Приклад 1.0 містив неіснуючі дати NISAR і координати сусіднього острова |
+| `SnapshotStep.before_url`, `before_date`, `track`, `polarization` | **New required fields.** Each "after" snapshot has its own "before" image from **the same track and polarization** | NISAR images the area from different tracks (day/night) and in different polarizations (HH/VV). Over the sea, VV is several dB brighter than HH, and the look angle and coverage differ as well. A before/after slider across different tracks shows the difference in acquisition modes, not oil |
+| `baseline_date`, `baseline_before_url` | Kept for compatibility: equal to the "before" image of the first snapshot | — |
+| `SnapshotStep.label_source`, `note` | New fields: where the label comes from (`manual` / `auto`) and a warning (calm sea, incomplete coverage) | For known events, labels are written manually from the event timeline; automatic labels come later, for unknown areas |
+| `contour.geojson` | **One slick = one `Feature`** with a class, a score, and doubt flags | So the frontend can color slicks by class and show why a slick is doubtful |
+| `sources.geojson` (new, optional) | The detected spill source and the known source (for validation) | The main result of the method: where the oil is coming from, not just where the slick is |
+| `targets_<step_id>.geojson` (new, optional) | Ships, platforms, and coastal structures on the snapshot date | Context: a ship next to a fresh slick, a platform near the source |
+| Rasters | Resampled onto a grid that is uniform in `EPSG:3857`; the brightness scale is computed per before/after pair of a single track | Exact overlay via `L.imageOverlay`; correct before/after comparison |
+| Examples | Dates, tracks, areas, and sources are real values from the Oman run; contour geometries and ship points in the examples are illustrative | The 1.0 example contained non-existent NISAR dates and the coordinates of a neighboring island |
 
-Нові опціональні поля можна ігнорувати, доки фронтенд їх не відмальовує: нічого не ламається.
+New optional fields can be ignored until the frontend renders them: nothing breaks.
 
 ---
 
-## 1. Загальні правила та конвенції
+## 1. General rules and conventions
 
-Дотримання цих конвенцій запобігає найчастішим багам на стику карти, GIS-даних і UI.
+Following these conventions prevents the most common bugs at the junction of the map, GIS data, and UI.
 
-### 1.1. Базові URL та префікси
-- **Локальна адреса бекенду:** `http://localhost:8000`
-- **Префікс REST API:** `/api/v1` (усі JSON/GeoJSON-ендпоінти)
-- **Роздача статичних файлів (растри, вектор, маніфести):** `/data/locations/{id}/...` (монтується через FastAPI `StaticFiles`)
-- **Відносні посилання у відповідях API:** бекенд повертає шляхи від кореня (наприклад, `/data/locations/oman-caroline-bezengi-2026/before_056A_VV.webp`), щоб фронтенд однаково працював як напряму, так і через Vite proxy (`/api` і `/data` -> `http://localhost:8000`).
+### 1.1. Base URLs and prefixes
+- **Local backend address:** `http://localhost:8000`
+- **REST API prefix:** `/api/v1` (all JSON/GeoJSON endpoints)
+- **Static file serving (rasters, vectors, manifests):** `/data/locations/{id}/...` (mounted via FastAPI `StaticFiles`)
+- **Relative links in API responses:** the backend returns root-relative paths (for example, `/data/locations/oman-caroline-bezengi-2026/before_056A_VV.webp`), so that the frontend works the same way both directly and through the Vite proxy (`/api` and `/data` -> `http://localhost:8000`).
 
-### 1.2. Порядок координат і проєкція (КРИТИЧНО)
-- **Система координат:** всюди в API та статиці для вебу використовується географічна СК **`EPSG:4326` (WGS 84, градуси)**.
-- **Точки (`coords`) та GeoJSON (`geometry.coordinates`):** порядок строго **`[lon, lat]`** (спочатку довгота, потім широта — за стандартом RFC 7946 / GeoJSON).
-- **Обмежувальний прямокутник (`bbox`):** порядок строго **`[west, south, east, north]`** (`[min_lon, min_lat, max_lon, max_lat]`).
-- **Растри:** межі задаються `bbox` у `EPSG:4326`, але пікселі рівномірні в `EPSG:3857` (Web Mercator) — див. розділ 3.
+### 1.2. Coordinate order and projection (CRITICAL)
+- **Coordinate system:** the geographic CRS **`EPSG:4326` (WGS 84, degrees)** is used everywhere in the API and in the static files for the web.
+- **Points (`coords`) and GeoJSON (`geometry.coordinates`):** strictly **`[lon, lat]`** order (longitude first, then latitude — per the RFC 7946 / GeoJSON standard).
+- **Bounding box (`bbox`):** strictly **`[west, south, east, north]`** order (`[min_lon, min_lat, max_lon, max_lat]`).
+- **Rasters:** bounds are given by `bbox` in `EPSG:4326`, but the pixels are uniform in `EPSG:3857` (Web Mercator) — see section 3.
 
 > [!WARNING]
-> **Пам'ятка для фронтенду (`Leaflet`):**
-> Бібліотека `Leaflet` очікує координати у зворотному порядку — **`[lat, lon]`**. Тому на клієнті потрібно робити перетворення:
-> - Маркер / центр: `coords` `[lon, lat]` $\rightarrow$ `[coords[1], coords[0]]`
-> - Межі для `L.imageOverlay` / `map.fitBounds`: `bbox` `[west, south, east, north]` $\rightarrow$ `[[bbox[1], bbox[0]], [bbox[3], bbox[2]]]` (`[[south, west], [north, east]]`)
-> - Для `L.geoJSON(...)` перевертати координати **не потрібно** — `Leaflet` сам читає GeoJSON у форматі `[lon, lat]`.
+> **Reminder for the frontend (`Leaflet`):**
+> The `Leaflet` library expects coordinates in the reverse order — **`[lat, lon]`**. Therefore, the client must convert them:
+> - Marker / center: `coords` `[lon, lat]` $\rightarrow$ `[coords[1], coords[0]]`
+> - Bounds for `L.imageOverlay` / `map.fitBounds`: `bbox` `[west, south, east, north]` $\rightarrow$ `[[bbox[1], bbox[0]], [bbox[3], bbox[2]]]` (`[[south, west], [north, east]]`)
+> - For `L.geoJSON(...)` you do **not** need to flip the coordinates — `Leaflet` reads GeoJSON in `[lon, lat]` format on its own.
 
-### 1.3. Одиниці вимірювання, типи та формати
-| Поле | Тип | Одиниці / Формат | Примітка |
+### 1.3. Units of measurement, types, and formats
+| Field | Type | Units / Format | Note |
 | :--- | :--- | :--- | :--- |
-| `id`, `step_id` | `string` | kebab-case / snake_case | URL-безпечні ідентифікатори (`oman-caroline-bezengi-2026`, `t1`, `t2`) |
-| `area_km2` | `number` (`float`) | км² | Округлення до 1 знака після коми (наприклад, `919.4`) |
-| `baseline_date`, `latest_date`, `date`, `before_date`, `first_date`, `last_date` | `string` | `YYYY-MM-DD` (ISO 8601) | Дата зйомки SAR-сцени за UTC |
-| `track` | `string` | номер треку + напрям (`A` висхідний / `D` низхідний) | Наприклад, `056A`, `150D` |
-| `polarization` | `string` | `"HH"` \| `"VV"` | Основна поляризація знімка |
-| `score` | `number` (`float`) | `0.0 .. 1.0` | Оцінка «схоже на нафту». Це ранжування для перевірки, а не ймовірність |
-| `source_url` | `string \| null` | Повний HTTP/HTTPS URL | Опціональне поле (посилання на новину/звіт) |
+| `id`, `step_id` | `string` | kebab-case / snake_case | URL-safe identifiers (`oman-caroline-bezengi-2026`, `t1`, `t2`) |
+| `area_km2` | `number` (`float`) | km² | Rounded to 1 decimal place (for example, `919.4`) |
+| `baseline_date`, `latest_date`, `date`, `before_date`, `first_date`, `last_date` | `string` | `YYYY-MM-DD` (ISO 8601) | Acquisition date of the SAR scene in UTC |
+| `track` | `string` | track number + direction (`A` ascending / `D` descending) | For example, `056A`, `150D` |
+| `polarization` | `string` | `"HH"` \| `"VV"` | Primary polarization of the image |
+| `score` | `number` (`float`) | `0.0 .. 1.0` | "Looks like oil" score. This is a ranking for review, not a probability |
+| `source_url` | `string \| null` | Full HTTP/HTTPS URL | Optional field (link to a news article/report) |
 
 ---
 
-## 2. Специфікація REST-ендпоінтів і JSON-відповідей
+## 2. REST endpoint and JSON response specification
 
-| Метод | Ендпоінт | Призначення | Content-Type |
+| Method | Endpoint | Purpose | Content-Type |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/locations` | Список усіх подій для міні-карти та `<select>` | `application/json` |
-| `GET` | `/api/v1/locations/{id}` | Детальна картка події + масив зрізів `snapshots[]` | `application/json` |
-| `GET` | `/api/v1/locations/{id}/snapshots/{step_id}/contour.geojson` | Контури плям на вибрану дату (одна пляма = одна `Feature`) | `application/geo+json` |
-| `GET` | `/api/v1/locations/{id}/sources.geojson` | **Нове (1.1), опціональне.** Знайдене та відоме джерела | `application/geo+json` |
-| `GET` | `/api/v1/locations/{id}/snapshots/{step_id}/targets.geojson` | **Нове (1.1), опціональне.** Судна, платформи, берегові споруди | `application/geo+json` |
+| `GET` | `/api/v1/locations` | List of all events for the minimap and the `<select>` | `application/json` |
+| `GET` | `/api/v1/locations/{id}` | Detailed event card + array of snapshots `snapshots[]` | `application/json` |
+| `GET` | `/api/v1/locations/{id}/snapshots/{step_id}/contour.geojson` | Slick contours for the selected date (one slick = one `Feature`) | `application/geo+json` |
+| `GET` | `/api/v1/locations/{id}/sources.geojson` | **New (1.1), optional.** Detected and known sources | `application/geo+json` |
+| `GET` | `/api/v1/locations/{id}/snapshots/{step_id}/targets.geojson` | **New (1.1), optional.** Ships, platforms, coastal structures | `application/geo+json` |
 
 ---
 
-### 2.1. `GET /api/v1/locations` — Список усіх оброблених подій
+### 2.1. `GET /api/v1/locations` — List of all processed events
 
-Використовується при старті застосунку для відображення маркерів на `OverviewMinimap` і заповнення випадаючого списку `EventSelect`. Без змін порівняно з 1.0.
+Used at application startup to display markers on the `OverviewMinimap` and to populate the `EventSelect` dropdown. Unchanged from 1.0.
 
-**Поля відповіді:**
-- `total` (`number`): кількість локацій у масиві.
+**Response fields:**
+- `total` (`number`): number of locations in the array.
 - `locations` (`LocationSummary[]`):
-  - `id` (`string`): унікальний ідентифікатор локації.
-  - `title` (`string`): назва події для UI.
-  - `coords` (`[number, number]`): центр локації у форматі `[lon, lat]` (для відомих подій — відоме джерело).
-  - `baseline_date` (`string`): дата знімка «До» першого зрізу (`YYYY-MM-DD`).
-  - `latest_date` (`string`): дата останнього зрізу (`YYYY-MM-DD`).
-  - `area_km2` (`number`): площа плям класу `probable` на останньому зрізі (км²).
+  - `id` (`string`): unique location identifier.
+  - `title` (`string`): event name for the UI.
+  - `coords` (`[number, number]`): location center in `[lon, lat]` format (for known events — the known source).
+  - `baseline_date` (`string`): date of the "before" image of the first snapshot (`YYYY-MM-DD`).
+  - `latest_date` (`string`): date of the latest snapshot (`YYYY-MM-DD`).
+  - `area_km2` (`number`): area of `probable`-class slicks in the latest snapshot (km²).
 
-**Приклад відповіді `200 OK`:**
+**Example `200 OK` response:**
 
 ```json
 {
@@ -102,7 +102,7 @@
   "locations": [
     {
       "id": "oman-caroline-bezengi-2026",
-      "title": "Острови Халланіят, Оман",
+      "title": "Hallaniyat Islands, Oman",
       "coords": [56.341, 17.5],
       "baseline_date": "2026-06-18",
       "latest_date": "2026-09-10",
@@ -110,7 +110,7 @@
     },
     {
       "id": "uae-umm-al-quwain-2026",
-      "title": "Умм-ель-Кайвайн, ОАЕ",
+      "title": "Umm Al Quwain, UAE",
       "coords": [55.55, 25.6],
       "baseline_date": "2026-09-23",
       "latest_date": "2026-10-29",
@@ -122,50 +122,50 @@
 
 ---
 
-### 2.2. `GET /api/v1/locations/{id}` — Детальна інформація про подію
+### 2.2. `GET /api/v1/locations/{id}` — Event details
 
-Викликається при виборі події користувачем. Повертає межі `bbox`, опис для картки `EventDetailsCard` та впорядкований за часом масив зрізів `snapshots[]` для `SnapshotTimeline`.
+Called when the user selects an event. Returns the `bbox` bounds, the description for the `EventDetailsCard`, and the chronologically ordered `snapshots[]` array for the `SnapshotTimeline`.
 
-**Поля відповіді:**
-- `id` (`string`): ідентифікатор локації.
-- `title` (`string`): назва події.
+**Response fields:**
+- `id` (`string`): location identifier.
+- `title` (`string`): event name.
 - `coords` (`[number, number]`): `[lon, lat]`.
-- `bbox` (`[number, number, number, number]`): географічні межі растрів `[west, south, east, north]`.
-- `baseline_date` (`string`): дата «До» першого зрізу (`YYYY-MM-DD`). *Залишено для сумісності з 1.0.*
-- `baseline_before_url` (`string`): URL «До» першого зрізу. *Залишено для сумісності з 1.0.*
-- `description` (`string`): короткий опис інциденту для лівої картки.
-- `source_url` (`string | null`, опціонально): посилання на першоджерело / новину.
-- `sources_geojson_url` (`string | null`, **нове, опціональне**): URL `sources.geojson`.
-- `snapshots` (`SnapshotStep[]`): хронологічно відсортовані кроки «Після» (`t1`, `t2`, ...):
-  - `step_id` (`string`): ідентифікатор зрізу (`"t1"`, `"t2"`).
-  - `date` (`string`): дата знімка «Після» (`YYYY-MM-DD`).
-  - `track` (`string`, **нове**): трек знімка (`"056A"`).
-  - `polarization` (`"HH" | "VV"`, **нове**): поляризація знімка.
-  - `before_url` (`string`, **нове**): URL растру «До» **того самого треку й поляризації**.
-  - `before_date` (`string`, **нове**): дата знімка «До» (`YYYY-MM-DD`).
-  - `label` (`string`): короткий підпис на таймлайні.
-  - `label_source` (`"manual" | "auto"`, **нове**): `manual` — підпис написаний людиною за хронологією події; `auto` — згенерований за правилами з даних. Поки для відомих подій лише `manual`.
-  - `note` (`string | null`, **нове, опціональне**): попередження до зрізу (наприклад, «Штиль — оцінка ненадійна», «Район покрито частково»).
-  - `area_km2` (`number`): площа плям класу `probable` на цю дату (км²).
-  - `after_url` (`string`): URL растру `after_<step_id>.webp`.
-  - `mask_url` (`string`): URL прозорої растрової маски `mask_<step_id>.webp` (лише клас `probable`).
-  - `contour_geojson_url` (`string`): URL контурів плям на цю дату.
-  - `targets_geojson_url` (`string | null`, **нове, опціональне**): URL `targets_<step_id>.geojson`.
+- `bbox` (`[number, number, number, number]`): geographic bounds of the rasters `[west, south, east, north]`.
+- `baseline_date` (`string`): date of the "before" image of the first snapshot (`YYYY-MM-DD`). *Kept for compatibility with 1.0.*
+- `baseline_before_url` (`string`): URL of the "before" image of the first snapshot. *Kept for compatibility with 1.0.*
+- `description` (`string`): short incident description for the left card.
+- `source_url` (`string | null`, optional): link to the primary source / news article.
+- `sources_geojson_url` (`string | null`, **new, optional**): URL of `sources.geojson`.
+- `snapshots` (`SnapshotStep[]`): chronologically sorted "after" steps (`t1`, `t2`, ...):
+  - `step_id` (`string`): snapshot identifier (`"t1"`, `"t2"`).
+  - `date` (`string`): date of the "after" image (`YYYY-MM-DD`).
+  - `track` (`string`, **new**): image track (`"056A"`).
+  - `polarization` (`"HH" | "VV"`, **new**): image polarization.
+  - `before_url` (`string`, **new**): URL of the "before" raster from **the same track and polarization**.
+  - `before_date` (`string`, **new**): date of the "before" image (`YYYY-MM-DD`).
+  - `label` (`string`): short label on the timeline.
+  - `label_source` (`"manual" | "auto"`, **new**): `manual` — the label was written by a person based on the event timeline; `auto` — generated by rules from the data. For now, known events use only `manual`.
+  - `note` (`string | null`, **new, optional**): a warning for the snapshot (for example, "Calm sea — score is unreliable", "Area is only partially covered").
+  - `area_km2` (`number`): area of `probable`-class slicks on this date (km²).
+  - `after_url` (`string`): URL of the `after_<step_id>.webp` raster.
+  - `mask_url` (`string`): URL of the transparent raster mask `mask_<step_id>.webp` (`probable` class only).
+  - `contour_geojson_url` (`string`): URL of the slick contours on this date.
+  - `targets_geojson_url` (`string | null`, **new, optional**): URL of `targets_<step_id>.geojson`.
 
 > [!NOTE]
-> **Для фронтенду:** при перемиканні зрізу на таймлайні треба міняти **обидві** картинки шторки — і `after_url`, і `before_url`. У зрізів одного треку `before_url` однаковий (файл не дублюється).
+> **For the frontend:** when switching snapshots on the timeline, you must swap **both** slider images — both `after_url` and `before_url`. Snapshots from the same track share the same `before_url` (the file is not duplicated).
 
-**Приклад відповіді `200 OK`:**
+**Example `200 OK` response:**
 
 ```json
 {
   "id": "oman-caroline-bezengi-2026",
-  "title": "Острови Халланіят, Оман",
+  "title": "Hallaniyat Islands, Oman",
   "coords": [56.341, 17.5],
   "bbox": [56.2, 17.2, 58.0, 18.3],
   "baseline_date": "2026-06-18",
   "baseline_before_url": "/data/locations/oman-caroline-bezengi-2026/before_056A_VV.webp",
-  "description": "Танкер Caroline Bezengi після вибуху сів на мілину біля острова Аль-Кіблія (острови Халланіят) 30.06.2026. Нафтовий шлейф дрейфує на північний схід, 12–13.08 нафта дійшла до берега.",
+  "description": "After an explosion, the tanker Caroline Bezengi ran aground off Al Qibliyah Island (Hallaniyat Islands) on 30.06.2026. The oil plume is drifting north-east; on 12–13.08 the oil reached the shore.",
   "source_url": "https://www.aljazeera.com/news/2026/8/13/oman-says-massive-oil-spill-reaches-coastline-what-damage-could-it-do",
   "sources_geojson_url": "/api/v1/locations/oman-caroline-bezengi-2026/sources.geojson",
   "snapshots": [
@@ -176,7 +176,7 @@
       "polarization": "VV",
       "before_url": "/data/locations/oman-caroline-bezengi-2026/before_056A_VV.webp",
       "before_date": "2026-06-18",
-      "label": "Через 5 днів після виходу нафти на берег",
+      "label": "5 days after the oil reached the shore",
       "label_source": "manual",
       "note": null,
       "area_km2": 149.1,
@@ -192,7 +192,7 @@
       "polarization": "HH",
       "before_url": "/data/locations/oman-caroline-bezengi-2026/before_150D_HH.webp",
       "before_date": "2026-06-24",
-      "label": "Широкий шлейф на північний схід",
+      "label": "Wide plume to the north-east",
       "label_source": "manual",
       "note": null,
       "area_km2": 219.8,
@@ -208,7 +208,7 @@
       "polarization": "VV",
       "before_url": "/data/locations/oman-caroline-bezengi-2026/before_056A_VV.webp",
       "before_date": "2026-06-18",
-      "label": "Найбільша площа плями",
+      "label": "Largest slick area",
       "label_source": "manual",
       "note": null,
       "area_km2": 919.4,
@@ -223,28 +223,28 @@
 
 ---
 
-### 2.3. `GET /api/v1/locations/{id}/snapshots/{step_id}/contour.geojson` — Контури плям
+### 2.3. `GET /api/v1/locations/{id}/snapshots/{step_id}/contour.geojson` — Slick contours
 
-Повертає контури всіх плям на дату для накладання через `L.geoJSON(...)`. Заголовок відповіді: `Content-Type: application/geo+json`.
+Returns the contours of all slicks on the date for overlaying via `L.geoJSON(...)`. Response header: `Content-Type: application/geo+json`.
 
-**Зміна 1.1:** одна пляма = одна `Feature` (раніше — одна `Feature` з `MultiPolygon` на всю дату). Повертаються плями класів `probable` і `possible`; клас `background` не повертається.
+**Change in 1.1:** one slick = one `Feature` (previously, a single `Feature` with a `MultiPolygon` for the whole date). Slicks of the `probable` and `possible` classes are returned; the `background` class is not returned.
 
-**Поля `properties` кожної `Feature`:**
-- `location_id` (`string`), `step_id` (`string`) — як у 1.0.
-- `area_km2` (`number`): площа **цієї плями** (км²).
-- `slick_id` (`string`, **нове**): ідентифікатор плями в межах зрізу (`"t1-07"`).
-- `class` (`"probable" | "possible"`, **нове**): `probable` — ймовірно нафта, `possible` — можливо. Рекомендація: `probable` — суцільна заливка `#ef4444`, `possible` — пунктирний контур без заливки.
-- `score` (`number`, **нове**): оцінка «схоже на нафту», `0.0 .. 1.0`.
-- `origin` (`"pipeline" | "reference"`, **нове в 1.2, опціональне**, за замовчуванням `pipeline`): `pipeline` — пляму знайшов автоматичний конвеєр; `reference` — пляму взято з еталонної розмітки відомої події (для дат, на яких конвеєр подію не бачить). Для `reference` оцінка й прапорці пораховані тією самою формулою.
-- `flags` (`string[]`, **нове**): чому оцінку знижено; порожній масив, якщо сумнівів немає:
-  - `near_coast` — ближче 2 км до берега;
-  - `low_wind` — вітер < 3 м/с (штиль виглядає як нафта);
-  - `near_noise` — сигнал менше ніж на 1 дБ вище шуму приладу;
-  - `rain` — опади;
-  - `small` — пляма менша за 2 км²;
-  - `static` — та сама темна область повторюється на інших датах (лагуна, мілина, вітрова тінь).
+**`properties` fields of each `Feature`:**
+- `location_id` (`string`), `step_id` (`string`) — as in 1.0.
+- `area_km2` (`number`): area of **this slick** (km²).
+- `slick_id` (`string`, **new**): slick identifier within the snapshot (`"t1-07"`).
+- `class` (`"probable" | "possible"`, **new**): `probable` — likely oil, `possible` — possibly oil. Recommendation: `probable` — solid `#ef4444` fill, `possible` — dashed outline with no fill.
+- `score` (`number`, **new**): "looks like oil" score, `0.0 .. 1.0`.
+- `origin` (`"pipeline" | "reference"`, **new in 1.2, optional**, defaults to `pipeline`): `pipeline` — the slick was found by the automated pipeline; `reference` — the slick was taken from the reference annotation of a known event (for dates on which the pipeline does not see the event). For `reference`, the score and flags are computed with the same formula.
+- `flags` (`string[]`, **new**): why the score was lowered; an empty array if there are no doubts:
+  - `near_coast` — closer than 2 km to the shore;
+  - `low_wind` — wind < 3 m/s (a calm sea looks like oil);
+  - `near_noise` — signal less than 1 dB above the instrument noise floor;
+  - `rain` — precipitation;
+  - `small` — slick smaller than 2 km²;
+  - `static` — the same dark area recurs on other dates (lagoon, shoal, wind shadow).
 
-**Приклад відповіді `200 OK`:**
+**Example `200 OK` response:**
 
 ```json
 {
@@ -290,19 +290,19 @@
 
 ---
 
-### 2.4. `GET /api/v1/locations/{id}/sources.geojson` — Джерела (нове, опціональне)
+### 2.4. `GET /api/v1/locations/{id}/sources.geojson` — Sources (new, optional)
 
-Точки: знайдене алгоритмом джерело (кластер точок початку плям, що повторюється на кількох датах) і, для відомих подій, відоме джерело — щоб було видно точність.
+Points: the source detected by the algorithm (a cluster of slick origin points that recurs across several dates) and, for known events, the known source — so that the accuracy is visible.
 
-**Поля `properties`:**
-- `kind` (`"detected" | "known"`): знайдене алгоритмом / відоме з новин і звітів.
-- `rank` (`number | null`): номер знайденого джерела за надійністю (`1` — найнадійніше); `null` для `known`.
-- `n_dates` (`number | null`): на скількох датах плями починаються з цього місця.
-- `first_date`, `last_date` (`string | null`): перша й остання така дата.
-- `dist_known_km` (`number | null`): відстань до відомого джерела (км), якщо воно задане.
-- `label` (`string`): підпис для спливаючої підказки.
+**`properties` fields:**
+- `kind` (`"detected" | "known"`): detected by the algorithm / known from news and reports.
+- `rank` (`number | null`): rank of the detected source by reliability (`1` — the most reliable); `null` for `known`.
+- `n_dates` (`number | null`): on how many dates slicks originate from this location.
+- `first_date`, `last_date` (`string | null`): the first and the last such date.
+- `dist_known_km` (`number | null`): distance to the known source (km), if one is specified.
+- `label` (`string`): label for the tooltip.
 
-**Приклад відповіді `200 OK`:**
+**Example `200 OK` response:**
 
 ```json
 {
@@ -317,7 +317,7 @@
         "first_date": "2026-08-17",
         "last_date": "2026-09-16",
         "dist_known_km": 3.6,
-        "label": "Знайдене джерело №1: 5 дат, 3,6 км від танкера"
+        "label": "Detected source #1: 5 dates, 3.6 km from the known source"
       },
       "geometry": { "type": "Point", "coordinates": [56.322, 17.473] }
     },
@@ -330,7 +330,7 @@
         "first_date": null,
         "last_date": null,
         "dist_known_km": null,
-        "label": "Танкер Caroline Bezengi (відоме джерело)"
+        "label": "Tanker Caroline Bezengi aground (known source)"
       },
       "geometry": { "type": "Point", "coordinates": [56.341, 17.5] }
     }
@@ -340,19 +340,19 @@
 
 ---
 
-### 2.5. `GET /api/v1/locations/{id}/snapshots/{step_id}/targets.geojson` — Судна й споруди (нове, опціональне)
+### 2.5. `GET /api/v1/locations/{id}/snapshots/{step_id}/targets.geojson` — Ships and structures (new, optional)
 
-Яскраві точкові цілі на радарному знімку цієї дати.
+Bright point targets in the radar image for this date.
 
-**Поля `properties`:**
+**`properties` fields:**
 - `kind` (`"ship" | "platform" | "coastal"`):
-  - `ship` — разова ціль у морі (судно);
-  - `platform` — ціль, що повторюється на кількох датах у тому ж місці (платформа, якірна стоянка, танкер на мілині);
-  - `coastal` — ціль ближче 2 км до берега (порт, споруди).
-- `snr_db` (`number`): перевищення над фоном моря, дБ.
-- `date` (`string`): дата знімка (`YYYY-MM-DD`).
+  - `ship` — a one-off target at sea (a ship);
+  - `platform` — a target that recurs at the same location on several dates (platform, anchorage, grounded tanker);
+  - `coastal` — a target closer than 2 km to the shore (port, structures).
+- `snr_db` (`number`): excess over the sea background, dB.
+- `date` (`string`): image date (`YYYY-MM-DD`).
 
-**Приклад відповіді `200 OK`:**
+**Example `200 OK` response:**
 
 ```json
 {
@@ -374,11 +374,11 @@
 
 ---
 
-### 2.6. Формат помилок
+### 2.6. Error format
 
-Усі 4xx/5xx помилки повертаються у стандартному форматі FastAPI з полем `detail`:
+All 4xx/5xx errors are returned in the standard FastAPI format with a `detail` field:
 
-- **`404 Not Found`** (невідома локація або `step_id`, або відсутній опціональний шар):
+- **`404 Not Found`** (unknown location or `step_id`, or a missing optional layer):
 
 ```json
 {
@@ -392,34 +392,34 @@
 }
 ```
 
-Якщо опціонального шару для локації немає, відповідне поле `*_geojson_url` дорівнює `null`, а ендпоінт повертає `404`.
+If a location has no optional layer, the corresponding `*_geojson_url` field is `null`, and the endpoint returns `404`.
 
 ---
 
-## 3. Контракт статичних файлів (`/data/locations/{id}/`)
+## 3. Static file contract (`/data/locations/{id}/`)
 
-Усі підготовлені файли локації зберігаються на сервері у папці `data/locations/{id}/` і роздаються як статика по URL `/data/locations/{id}/<filename>`.
+All prepared files of a location are stored on the server in the `data/locations/{id}/` folder and served as static files at the URL `/data/locations/{id}/<filename>`.
 
-| Файл | Формат | Вміст і візуальні вимоги |
+| File | Format | Content and visual requirements |
 | :--- | :--- | :--- |
-| `before_<track>_<pol>.webp` | RGBA WebP | **Змінено (1.1):** «До» для кожної пари трек + поляризація (наприклад, `before_056A_VV.webp`). Радіолокаційна яскравість у градаціях сірого (`0..255`), шкала — див. гарантію 3; `NaN`-пікселі (немає зйомки, суша) мають `alpha = 0` |
-| `after_<step_id>.webp` | RGBA WebP | Яскравість «Після» у тій самій шкалі, що й відповідний `before_<track>_<pol>.webp`; `NaN`-пікселі мають `alpha = 0` |
-| `mask_<step_id>.webp` | RGBA WebP | Пікселі плям класу `probable` (включно з `origin: reference`) — **суцільний `#ef4444`** (`rgba(239, 68, 68, 255)`, `alpha = 255`); усі інші пікселі — **повністю прозорі** (`rgba(0, 0, 0, 0)`, `alpha = 0`) |
-| `contour_<step_id>.geojson` | GeoJSON (`EPSG:4326`) | `FeatureCollection`, одна пляма = одна `Feature` (`Polygon`), властивості — див. 2.3 |
-| `sources.geojson` | GeoJSON (`EPSG:4326`) | **Нове (1.1), опціональне.** Див. 2.4 |
-| `targets_<step_id>.geojson` | GeoJSON (`EPSG:4326`) | **Нове (1.1), опціональне.** Див. 2.5 |
-| `meta.json` | JSON | Маніфест локації (ідентичний за структурою до відповіді `GET /api/v1/locations/{id}`) |
+| `before_<track>_<pol>.webp` | RGBA WebP | **Changed (1.1):** a "before" image for each track + polarization pair (for example, `before_056A_VV.webp`). Radar brightness in grayscale (`0..255`), scale — see guarantee 3; `NaN` pixels (no coverage, land) have `alpha = 0` |
+| `after_<step_id>.webp` | RGBA WebP | "After" brightness on the same scale as the corresponding `before_<track>_<pol>.webp`; `NaN` pixels have `alpha = 0` |
+| `mask_<step_id>.webp` | RGBA WebP | Pixels of `probable`-class slicks (including `origin: reference`) — **solid `#ef4444`** (`rgba(239, 68, 68, 255)`, `alpha = 255`); all other pixels — **fully transparent** (`rgba(0, 0, 0, 0)`, `alpha = 0`) |
+| `contour_<step_id>.geojson` | GeoJSON (`EPSG:4326`) | `FeatureCollection`, one slick = one `Feature` (`Polygon`), properties — see 2.3 |
+| `sources.geojson` | GeoJSON (`EPSG:4326`) | **New (1.1), optional.** See 2.4 |
+| `targets_<step_id>.geojson` | GeoJSON (`EPSG:4326`) | **New (1.1), optional.** See 2.5 |
+| `meta.json` | JSON | Location manifest (structurally identical to the `GET /api/v1/locations/{id}` response) |
 
 > [!CAUTION]
-> **Обов'язкові гарантії для растрових шарів однієї локації:**
-> 1. **Попіксельне суміщення:** усі `before_*.webp`, `after_<step_id>.webp` та `mask_<step_id>.webp` в межах однієї локації мають **абсолютно однакову ширину та висоту в пікселях (`W × H`)** (до `1200 px` по довгій стороні) і прив'язуються на карту строго в **один і той самий `bbox` у `EPSG:4326`**. Завдяки цьому шторка «До / Після» та маска не «їдуть» одна відносно одної.
-> 2. **Сітка в проєкції карти (нове, 1.1):** `L.imageOverlay` розтягує картинку лінійно між кутами `bbox` у проєкції карти (`EPSG:3857`). Тому бекенд ресемплює растри (з UTM, у якому ведеться розрахунок) на сітку, **рівномірну в `EPSG:3857`** у межах `bbox`. Фронтенду нічого робити не треба — просто `L.imageOverlay(url, bounds)`.
-> 3. **Спільна шкала яскравості для пари (змінено, 1.1):** перцентилі `[2%, 98%]` рахуються на пару «До / Після» **одного треку й поляризації** (`before_<track>_<pol>` + усі `after_*` цього треку). Між різними треками шкали різні — порівнювати яскравість між треками не можна.
-> 4. **Чиста прозорість маски:** бекенд **не запікає** напівпрозорість у `mask_<step_id>.webp` (`alpha` тільки `255` або `0`). Інтенсивність підсвітки регулюється виключно на фронтенді повзунком (`spillOpacity: 0.0 .. 1.0`).
+> **Mandatory guarantees for the raster layers of a single location:**
+> 1. **Pixel-perfect alignment:** all `before_*.webp`, `after_<step_id>.webp`, and `mask_<step_id>.webp` within a single location have **exactly the same width and height in pixels (`W × H`)** (up to `1200 px` on the long side) and are placed on the map strictly within **the same `bbox` in `EPSG:4326`**. This keeps the before / after slider and the mask from drifting relative to each other.
+> 2. **Grid in the map projection (new, 1.1):** `L.imageOverlay` stretches the image linearly between the `bbox` corners in the map projection (`EPSG:3857`). Therefore, the backend resamples the rasters (from UTM, in which the computation is performed) onto a grid that is **uniform in `EPSG:3857`** within the `bbox`. The frontend does not need to do anything — just `L.imageOverlay(url, bounds)`.
+> 3. **Shared brightness scale per pair (changed, 1.1):** the `[2%, 98%]` percentiles are computed per before / after pair of **a single track and polarization** (`before_<track>_<pol>` + all `after_*` of that track). The scales differ between tracks — brightness cannot be compared across tracks.
+> 4. **Clean mask transparency:** the backend **does not bake** semi-transparency into `mask_<step_id>.webp` (`alpha` is only `255` or `0`). The highlight intensity is controlled exclusively on the frontend with a slider (`spillOpacity: 0.0 .. 1.0`).
 
 ---
 
-## 4. Готові схеми для коду (Copy-Paste)
+## 4. Ready-made schemas for code (Copy-Paste)
 
 ### 4.1. TypeScript (Frontend: `frontend/src/types/location.ts`)
 
@@ -427,7 +427,7 @@
 export interface LocationSummary {
   id: string;
   title: string;
-  /** Центр події у форматі [lon, lat] (EPSG:4326) */
+  /** Event center in [lon, lat] format (EPSG:4326) */
   coords: [number, number];
   baseline_date: string; // YYYY-MM-DD
   latest_date: string;   // YYYY-MM-DD
@@ -445,42 +445,42 @@ export type LabelSource = "manual" | "auto";
 export interface SnapshotStep {
   step_id: string;
   date: string;          // YYYY-MM-DD
-  /** 1.1: трек знімка, напр. "056A" */
+  /** 1.1: image track, e.g. "056A" */
   track: string;
-  /** 1.1: поляризація знімка */
+  /** 1.1: image polarization */
   polarization: Polarization;
-  /** 1.1: «До» того самого треку й поляризації */
+  /** 1.1: "before" image of the same track and polarization */
   before_url: string;
   /** 1.1: YYYY-MM-DD */
   before_date: string;
   label: string;
-  /** 1.1: manual — підпис людини, auto — за правилами з даних */
+  /** 1.1: manual — label written by a person, auto — generated by rules from the data */
   label_source: LabelSource;
-  /** 1.1: попередження (штиль, неповне покриття) */
+  /** 1.1: warning (calm sea, incomplete coverage) */
   note?: string | null;
-  /** Площа плям класу probable (км²) */
+  /** Area of probable-class slicks (km²) */
   area_km2: number;
   after_url: string;
   mask_url: string;
   contour_geojson_url: string;
-  /** 1.1, опціонально */
+  /** 1.1, optional */
   targets_geojson_url?: string | null;
 }
 
 export interface LocationDetail {
   id: string;
   title: string;
-  /** Центр події у форматі [lon, lat] (EPSG:4326) */
+  /** Event center in [lon, lat] format (EPSG:4326) */
   coords: [number, number];
-  /** Межі зображення [west, south, east, north] (EPSG:4326) */
+  /** Image bounds [west, south, east, north] (EPSG:4326) */
   bbox: [number, number, number, number];
-  /** = before_date першого зрізу (сумісність з 1.0) */
+  /** = before_date of the first snapshot (compatibility with 1.0) */
   baseline_date: string; // YYYY-MM-DD
-  /** = before_url першого зрізу (сумісність з 1.0) */
+  /** = before_url of the first snapshot (compatibility with 1.0) */
   baseline_before_url: string;
   description: string;
   source_url?: string | null;
-  /** 1.1, опціонально */
+  /** 1.1, optional */
   sources_geojson_url?: string | null;
   snapshots: SnapshotStep[];
 }
@@ -491,17 +491,17 @@ export type SlickFlag = "near_coast" | "low_wind" | "near_noise" | "rain" | "sma
 export interface SpillContourProperties {
   location_id: string;
   step_id: string;
-  /** Площа цієї плями (км²) */
+  /** Area of this slick (km²) */
   area_km2: number;
   /** 1.1 */
   slick_id: string;
   /** 1.1 */
   class: SlickClass;
-  /** 1.1: 0..1, ранжування, а не ймовірність */
+  /** 1.1: 0..1, a ranking, not a probability */
   score: number;
-  /** 1.1: чому оцінку знижено */
+  /** 1.1: why the score was lowered */
   flags: SlickFlag[];
-  /** 1.2: pipeline — знайдено конвеєром, reference — еталонна розмітка відомої події */
+  /** 1.2: pipeline — found by the pipeline, reference — reference annotation of a known event */
   origin?: "pipeline" | "reference";
 }
 
@@ -577,7 +577,7 @@ class LocationSummary(BaseModel):
     id: str
     title: str
     coords: Tuple[float, float] = Field(
-        ..., description="Центр події [lon, lat] у EPSG:4326"
+        ..., description="Event center [lon, lat] in EPSG:4326"
     )
     baseline_date: str = Field(..., description="YYYY-MM-DD")
     latest_date: str = Field(..., description="YYYY-MM-DD")
@@ -592,14 +592,14 @@ class LocationsListResponse(BaseModel):
 class SnapshotStep(BaseModel):
     step_id: str
     date: str = Field(..., description="YYYY-MM-DD")
-    track: str = Field(..., description="Трек, напр. 056A (1.1)")
+    track: str = Field(..., description="Track, e.g. 056A (1.1)")
     polarization: Literal["HH", "VV"]
-    before_url: str = Field(..., description="«До» того самого треку й поляризації (1.1)")
+    before_url: str = Field(..., description="'Before' image of the same track and polarization (1.1)")
     before_date: str = Field(..., description="YYYY-MM-DD (1.1)")
     label: str
     label_source: Literal["manual", "auto"]
     note: Optional[str] = None
-    area_km2: float = Field(..., ge=0.0, description="Площа плям класу probable")
+    area_km2: float = Field(..., ge=0.0, description="Area of probable-class slicks")
     after_url: str
     mask_url: str
     contour_geojson_url: str
@@ -610,13 +610,13 @@ class LocationDetail(BaseModel):
     id: str
     title: str
     coords: Tuple[float, float] = Field(
-        ..., description="Центр події [lon, lat] у EPSG:4326"
+        ..., description="Event center [lon, lat] in EPSG:4326"
     )
     bbox: Tuple[float, float, float, float] = Field(
-        ..., description="Межі растру [west, south, east, north] у EPSG:4326"
+        ..., description="Raster bounds [west, south, east, north] in EPSG:4326"
     )
-    baseline_date: str = Field(..., description="= before_date першого зрізу")
-    baseline_before_url: str = Field(..., description="= before_url першого зрізу")
+    baseline_date: str = Field(..., description="= before_date of the first snapshot")
+    baseline_before_url: str = Field(..., description="= before_url of the first snapshot")
     description: str
     source_url: Optional[str] = None
     sources_geojson_url: Optional[str] = None
@@ -626,7 +626,7 @@ class LocationDetail(BaseModel):
 class SpillContourProperties(BaseModel):
     location_id: str
     step_id: str
-    area_km2: float = Field(..., ge=0.0, description="Площа цієї плями")
+    area_km2: float = Field(..., ge=0.0, description="Area of this slick")
     slick_id: str
     class_: Literal["probable", "possible"] = Field(..., alias="class")
     score: float = Field(..., ge=0.0, le=1.0)
@@ -657,16 +657,16 @@ class ErrorResponse(BaseModel):
 ```
 
 > [!NOTE]
-> `class` — зарезервоване слово в Python, тому в Pydantic поле називається `class_` з `alias="class"`. При серіалізації використовувати `model_dump(by_alias=True)`, щоб у JSON було саме `"class"`.
+> `class` is a reserved word in Python, so in Pydantic the field is named `class_` with `alias="class"`. When serializing, use `model_dump(by_alias=True)` so that the JSON contains exactly `"class"`.
 
 ---
 
-## 5. Як користуватися контрактом у команді (Workflow)
+## 5. How to use the contract in the team (Workflow)
 
-1. **Старт (Етап 0):**
-   - **Фронтенд (Dev 1 + Dev 2):** копіюють інтерфейси з розділу `4.1` у `frontend/src/types/location.ts`, а JSON-приклади з розділу `2` — у `frontend/public/mock/` (`locations.json`, `oman-caroline-bezengi-2026.json`, `contour_t1.geojson`, `sources.geojson`, `targets_t1.geojson`). Після цього обидва фронтендери можуть працювати повністю автономно, не чекаючи запуску FastAPI.
-   - **Бекенд:** копіює класи з розділу `4.2` у `backend/app/schemas.py` і гарантує, що `prepare_location.py` генерує `meta.json`, `.webp` та `.geojson` строго за цим контрактом.
-2. **Інтеграція (Етап 3):**
-   - Фронтенд перемикає `VITE_USE_MOCK=false`, і реальні дані з `http://localhost:8000` лягають у UI без переписування жодного компонента.
-3. **Правило внесення змін:**
-   - Будь-яка зміна імені поля, типу, структури URL або порядку координат **спочатку фіксується в `docs/API_CONTRACT.md`** (зі збільшенням версії, наприклад `1.2` -> `1.3`) і узгоджується між бекендом і фронтендом. Змінювати JSON «тишком» на одній зі сторін заборонено.
+1. **Start (Stage 0):**
+   - **Frontend (Dev 1 + Dev 2):** copy the interfaces from section `4.1` into `frontend/src/types/location.ts`, and the JSON examples from section `2` into `frontend/public/mock/` (`locations.json`, `oman-caroline-bezengi-2026.json`, `contour_t1.geojson`, `sources.geojson`, `targets_t1.geojson`). After that, both frontend developers can work fully autonomously, without waiting for FastAPI to be running.
+   - **Backend:** copies the classes from section `4.2` into `backend/app/schemas.py` and ensures that `prepare_location.py` generates `meta.json`, `.webp`, and `.geojson` strictly according to this contract.
+2. **Integration (Stage 3):**
+   - The frontend switches to `VITE_USE_MOCK=false`, and real data from `http://localhost:8000` lands in the UI without rewriting a single component.
+3. **Change rule:**
+   - Any change to a field name, type, URL structure, or coordinate order **is first recorded in `docs/API_CONTRACT.md`** (with a version bump, for example `1.2` -> `1.3`) and agreed between the backend and the frontend. Changing the JSON "silently" on one side is prohibited.

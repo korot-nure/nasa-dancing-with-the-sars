@@ -60,6 +60,4 @@ Outputs go to `runs/<region>/`:
 - **NISAR S-band data and its downloader.** 41 S-band products over the Oman case were obtained from ISRO Bhoonidhi but have not been analysed yet, so they do not enter any result.
 - **Working notes in Russian.** Their content is summarised in the two documents in `docs/`.
 
-Two other pieces of text are not in English:
-- the per-run markdown report and some figure captions produced by the scripts are in Russian;
-- the location titles, labels and notes for the web application (`nisar_oil/web_specs.py`) are in Ukrainian.
+All texts, including the location titles, labels and notes of the web application (`nisar_oil/web_specs.py`), are in English.

@@ -29,7 +29,7 @@ function lonLatToMini(lon: number, lat: number): [number, number] {
 }
 
 /**
- * [Dev 1 — Lead] SVG-мінікарта світу з інтерактивними пінами подій та регіональним фокусом.
+ * [Dev 1 — Lead] SVG world minimap with interactive event pins and regional focus.
  */
 export function OverviewMinimap({
   locations,

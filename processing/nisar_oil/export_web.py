@@ -263,7 +263,7 @@ def export_location(region, spec, out_dir, max_px=1200, objs=None, srcs=None):
     sfeats = []
     for r in srcs.itertuples() if len(srcs) else []:
         d = float(r.dist_known_source_km) if "dist_known_source_km" in srcs and np.isfinite(r.dist_known_source_km) else None
-        lbl = f"Знайдене джерело №{int(r.rank)}: {int(r.n_dates)} дат" + (f", {d:.1f} км від відомого джерела".replace(".", ",") if d is not None else "")
+        lbl = f"Detected source #{int(r.rank)}: {int(r.n_dates)} dates" + (f", {d:.1f} km from the known source" if d is not None else "")
         sfeats.append({"type": "Feature",
                        "properties": {"kind": "detected", "rank": int(r.rank), "n_dates": int(r.n_dates),
                                       "first_date": str(r.first)[:10], "last_date": str(r.last)[:10],
@@ -272,7 +272,7 @@ def export_location(region, spec, out_dir, max_px=1200, objs=None, srcs=None):
     if spec.get("known_source"):
         sfeats.append({"type": "Feature",
                        "properties": {"kind": "known", "rank": None, "n_dates": None, "first_date": None, "last_date": None,
-                                      "dist_known_km": None, "label": spec.get("known_source_label", "Відоме джерело")},
+                                      "dist_known_km": None, "label": spec.get("known_source_label", "Known source")},
                        "geometry": {"type": "Point", "coordinates": list(spec["known_source"])}})
     (data_dir / "sources.geojson").write_text(json.dumps(_feature_collection(sfeats), ensure_ascii=False))
 

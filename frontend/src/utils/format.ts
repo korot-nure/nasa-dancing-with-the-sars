@@ -1,4 +1,4 @@
-/** Українська множина: pluralUk(1, ["подія", "події", "подій"]) -> "подія". */
+/** Ukrainian plural form: pluralUk(1, ["подія", "події", "подій"]) -> "подія" ("event", one/few/many forms). */
 export function pluralUk(n: number, forms: [string, string, string]): string {
   const mod10 = Math.abs(n) % 10;
   const mod100 = Math.abs(n) % 100;
@@ -7,7 +7,7 @@ export function pluralUk(n: number, forms: [string, string, string]): string {
   return forms[2];
 }
 
-/** Координати [lon, lat] -> "17.5°N 56.0°E" з урахуванням півкуль (S / W для від'ємних). */
+/** Coordinates [lon, lat] -> "17.5°N 56.0°E", hemisphere-aware (S / W for negative values). */
 export function formatLatLon(coords: [number, number], digits = 2, separator = ", "): string {
   const [lon, lat] = coords;
   const latStr = `${Math.abs(lat).toFixed(digits)}°${lat >= 0 ? "N" : "S"}`;

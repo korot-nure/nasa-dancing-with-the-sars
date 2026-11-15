@@ -3,7 +3,7 @@
   "locations": [
     {
       "id": "oman-caroline-bezengi-2026",
-      "title": "Острови Халланіят, Оман",
+      "title": "Hallaniyat Islands, Oman",
       "coords": [
         56.341,
         17.5
@@ -14,7 +14,7 @@
     },
     {
       "id": "green-canyon-600-seeps-2026",
-      "title": "Green Canyon 600, Мексиканська затока",
+      "title": "Green Canyon 600, Gulf of Mexico",
       "coords": [
         -90.5743,
         27.36986
@@ -25,7 +25,7 @@
     },
     {
       "id": "eugene-island-316-2026",
-      "title": "Eugene Island 316, Мексиканська затока",
+      "title": "Eugene Island 316, Gulf of Mexico",
       "coords": [
         -91.61861,
         28.26278
@@ -36,7 +36,7 @@
     },
     {
       "id": "wreck-1487-nantucket-2026",
-      "title": "Wreck 1487, південніше Нантакета (США)",
+      "title": "Wreck 1487, south of Nantucket (USA)",
       "coords": [
         -69.9175,
         40.10056
@@ -47,7 +47,7 @@
     },
     {
       "id": "neft-dashlari-caspian-2026",
-      "title": "Нафтові Камені, Каспійське море",
+      "title": "Neft Daşları (Oil Rocks), Caspian Sea",
       "coords": [
         50.8583,
         40.2361
@@ -58,7 +58,7 @@
     },
     {
       "id": "coal-oil-point-seeps-2026",
-      "title": "Coal Oil Point, протока Санта-Барбара",
+      "title": "Coal Oil Point, Santa Barbara Channel",
       "coords": [
         -119.8833,
         34.4
@@ -69,7 +69,7 @@
     },
     {
       "id": "canary-lee-twin-2026",
-      "title": "Тенерифе – Ла-Гомера (двійник без нафти)",
+      "title": "Tenerife – La Gomera (oil-free twin)",
       "coords": [
         -16.95,
         28.0
@@ -80,7 +80,7 @@
     },
     {
       "id": "baltic-bloom-twin-2026",
-      "title": "Готландська западина, Балтика (двійник без нафти)",
+      "title": "Gotland Basin, Baltic Sea (oil-free twin)",
       "coords": [
         20.05,
         57.3
@@ -91,7 +91,7 @@
     },
     {
       "id": "uae-gem2-umm-al-quwain-2026",
-      "title": "Умм-ель-Кайвайн, ОАЕ",
+      "title": "Umm Al Quwain, UAE",
       "coords": [
         55.45,
         25.65

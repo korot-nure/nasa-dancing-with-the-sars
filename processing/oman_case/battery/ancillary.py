@@ -383,14 +383,14 @@ def quicklook_figure(scene_ids, out_png, view=(55.9, 17.0, 58.4, 18.6)):
         if cu is not None:
             CL, CA = np.meshgrid(cu["lon"], cu["lat"])
             ax.quiver(CL, CA, cu["u"], cu["v"], color="#1f4fd1", scale=6, width=0.003)
-        ax.set_title(f"{sid} ({sc['role']}) {sc['time']} UTC — MUR SST; ERA5 ветер (чёрн.), течения (син.)", fontsize=8)
+        ax.set_title(f"{sid} ({sc['role']}) {sc['time']} UTC — MUR SST; ERA5 wind (black), currents (blue)", fontsize=8)
         ax = axes[r, 1]
         if c["chl_mg_m3"].size:
             im = ax.pcolormesh(c["lon"], c["lat"], c["chl_mg_m3"], cmap="viridis", shading="auto",
                                norm=LogNorm(vmin=0.1, vmax=10))
-            plt.colorbar(im, ax=ax, label="Chl-a, мг/м³", shrink=0.85)
-        ax.set_title(f"Хлорофилл DINEOF (gap-filled), сдвиг {int(c['days_from_scene'])} дн; "
-                     f"реальное покрытие без облаков ±3 дн: {float(c['raw_coverage']):.0%}", fontsize=8)
+            plt.colorbar(im, ax=ax, label="Chl-a, mg/m³", shrink=0.85)
+        ax.set_title(f"Chlorophyll DINEOF (gap-filled), offset {int(c['days_from_scene'])} d; "
+                     f"cloud-free coverage ±3 d: {float(c['raw_coverage']):.0%}", fontsize=8)
         for ax in axes[r]:
             ax.plot(*config.SOURCE_LONLAT, marker="*", color="red", ms=12, mec="k")
             bx = PLUME_BOX
@@ -417,25 +417,25 @@ def timeseries_figure(out_png, scene_ids=None):
     rows = sorted((box_stats(s) for s in scene_ids), key=lambda r: r["time_utc"])
     tt = [datetime.strptime(r["time_utc"], "%Y-%m-%dT%H:%M") for r in rows]
     fig, ax = plt.subplots(4, 1, figsize=(9, 9), dpi=110, sharex=True)
-    ax[0].plot(tt, [r["sst_box_c"] - r["sst_aoi_median_c"] for r in rows], "o-", label="средняя в боксе − медиана района")
-    ax[0].plot(tt, [r["sst_box_min_c"] - r["sst_aoi_median_c"] for r in rows], "v--", label="минимум в боксе − медиана района")
+    ax[0].plot(tt, [r["sst_box_c"] - r["sst_aoi_median_c"] for r in rows], "o-", label="box mean − area median")
+    ax[0].plot(tt, [r["sst_box_min_c"] - r["sst_aoi_median_c"] for r in rows], "v--", label="box minimum − area median")
     ax[0].axhline(0, color="gray", lw=0.6)
     ax[0].set_ylabel("ΔSST, °C")
     ax[0].legend(fontsize=7)
     ax[1].plot(tt, [r.get("chl_box_median", np.nan) / r.get("chl_aoi_median", np.nan) for r in rows], "o-g")
     ax[1].axhline(1, color="gray", lw=0.6)
-    ax[1].set_ylabel("Chl бокс / район")
-    ax[2].plot(tt, [r["wspd_box"] for r in rows], "o-k", label="ERA5 ветер, м/с")
-    ax[2].set_ylabel("ветер, м/с")
+    ax[1].set_ylabel("Chl box / area")
+    ax[2].plot(tt, [r["wspd_box"] for r in rows], "o-k", label="ERA5 wind, m/s")
+    ax[2].set_ylabel("wind, m/s")
     ax2 = ax[2].twinx()
-    ax2.plot(tt, [r["wdir_from_box"] for r in rows], "s:", color="#888", label="направление (откуда), °")
-    ax2.set_ylabel("откуда, °")
+    ax2.plot(tt, [r["wdir_from_box"] for r in rows], "s:", color="#888", label="direction (from), °")
+    ax2.set_ylabel("from, °")
     ax[3].plot(tt, [r.get("cur_speed_box", np.nan) for r in rows], "o-", color="#1f4fd1")
-    ax[3].set_ylabel("течение, м/с")
+    ax[3].set_ylabel("current, m/s")
     for a in ax:
         a.axvline(datetime.strptime(config.GROUNDING_DATE, "%Y-%m-%d"), color="r", ls=":", lw=1)
         a.grid(alpha=0.3)
-    ax[0].set_title("Внешние условия в боксе шлейфа (56.35–57.0° в.д., 17.45–17.95° с.ш.); красная линия — посадка на мель",
+    ax[0].set_title("External conditions in the plume box (56.35–57.0°E, 17.45–17.95°N); red line = grounding",
                     fontsize=9)
     fig.autofmt_xdate()
     fig.tight_layout()
