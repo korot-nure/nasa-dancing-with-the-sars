@@ -25,20 +25,18 @@ interface BaseTileConfig {
 const BASE_TILE_CONFIGS: Record<BaseMapStyle, BaseTileConfig> = {
   dark: {
     label: "Темна",
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     options: {
-      subdomains: "abcd",
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap &copy; CARTO"
+      maxZoom: 16,
+      attribution: "&copy; Esri, HERE, Garmin, OpenStreetMap"
     }
   },
   osm: {
     label: "OSM",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     options: {
-      subdomains: "abc",
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap"
+      attribution: "&copy; OpenStreetMap contributors"
     }
   },
   sat: {
