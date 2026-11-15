@@ -1,5 +1,5 @@
 {
-  "total": 3,
+  "total": 4,
   "locations": [
     {
       "id": "oman-caroline-bezengi-2026",
@@ -32,6 +32,17 @@
       ],
       "baseline_date": "2026-01-20",
       "latest_date": "2026-10-14",
+      "area_km2": 0.0
+    },
+    {
+      "id": "wreck-1487-nantucket-2026",
+      "title": "Wreck 1487, південніше Нантакета (США)",
+      "coords": [
+        -69.9175,
+        40.10056
+      ],
+      "baseline_date": "2026-07-22",
+      "latest_date": "2026-10-31",
       "area_km2": 0.0
     }
   ]

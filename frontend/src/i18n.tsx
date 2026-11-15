@@ -62,6 +62,7 @@ const EN_LOCATION_TITLES: Record<string, string> = {
   "oman-caroline-bezengi-2026": "Al Hallaniyat Islands, Oman",
   "green-canyon-600-seeps-2026": "Green Canyon 600, Gulf of Mexico",
   "eugene-island-316-2026": "Eugene Island 316, Gulf of Mexico",
+  "wreck-1487-nantucket-2026": "Wreck 1487, South of Nantucket (USA)",
 };
 
 const EN_LOCATION_DESCRIPTIONS: Record<string, string> = {
@@ -71,6 +72,8 @@ const EN_LOCATION_DESCRIPTIONS: Record<string, string> = {
     "Natural hydrocarbon seeps in the northern Gulf of Mexico producing recurring surface slicks tracked across NISAR L2 GCOV acquisitions.",
   "eugene-island-316-2026":
     "Offshore infrastructure and surface slick monitoring in the Eugene Island 316 block, Gulf of Mexico, using calibrated NISAR L-band backscatter.",
+  "wreck-1487-nantucket-2026":
+    "Submerged wreck (Wreck 1487) ~90 NM south of Nantucket producing chronic small oil slicks (0.02–6.5 km²). NISAR L-band VV 5 MHz imagery tests detection limits near small point sources.",
 };
 
 export function localizeTitle(id: string, rawTitle: string, lang: Lang): string {
@@ -96,6 +99,8 @@ const EN_SNAPSHOT_LABELS: Record<string, string> = {
   "Слід від точки ще до першого повідомлення NOAA": "Pre-NOAA trace near source",
   "Без незалежного підтвердження": "No independent confirmation",
   "Пляму біля вента видно на знімку": "Slick visible near vent",
+  "Пляму біля судна видно на знімку": "Slick visible near wreck",
+  "Аналітики NOAA бачили пляму цього дня": "NOAA analysts observed slick",
   "Sentinel-1 бачив пляму цього дня": "Sentinel-1 observed slick",
 };
 
@@ -136,6 +141,7 @@ const NOTE_REPLACEMENTS: [string, string][] = [
   ],
   ["Вітер біля точки витоку", "Wind near source"],
   ["Вітер біля вента", "Wind near vent"],
+  ["Вітер біля судна", "Wind near wreck"],
   ["(ERA5)", "(ERA5)"],
   ["м/с", "m/s"],
   ["майже штиль: темні ділянки можуть бути не нафтою.", "near-calm: dark patches may be non-oil lookalikes."],
@@ -143,10 +149,13 @@ const NOTE_REPLACEMENTS: [string, string][] = [
   ["Аналітики NOAA бачили пляму в цей день на знімках інших супутників.", "NOAA analysts observed the slick on other satellite imagery this day."],
   ["Візуально на знімку видно пляму біля точки витоку.", "Slick is visually discernible near the source."],
   ["Візуально на знімку видно пляму біля вента.", "Slick is visually discernible near the vent."],
+  ["Візуально на знімку видно пляму біля судна.", "Slick is visually discernible near the wreck."],
   ["Конвеєр пляму біля точки витоку не виділяє.", "Pipeline does not segment the slick near the source."],
   ["Конвеєр пляму біля вента не виділяє.", "Pipeline does not segment the slick near the vent."],
+  ["Конвеєр пляму біля судна не виділяє.", "Pipeline does not segment the slick near the wreck."],
   ["Конвеєр виділяє пляму біля точки витоку", "Pipeline segments the slick near the source"],
   ["Конвеєр виділяє пляму біля вента", "Pipeline segments the slick near the vent"],
+  ["Конвеєр виділяє пляму біля судна", "Pipeline segments the slick near the wreck"],
   ["«схоже на нафту»", '"probable oil"'],
   ["«можливо нафта»", '"possible oil"'],
   ["оцінка", "score"],

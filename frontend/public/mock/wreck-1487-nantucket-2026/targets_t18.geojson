@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"kind": "ship", "snr_db": 15.8, "date": "2026-10-26"}, "geometry": {"type": "Point", "coordinates": [-69.995, 40.43016]}}]}
