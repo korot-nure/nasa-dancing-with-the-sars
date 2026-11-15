@@ -63,6 +63,11 @@ const EN_LOCATION_TITLES: Record<string, string> = {
   "green-canyon-600-seeps-2026": "Green Canyon 600, Gulf of Mexico",
   "eugene-island-316-2026": "Eugene Island 316, Gulf of Mexico",
   "wreck-1487-nantucket-2026": "Wreck 1487, South of Nantucket (USA)",
+  "neft-dashlari-caspian-2026": "Neft Dashlari, Caspian Sea",
+  "coal-oil-point-seeps-2026": "Coal Oil Point, Santa Barbara Channel",
+  "canary-lee-twin-2026": "Tenerife – La Gomera (non-oil lookalike)",
+  "baltic-bloom-twin-2026": "Gotland Basin, Baltic Sea (non-oil lookalike)",
+  "uae-gem2-umm-al-quwain-2026": "Umm Al Quwain, UAE",
 };
 
 const EN_LOCATION_DESCRIPTIONS: Record<string, string> = {
@@ -74,6 +79,16 @@ const EN_LOCATION_DESCRIPTIONS: Record<string, string> = {
     "Offshore infrastructure and surface slick monitoring in the Eugene Island 316 block, Gulf of Mexico, using calibrated NISAR L-band backscatter.",
   "wreck-1487-nantucket-2026":
     "Submerged wreck (Wreck 1487) ~90 NM south of Nantucket producing chronic small oil slicks (0.02–6.5 km²). NISAR L-band VV 5 MHz imagery tests detection limits near small point sources.",
+  "neft-dashlari-caspian-2026":
+    "Neft Dashlari offshore pile-mounted oilfield in the Caspian Sea (operating since 1949). NISAR L-band (HH, 20/40 MHz) captures recurring slicks from platforms, pipelines, and natural seeps.",
+  "coal-oil-point-seeps-2026":
+    "One of the world's largest natural marine oil seep fields off California (100–150 bbl/day). NISAR L-band tracks surface slicks near the seeps and offshore platforms.",
+  "canary-lee-twin-2026":
+    "Non-oil control site: wind shadow behind Tenerife in the channel toward La Gomera. Calm lee zones create dark radar lookalikes—demonstrating false-positive behavior with zero oil production.",
+  "baltic-bloom-twin-2026":
+    "Non-oil control site: summer 2026 cyanobacteria bloom in the Baltic Sea (SMHI report #8). Surface algae dampen capillary waves and appear dark on SAR—testing false-alarm rates.",
+  "uae-gem2-umm-al-quwain-2026":
+    "Supertanker GEM No. 2 incident ~25 km off Umm Al Quwain (Oct 2026), with shoreline impact on Oct 22 and leak stoppage on Oct 30. Pre-Oct 9 passes serve as clean baselines.",
 };
 
 export function localizeTitle(id: string, rawTitle: string, lang: Lang): string {
@@ -100,8 +115,17 @@ const EN_SNAPSHOT_LABELS: Record<string, string> = {
   "Без незалежного підтвердження": "No independent confirmation",
   "Пляму біля вента видно на знімку": "Slick visible near vent",
   "Пляму біля судна видно на знімку": "Slick visible near wreck",
+  "Пляму біля сипів видно на знімку": "Slick visible near seeps",
+  "Пляму біля промислу видно на знімку": "Slick visible near oilfield",
   "Аналітики NOAA бачили пляму цього дня": "NOAA analysts observed slick",
   "Sentinel-1 бачив пляму цього дня": "Sentinel-1 observed slick",
+  "Цвітіння ціанобактерій: нафти немає": "Cyanobacteria bloom: no oil",
+  "Вітрова тінь: нафти немає": "Wind shadow: no oil",
+  "Виток триває": "Leak ongoing",
+  "Виток: Sentinel-1 бачив пляму цього дня": "Leak: Sentinel-1 observed slick",
+  "До ураження танкера (контроль)": "Pre-incident (control)",
+  "Після зупинки витоку (30.10): залишки плями": "Post-stoppage (30.10): residual slick",
+  "Після ураження танкера, до помітного витоку": "Post-strike, before visible leak",
 };
 
 export function localizeSnapshotLabel(rawLabel: string, lang: Lang): string {
@@ -142,6 +166,9 @@ const NOTE_REPLACEMENTS: [string, string][] = [
   ["Вітер біля точки витоку", "Wind near source"],
   ["Вітер біля вента", "Wind near vent"],
   ["Вітер біля судна", "Wind near wreck"],
+  ["Вітер біля сипів", "Wind near seeps"],
+  ["Вітер біля промислу", "Wind near oilfield"],
+  ["Вітер", "Wind"],
   ["(ERA5)", "(ERA5)"],
   ["м/с", "m/s"],
   ["майже штиль: темні ділянки можуть бути не нафтою.", "near-calm: dark patches may be non-oil lookalikes."],

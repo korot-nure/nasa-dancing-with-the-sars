@@ -1,5 +1,5 @@
 {
-  "total": 4,
+  "total": 9,
   "locations": [
     {
       "id": "oman-caroline-bezengi-2026",
@@ -43,6 +43,61 @@
       ],
       "baseline_date": "2026-07-22",
       "latest_date": "2026-10-31",
+      "area_km2": 0.0
+    },
+    {
+      "id": "neft-dashlari-caspian-2026",
+      "title": "Нафтові Камені, Каспійське море",
+      "coords": [
+        50.8583,
+        40.2361
+      ],
+      "baseline_date": "2026-07-12",
+      "latest_date": "2026-11-02",
+      "area_km2": 0.0
+    },
+    {
+      "id": "coal-oil-point-seeps-2026",
+      "title": "Coal Oil Point, протока Санта-Барбара",
+      "coords": [
+        -119.8833,
+        34.4
+      ],
+      "baseline_date": "2026-07-22",
+      "latest_date": "2026-11-01",
+      "area_km2": 0.0
+    },
+    {
+      "id": "canary-lee-twin-2026",
+      "title": "Тенерифе – Ла-Гомера (двійник без нафти)",
+      "coords": [
+        -16.95,
+        28.0
+      ],
+      "baseline_date": "2026-10-17",
+      "latest_date": "2026-11-03",
+      "area_km2": 0.0
+    },
+    {
+      "id": "baltic-bloom-twin-2026",
+      "title": "Готландська западина, Балтика (двійник без нафти)",
+      "coords": [
+        20.05,
+        57.3
+      ],
+      "baseline_date": "2026-07-13",
+      "latest_date": "2026-08-30",
+      "area_km2": 0.0
+    },
+    {
+      "id": "uae-gem2-umm-al-quwain-2026",
+      "title": "Умм-ель-Кайвайн, ОАЕ",
+      "coords": [
+        55.45,
+        25.65
+      ],
+      "baseline_date": "2026-09-03",
+      "latest_date": "2026-11-02",
       "area_km2": 0.0
     }
   ]
