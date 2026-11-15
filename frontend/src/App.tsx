@@ -204,7 +204,7 @@ export function App() {
             onSelectLocation={handleSelectLocation}
           />
 
-          <div className="sidebar-scroll">
+          <div className="sidebar-details-scroll">
             <EventDetailsCard
               detail={state.activeDetail}
               activeStepIdx={state.activeStepIdx}

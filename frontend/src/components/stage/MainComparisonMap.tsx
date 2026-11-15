@@ -22,6 +22,11 @@ interface BaseTileConfig {
   options: L.TileLayerOptions;
 }
 
+const WORLD_BOUNDS: L.LatLngBoundsLiteral = [
+  [-85.05112878, -180],
+  [85.05112878, 180]
+];
+
 const BASE_TILE_CONFIGS: Record<BaseMapStyle, BaseTileConfig> = {
   dark: {
     label: "Темна",
@@ -206,9 +211,15 @@ export function MainComparisonMap({
 
     const map = L.map(container, {
       zoomControl: false,
-      attributionControl: true
+      attributionControl: true,
+      minZoom: 3,
+      maxBounds: WORLD_BOUNDS,
+      maxBoundsViscosity: 1.0,
+      bounceAtZoomLimits: false
     });
-    map.setView([20, 15], 3);
+    const initialMinZoom = Math.max(3, map.getBoundsZoom(WORLD_BOUNDS, true));
+    map.setMinZoom(initialMinZoom);
+    map.setView([20, 15], initialMinZoom);
 
     const sarPane = map.createPane("sarRightPane");
     sarPane.style.zIndex = "410";
@@ -243,6 +254,12 @@ export function MainComparisonMap({
 
     const resizeObserver = new ResizeObserver(() => {
       map.invalidateSize();
+      const minZ = Math.max(3, map.getBoundsZoom(WORLD_BOUNDS, true));
+      map.setMinZoom(minZ);
+      if (map.getZoom() < minZ) {
+        map.setZoom(minZ, { animate: false });
+      }
+      map.panInsideBounds(WORLD_BOUNDS, { animate: false });
       handleViewChange();
     });
     resizeObserver.observe(container);
@@ -278,7 +295,11 @@ export function MainComparisonMap({
     }
 
     const cfg = BASE_TILE_CONFIGS[baseStyle];
-    const layer = L.tileLayer(cfg.url, cfg.options).addTo(map);
+    const layer = L.tileLayer(cfg.url, {
+      ...cfg.options,
+      noWrap: true,
+      bounds: WORLD_BOUNDS
+    }).addTo(map);
     baseLayerRef.current = layer;
   }, [baseStyle]);
 
