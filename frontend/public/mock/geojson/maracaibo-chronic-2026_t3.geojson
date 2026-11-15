@@ -64,7 +64,27 @@
       "properties": {
         "location_id": "maracaibo-chronic-2026",
         "step_id": "t3",
-        "area_km2": 264.0
+        "slick_id": "t3-01",
+        "area_km2": 264.0,
+        "class": "probable",
+        "score": 0.76,
+        "flags": ["low_wind"]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "location_id": "maracaibo-chronic-2026",
+        "step_id": "t3",
+        "slick_id": "t3-02",
+        "area_km2": 8.4,
+        "class": "possible",
+        "score": 0.36,
+        "flags": ["low_wind", "near_coast"]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-71.81, 9.86], [-71.77, 9.87], [-71.78, 9.89], [-71.82, 9.88], [-71.81, 9.86]]]
       }
     }
   ],

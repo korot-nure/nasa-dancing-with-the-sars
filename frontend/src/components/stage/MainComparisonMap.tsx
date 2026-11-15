@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { fetchGeoJson } from "../../api/locationsApi";
-import type { LocationDetail, SpillContourFeatureCollection } from "../../types/location";
+import {
+  fetchGeoJson,
+  fetchSourcesGeoJson,
+  fetchTargetsGeoJson
+} from "../../api/locationsApi";
+import type {
+  LocationDetail,
+  SpillContourFeature,
+  SpillContourFeatureCollection,
+  SpillContourProperties,
+  TargetProperties
+} from "../../types/location";
 import { SplitCurtainControl } from "./SplitCurtainControl";
 
 export interface MainComparisonMapProps {
@@ -67,15 +77,23 @@ function bboxToLeafletBounds(bbox: [number, number, number, number]): L.LatLngBo
 }
 
 function extractCentroid(fc: SpillContourFeatureCollection): [number, number] | null {
-  const firstFeature = fc.features[0];
-  if (!firstFeature) return null;
+  const candidates: SpillContourFeature[] = fc.features.filter(
+    (f) => f.properties.class !== "possible"
+  );
+  const pool = candidates.length > 0 ? candidates : fc.features;
+  const primaryFeature = pool.reduce<SpillContourFeature | null>(
+    (best, cur) =>
+      !best || cur.properties.area_km2 > best.properties.area_km2 ? cur : best,
+    null
+  );
+  if (!primaryFeature) return null;
 
   let ring: number[][] | undefined;
-  if (firstFeature.geometry.type === "Polygon") {
-    const coords = firstFeature.geometry.coordinates as number[][][];
+  if (primaryFeature.geometry.type === "Polygon") {
+    const coords = primaryFeature.geometry.coordinates as number[][][];
     ring = coords[0];
-  } else if (firstFeature.geometry.type === "MultiPolygon") {
-    const coords = firstFeature.geometry.coordinates as number[][][][];
+  } else if (primaryFeature.geometry.type === "MultiPolygon") {
+    const coords = primaryFeature.geometry.coordinates as number[][][][];
     ring = coords[0]?.[0];
   }
 
@@ -121,11 +139,44 @@ function buildArrowHead(
   return [[wing1Lat, wing1Lon], toPt, [wing2Lat, wing2Lon]];
 }
 
+const TARGET_STYLE_MAP: Record<
+  TargetProperties["kind"],
+  { label: string; color: string; radius: number }
+> = {
+  ship: { label: "Судно", color: "#38bdf8", radius: 3.5 },
+  platform: { label: "Платформа / об'єкт", color: "#f59e0b", radius: 4 },
+  coastal: { label: "Берегова споруда", color: "#94a3b8", radius: 3 }
+};
+
+function contourStyleForFeature(
+  renderer: L.SVG,
+  props: SpillContourProperties | undefined,
+  opacity: number
+): L.PathOptions {
+  if (props?.class === "possible") {
+    return {
+      renderer,
+      color: "#fbbf24",
+      weight: 1.6,
+      dashArray: "4 4",
+      fillColor: "#fbbf24",
+      fillOpacity: 0
+    };
+  }
+  return {
+    renderer,
+    color: "#ef4444",
+    weight: 2.2,
+    fillColor: "#ef4444",
+    fillOpacity: Math.min(0.45, opacity * 0.35)
+  };
+}
+
 /**
  * [Dev 1 — Lead] Головна карта Leaflet:
- * - Ліворуч від шторки: базова підкладка (Темна / OSM / Супутник)
+ * - Ліворуч від шторки (`sarLeftPane`): базова підкладка + парний SAR «До» (`before_url`)
  * - Праворуч від шторки (`sarRightPane` із `clip: rect(...)`):
- *   SAR-шар (T0 або after_<step>) + маска розливу + GeoJSON-контур + траєкторія дрейфу
+ *   SAR «Після» (`after_url`) + маска розливу + GeoJSON-контури (`probable`/`possible`) + траєкторія дрейфу
  */
 export function MainComparisonMap({
   detail,
@@ -138,11 +189,15 @@ export function MainComparisonMap({
 }: MainComparisonMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const sarLeftPaneRef = useRef<HTMLElement | null>(null);
   const sarPaneRef = useRef<HTMLElement | null>(null);
   const sarRendererRef = useRef<L.SVG | null>(null);
 
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const referenceGroupRef = useRef<L.LayerGroup | null>(null);
+  const sourcesGroupRef = useRef<L.LayerGroup | null>(null);
+  const targetsGroupRef = useRef<L.LayerGroup | null>(null);
+  const beforeImageLayerRef = useRef<L.ImageOverlay | null>(null);
   const sarImageLayerRef = useRef<L.ImageOverlay | null>(null);
   const maskImageLayerRef = useRef<L.ImageOverlay | null>(null);
   const vectorGroupRef = useRef<L.LayerGroup | null>(null);
@@ -165,6 +220,7 @@ export function MainComparisonMap({
 
   const updateClip = useCallback(() => {
     const map = mapRef.current;
+    const sarLeftPane = sarLeftPaneRef.current;
     const sarPane = sarPaneRef.current;
     if (!map || !sarPane) return;
 
@@ -172,9 +228,14 @@ export function MainComparisonMap({
     if (size.x <= 0 || size.y <= 0) return;
 
     const splitX = Math.round(size.x * splitRatioRef.current);
-    const nw = map.containerPointToLayerPoint([splitX, 0]);
+    const nw = map.containerPointToLayerPoint([0, 0]);
+    const splitPt = map.containerPointToLayerPoint([splitX, 0]);
     const se = map.containerPointToLayerPoint([size.x, size.y]);
-    sarPane.style.clip = `rect(${nw.y}px, ${se.x}px, ${se.y}px, ${nw.x}px)`;
+
+    if (sarLeftPane) {
+      sarLeftPane.style.clip = `rect(${nw.y}px, ${splitPt.x}px, ${se.y}px, ${nw.x}px)`;
+    }
+    sarPane.style.clip = `rect(${nw.y}px, ${se.x}px, ${se.y}px, ${splitPt.x}px)`;
   }, []);
 
   const updateScaleBar = useCallback(() => {
@@ -221,18 +282,27 @@ export function MainComparisonMap({
     map.setMinZoom(initialMinZoom);
     map.setView([20, 15], initialMinZoom);
 
+    const sarLeftPane = map.createPane("sarLeftPane");
+    sarLeftPane.style.zIndex = "405";
+    sarLeftPane.style.pointerEvents = "none";
+
     const sarPane = map.createPane("sarRightPane");
     sarPane.style.zIndex = "410";
     sarPane.style.pointerEvents = "none";
 
     const sarRenderer = L.svg({ pane: "sarRightPane" });
     const referenceGroup = L.layerGroup().addTo(map);
+    const sourcesGroup = L.layerGroup().addTo(map);
+    const targetsGroup = L.layerGroup().addTo(map);
     const vectorGroup = L.layerGroup().addTo(map);
 
     mapRef.current = map;
+    sarLeftPaneRef.current = sarLeftPane;
     sarPaneRef.current = sarPane;
     sarRendererRef.current = sarRenderer;
     referenceGroupRef.current = referenceGroup;
+    sourcesGroupRef.current = sourcesGroup;
+    targetsGroupRef.current = targetsGroup;
     vectorGroupRef.current = vectorGroup;
 
     const handleViewChange = () => {
@@ -273,10 +343,14 @@ export function MainComparisonMap({
       map.off("mouseout", handleMouseOut);
       map.remove();
       mapRef.current = null;
+      sarLeftPaneRef.current = null;
       sarPaneRef.current = null;
       sarRendererRef.current = null;
       baseLayerRef.current = null;
       referenceGroupRef.current = null;
+      sourcesGroupRef.current = null;
+      targetsGroupRef.current = null;
+      beforeImageLayerRef.current = null;
       sarImageLayerRef.current = null;
       maskImageLayerRef.current = null;
       vectorGroupRef.current = null;
@@ -308,13 +382,15 @@ export function MainComparisonMap({
     updateClip();
   }, [splitRatio, updateClip]);
 
-  // 4. Позиціонування камери та маркер епіцентру при зміні події
+  // 4. Позиціонування камери, маркер епіцентру та опціональний шар джерел (sources.geojson)
   useEffect(() => {
     const map = mapRef.current;
     const referenceGroup = referenceGroupRef.current;
-    if (!map || !referenceGroup) return;
+    const sourcesGroup = sourcesGroupRef.current;
+    if (!map || !referenceGroup || !sourcesGroup) return;
 
     referenceGroup.clearLayers();
+    sourcesGroup.clearLayers();
 
     if (!detail) {
       lastFittedIdRef.current = null;
@@ -346,13 +422,54 @@ export function MainComparisonMap({
       updateClip();
       updateScaleBar();
     }
+
+    if (!detail.sources_geojson_url) {
+      return;
+    }
+
+    let cancelled = false;
+    const sourcesUrl = detail.sources_geojson_url;
+
+    async function loadSources() {
+      try {
+        const fc = await fetchSourcesGeoJson(sourcesUrl);
+        if (cancelled || !sourcesGroupRef.current) return;
+        const targetGroup = sourcesGroupRef.current;
+        targetGroup.clearLayers();
+
+        for (const feat of fc.features) {
+          const [lon, lat] = feat.geometry.coordinates;
+          const isDetected = feat.properties.kind === "detected";
+          L.circleMarker([lat, lon], {
+            radius: isDetected ? 5.5 : 5,
+            color: "#09090b",
+            weight: 1.5,
+            fillColor: isDetected ? "#22d3ee" : "#f97316",
+            fillOpacity: 0.95
+          })
+            .bindTooltip(feat.properties.label, { direction: "top", opacity: 0.95 })
+            .addTo(targetGroup);
+        }
+      } catch {
+        // Опціональний шар джерел не має блокувати карту
+      }
+    }
+
+    loadSources();
+    return () => {
+      cancelled = true;
+    };
   }, [detail, updateClip, updateScaleBar]);
 
-  // 5. Растрові шари SAR і маски розливу в панелі праворуч від шторки
+  // 5. Растрові шари SAR «До» (ліворуч), SAR «Після» (праворуч) і маски розливу
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
+    if (beforeImageLayerRef.current) {
+      beforeImageLayerRef.current.remove();
+      beforeImageLayerRef.current = null;
+    }
     if (sarImageLayerRef.current) {
       sarImageLayerRef.current.remove();
       sarImageLayerRef.current = null;
@@ -366,9 +483,16 @@ export function MainComparisonMap({
 
     const bounds = bboxToLeafletBounds(detail.bbox);
     const snap = activeStepIdx >= 0 ? detail.snapshots[activeStepIdx] ?? null : null;
-    const sarUrl = snap ? snap.after_url : detail.baseline_before_url;
+    const beforeUrl = snap ? snap.before_url : detail.baseline_before_url;
+    const afterUrl = snap ? snap.after_url : detail.baseline_before_url;
 
-    sarImageLayerRef.current = L.imageOverlay(sarUrl, bounds, {
+    beforeImageLayerRef.current = L.imageOverlay(beforeUrl, bounds, {
+      pane: "sarLeftPane",
+      opacity: 0.9,
+      interactive: false
+    }).addTo(map);
+
+    sarImageLayerRef.current = L.imageOverlay(afterUrl, bounds, {
       pane: "sarRightPane",
       opacity: 0.9,
       interactive: false
@@ -385,14 +509,18 @@ export function MainComparisonMap({
     updateClip();
   }, [detail, activeStepIdx, updateClip]);
 
-  // 6. Плавне оновлення прозорості маски та заливки контуру
+  // 6. Плавне оновлення прозорості маски та заливки контуру (без заливки для possible)
   useEffect(() => {
     if (maskImageLayerRef.current) {
       maskImageLayerRef.current.setOpacity(spillOpacity);
     }
     if (activeContourLayerRef.current) {
-      activeContourLayerRef.current.setStyle({
-        fillOpacity: Math.min(0.45, spillOpacity * 0.35)
+      activeContourLayerRef.current.setStyle((feature) => {
+        const isPossible =
+          (feature?.properties as SpillContourProperties | undefined)?.class === "possible";
+        return {
+          fillOpacity: isPossible ? 0 : Math.min(0.45, spillOpacity * 0.35)
+        };
       });
     }
   }, [spillOpacity]);
@@ -427,11 +555,17 @@ export function MainComparisonMap({
         group.clearLayers();
         activeContourLayerRef.current = null;
 
-        // Попередні пунктирні контури для відображення історії розтікання
+        // Попередні пунктирні контури (клас probable) для відображення історії розтікання
         if (showTrajectory && collections.length > 1) {
           for (let i = 0; i < collections.length - 1; i += 1) {
             const histFc = collections[i];
-            L.geoJSON(histFc as unknown as Parameters<typeof L.geoJSON>[0], {
+            const probableOnly: SpillContourFeatureCollection = {
+              type: "FeatureCollection",
+              features: histFc.features.filter((f) => f.properties.class !== "possible")
+            };
+            if (probableOnly.features.length === 0) continue;
+
+            L.geoJSON(probableOnly as unknown as Parameters<typeof L.geoJSON>[0], {
               pane: "sarRightPane",
               interactive: false,
               style: () => ({
@@ -446,19 +580,18 @@ export function MainComparisonMap({
           }
         }
 
-        // Активний векторний контур поточного кроку
+        // Активний векторний контур поточного кроку (probable = суцільний #ef4444, possible = пунктир без заливки)
         if (showContour && collections.length > 0) {
           const currentFc = collections[collections.length - 1];
           const contourLayer = L.geoJSON(currentFc as unknown as Parameters<typeof L.geoJSON>[0], {
             pane: "sarRightPane",
             interactive: false,
-            style: () => ({
-              renderer,
-              color: "#ef4444",
-              weight: 2.2,
-              fillColor: "#ef4444",
-              fillOpacity: Math.min(0.45, spillOpacityRef.current * 0.35)
-            })
+            style: (feature) =>
+              contourStyleForFeature(
+                renderer,
+                feature?.properties as SpillContourProperties | undefined,
+                spillOpacityRef.current
+              )
           }).addTo(group);
           activeContourLayerRef.current = contourLayer;
         }
@@ -527,6 +660,54 @@ export function MainComparisonMap({
     };
   }, [detail, activeStepIdx, showContour, showTrajectory, updateClip]);
 
+  // 8. Опціональні точкові цілі на дату знімка (targets_<step_id>.geojson)
+  useEffect(() => {
+    const targetsGroup = targetsGroupRef.current;
+    if (!targetsGroup) return;
+
+    targetsGroup.clearLayers();
+
+    if (!activeSnap?.targets_geojson_url) {
+      return;
+    }
+
+    let cancelled = false;
+    const targetsUrl = activeSnap.targets_geojson_url;
+
+    async function loadTargets() {
+      try {
+        const fc = await fetchTargetsGeoJson(targetsUrl);
+        if (cancelled || !targetsGroupRef.current) return;
+        const targetLayerGroup = targetsGroupRef.current;
+        targetLayerGroup.clearLayers();
+
+        for (const feat of fc.features) {
+          const [lon, lat] = feat.geometry.coordinates;
+          const cfg = TARGET_STYLE_MAP[feat.properties.kind] ?? TARGET_STYLE_MAP.ship;
+          L.circleMarker([lat, lon], {
+            radius: cfg.radius,
+            color: "#09090b",
+            weight: 1,
+            fillColor: cfg.color,
+            fillOpacity: 0.9
+          })
+            .bindTooltip(`${cfg.label} · +${feat.properties.snr_db.toFixed(1)} dB (${feat.properties.date})`, {
+              direction: "top",
+              opacity: 0.95
+            })
+            .addTo(targetLayerGroup);
+        }
+      } catch {
+        // Опціональний шар цілей не має блокувати карту
+      }
+    }
+
+    loadTargets();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSnap]);
+
   const handleZoomIn = () => mapRef.current?.zoomIn();
   const handleZoomOut = () => mapRef.current?.zoomOut();
 
@@ -542,7 +723,7 @@ export function MainComparisonMap({
 
       <SplitCurtainControl splitRatio={splitRatio} onSplitChange={onSplitChange} />
 
-      {/* Лівий верхній бейдж + перемикач підкладки */}
+      {/* Лівий верхній бейдж SAR «До» + перемикач підкладки */}
       <div
         style={{
           position: "absolute",
@@ -550,6 +731,7 @@ export function MainComparisonMap({
           left: 12,
           zIndex: 440,
           display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
           gap: 6,
           padding: "4px 8px",
@@ -564,13 +746,19 @@ export function MainComparisonMap({
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: "0.05em",
-            color: "var(--accent-signal)",
-            paddingRight: 4,
-            borderRight: "1px solid var(--border)"
+            color: "var(--accent-signal)"
           }}
         >
-          ЗВИЧАЙНА КАРТА
+          SAR ДО
         </span>
+        {detail && (
+          <span className="mono" style={{ fontSize: 10, color: "var(--text-secondary)" }}>
+            {activeSnap
+              ? `${activeSnap.before_date} · ${activeSnap.track} · ${activeSnap.polarization}`
+              : `${detail.baseline_date} · БАЗА`}
+          </span>
+        )}
+        <span style={{ color: "var(--border-strong)", fontSize: 10 }}>|</span>
 
         {(Object.keys(BASE_TILE_CONFIGS) as BaseMapStyle[]).map((styleKey) => {
           const isActive = baseStyle === styleKey;
@@ -595,7 +783,7 @@ export function MainComparisonMap({
         })}
       </div>
 
-      {/* Правий верхній бейдж SAR */}
+      {/* Правий верхній бейдж SAR «Після» */}
       <div
         className="mono"
         style={{
@@ -615,13 +803,16 @@ export function MainComparisonMap({
           pointerEvents: "none"
         }}
       >
-        <span style={{ color: "var(--accent-spill)", fontWeight: 600 }}>SAR РАДАР</span>
+        <span style={{ color: "var(--accent-spill)", fontWeight: 600 }}>SAR ПІСЛЯ</span>
         <span style={{ color: "var(--border-strong)" }}>|</span>
         {detail ? (
           activeSnap ? (
             <>
               <span>{activeSnap.step_id.toUpperCase()}</span>
               <span>{activeSnap.date}</span>
+              <span style={{ color: "var(--text-muted)" }}>
+                {activeSnap.track} · {activeSnap.polarization}
+              </span>
               <span style={{ color: "var(--text-secondary)" }}>{activeSnap.area_km2.toFixed(1)} км²</span>
             </>
           ) : (

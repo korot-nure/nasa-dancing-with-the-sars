@@ -185,6 +185,13 @@ export function EventDetailsCard({
 
   const snapCount = snapshots.length;
   const stageBadgeText = snapCount > 0 ? `${stageBadge} / T${snapCount}` : "T0";
+  const trackPolText = activeSnap
+    ? `${activeSnap.track} · ${activeSnap.polarization}`
+    : firstSnap
+      ? `${firstSnap.track} · ${firstSnap.polarization}`
+      : "—";
+  const pairBeforeDate = (activeSnap ? activeSnap.before_date : detail.baseline_date) || "—";
+  const activeNote = activeSnap?.note?.trim() ?? "";
   const description = detail.description?.trim() ?? "";
   const sourceUrl = detail.source_url?.trim() ?? "";
 
@@ -294,12 +301,13 @@ export function EventDetailsCard({
         </div>
 
         <div className="kv-cell">
-          <div className="kv-label">Динаміка серії</div>
-          <div className="kv-val">
-            <span className="mono">{snapCount}</span> {pluralUk(snapCount, ["знімок", "знімки", "знімків"])}
+          <div className="kv-label">Трек і серія</div>
+          <div className="kv-val mono" style={{ fontSize: "12px" }}>{trackPolText}</div>
+          <div className="kv-sub">
+            Пара «До»: <span className="mono">{pairBeforeDate}</span>
           </div>
           <div className="kv-sub">
-            Старт T1: <span className="mono">{firstSnap?.date ?? "—"}</span>
+            Серія: <span className="mono">{snapCount}</span> {pluralUk(snapCount, ["знімок", "знімки", "знімків"])}
           </div>
         </div>
       </div>
@@ -312,6 +320,44 @@ export function EventDetailsCard({
           gap: "10px",
         }}
       >
+        {activeNote && (
+          <div
+            role="note"
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "8px",
+              padding: "7px 9px",
+              border: "1px solid var(--border-strong)",
+              borderLeft: "2px solid #fbbf24",
+              borderRadius: "4px",
+              background: "var(--bg-surface)",
+              fontSize: "11px",
+              lineHeight: 1.4,
+              color: "var(--text-primary)",
+            }}
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+              style={{ flexShrink: 0, marginTop: "1px", color: "#fbbf24" }}
+            >
+              <path
+                d="M8 2L14.5 13.5H1.5L8 2Z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinejoin="round"
+              />
+              <path d="M8 6.5V9.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              <circle cx="8" cy="11.5" r="0.7" fill="currentColor" />
+            </svg>
+            <span>{activeNote}</span>
+          </div>
+        )}
+
         {description && (
           <p
             style={{

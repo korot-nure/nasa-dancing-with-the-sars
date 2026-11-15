@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "kind": "platform", "snr_db": 27.0, "date": "2026-09-10" },
+      "geometry": { "type": "Point", "coordinates": [56.341, 17.5] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "kind": "ship", "snr_db": 19.5, "date": "2026-09-10" },
+      "geometry": { "type": "Point", "coordinates": [57.12, 17.83] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "kind": "ship", "snr_db": 14.8, "date": "2026-09-10" },
+      "geometry": { "type": "Point", "coordinates": [57.45, 17.95] }
+    }
+  ]
+}

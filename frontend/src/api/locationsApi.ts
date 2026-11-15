@@ -2,13 +2,17 @@ import type {
   LocationDetail,
   LocationsListResponse,
   LocationSummary,
-  SpillContourFeatureCollection
+  SourceFeatureCollection,
+  SpillContourFeatureCollection,
+  TargetFeatureCollection
 } from "../types/location";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
 
 const detailCache = new Map<string, Promise<LocationDetail>>();
 const geoJsonCache = new Map<string, Promise<SpillContourFeatureCollection>>();
+const sourcesCache = new Map<string, Promise<SourceFeatureCollection>>();
+const targetsCache = new Map<string, Promise<TargetFeatureCollection>>();
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -18,42 +22,42 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+function fetchCachedJson<T>(cache: Map<string, Promise<T>>, key: string, url: string): Promise<T> {
+  const cached = cache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  const request = fetchJson<T>(url).catch((err) => {
+    cache.delete(key);
+    throw err;
+  });
+
+  cache.set(key, request);
+  return request;
+}
+
 export async function fetchLocations(): Promise<LocationSummary[]> {
   const url = USE_MOCK ? "/mock/locations.json" : "/api/v1/locations";
   const data = await fetchJson<LocationsListResponse>(url);
   return data.locations;
 }
 
-export async function fetchLocationDetail(id: string): Promise<LocationDetail> {
-  const cached = detailCache.get(id);
-  if (cached) {
-    return cached;
-  }
-
+export function fetchLocationDetail(id: string): Promise<LocationDetail> {
   const url = USE_MOCK
     ? `/mock/locations/${encodeURIComponent(id)}.json`
     : `/api/v1/locations/${encodeURIComponent(id)}`;
-
-  const request = fetchJson<LocationDetail>(url).catch((err) => {
-    detailCache.delete(id);
-    throw err;
-  });
-
-  detailCache.set(id, request);
-  return request;
+  return fetchCachedJson(detailCache, id, url);
 }
 
-export async function fetchGeoJson(url: string): Promise<SpillContourFeatureCollection> {
-  const cached = geoJsonCache.get(url);
-  if (cached) {
-    return cached;
-  }
+export function fetchGeoJson(url: string): Promise<SpillContourFeatureCollection> {
+  return fetchCachedJson(geoJsonCache, url, url);
+}
 
-  const request = fetchJson<SpillContourFeatureCollection>(url).catch((err) => {
-    geoJsonCache.delete(url);
-    throw err;
-  });
+export function fetchSourcesGeoJson(url: string): Promise<SourceFeatureCollection> {
+  return fetchCachedJson(sourcesCache, url, url);
+}
 
-  geoJsonCache.set(url, request);
-  return request;
+export function fetchTargetsGeoJson(url: string): Promise<TargetFeatureCollection> {
+  return fetchCachedJson(targetsCache, url, url);
 }

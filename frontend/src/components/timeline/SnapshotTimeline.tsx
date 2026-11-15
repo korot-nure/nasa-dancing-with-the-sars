@@ -236,11 +236,12 @@ export function SnapshotTimeline({
               key={snap.step_id}
               type="button"
               className="btn"
+              title={snap.note ?? undefined}
               onClick={() => onSelectStep(idx)}
               style={{
                 height: 52,
                 flex: "1 1 0",
-                minWidth: 165,
+                minWidth: 195,
                 padding: "6px 10px",
                 flexDirection: "column",
                 alignItems: "flex-start",
@@ -277,11 +278,35 @@ export function SnapshotTimeline({
                   color: isActive ? "var(--text-secondary)" : "var(--text-muted)"
                 }}
               >
-                <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {snap.label}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, minWidth: 0 }}>
+                  {snap.note && (
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-label={snap.note}
+                      style={{ flexShrink: 0, color: "#fbbf24" }}
+                    >
+                      <path
+                        d="M8 2L14.5 13.5H1.5L8 2Z"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinejoin="round"
+                      />
+                      <path d="M8 6.5V9.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                      <circle cx="8" cy="11.5" r="0.7" fill="currentColor" />
+                    </svg>
+                  )}
+                  <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {snap.label}
+                  </span>
                 </span>
-                <span className="mono" style={{ fontSize: 10, flexShrink: 0, color: isActive ? "var(--accent-drift)" : "var(--text-muted)" }}>
-                  {stepTag}
+                <span
+                  className="mono"
+                  style={{ fontSize: 10, flexShrink: 0, color: isActive ? "var(--accent-drift)" : "var(--text-muted)" }}
+                >
+                  {snap.track} · {snap.polarization} · {stepTag}
                 </span>
               </div>
             </button>

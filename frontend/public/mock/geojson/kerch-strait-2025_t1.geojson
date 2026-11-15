@@ -64,7 +64,27 @@
       "properties": {
         "location_id": "kerch-strait-2025",
         "step_id": "t1",
-        "area_km2": 38.4
+        "slick_id": "t1-01",
+        "area_km2": 38.4,
+        "class": "probable",
+        "score": 0.78,
+        "flags": []
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "location_id": "kerch-strait-2025",
+        "step_id": "t1",
+        "slick_id": "t1-02",
+        "area_km2": 2.4,
+        "class": "possible",
+        "score": 0.44,
+        "flags": ["near_coast"]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[36.51, 45.14], [36.53, 45.15], [36.52, 45.16], [36.5, 45.15], [36.51, 45.14]]]
       }
     }
   ],
