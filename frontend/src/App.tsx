@@ -7,6 +7,7 @@ import { OverviewMinimap } from "./components/sidebar/OverviewMinimap";
 import { MainComparisonMap } from "./components/stage/MainComparisonMap";
 import { SnapshotTimeline } from "./components/timeline/SnapshotTimeline";
 import type { AppState } from "./types/location";
+import { pluralUk } from "./utils/format";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
 
@@ -187,7 +188,7 @@ export function App() {
           <div className="section-head">
             <span className="section-title">Глобальний огляд</span>
             <span className="mono" style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-              {state.locations.length} події
+              {state.locations.length} {pluralUk(state.locations.length, ["подія", "події", "подій"])}
             </span>
           </div>
 
@@ -203,7 +204,7 @@ export function App() {
             onSelectLocation={handleSelectLocation}
           />
 
-          <div className="sidebar-details-scroll">
+          <div className="sidebar-scroll">
             <EventDetailsCard
               detail={state.activeDetail}
               activeStepIdx={state.activeStepIdx}
