@@ -4,26 +4,35 @@
     {
       "id": "oman-caroline-bezengi-2026",
       "title": "Острови Халланіят, Оман",
-      "coords": [56.341, 17.5],
+      "coords": [
+        56.341,
+        17.5
+      ],
       "baseline_date": "2026-06-18",
       "latest_date": "2026-09-16",
       "area_km2": 138.2
     },
     {
-      "id": "kerch-strait-2025",
-      "title": "Керченська протока: аварія танкерів",
-      "coords": [36.55, 45.12],
-      "baseline_date": "2024-12-03",
-      "latest_date": "2025-07-14",
-      "area_km2": 86.5
+      "id": "green-canyon-600-seeps-2026",
+      "title": "Green Canyon 600, Мексиканська затока",
+      "coords": [
+        -90.5743,
+        27.36986
+      ],
+      "baseline_date": "2026-10-19",
+      "latest_date": "2026-10-31",
+      "area_km2": 0.0
     },
     {
-      "id": "maracaibo-chronic-2026",
-      "title": "Озеро Маракайбо: хронічні витоки",
-      "coords": [-71.56, 9.82],
-      "baseline_date": "2026-04-10",
-      "latest_date": "2026-08-03",
-      "area_km2": 264.0
+      "id": "eugene-island-316-2026",
+      "title": "Eugene Island 316, Мексиканська затока",
+      "coords": [
+        -91.61861,
+        28.26278
+      ],
+      "baseline_date": "2026-01-20",
+      "latest_date": "2026-10-14",
+      "area_km2": 0.0
     }
   ]
 }
