@@ -1,4 +1,7 @@
-import type { LocationDetail } from "../../types/location";
+import { useCallback, useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import { fetchGeoJson } from "../../api/locationsApi";
+import type { LocationDetail, SpillContourFeatureCollection } from "../../types/location";
 import { SplitCurtainControl } from "./SplitCurtainControl";
 
 export interface MainComparisonMapProps {
@@ -11,10 +14,115 @@ export interface MainComparisonMapProps {
   onSplitChange: (ratio: number) => void;
 }
 
+type BaseMapStyle = "dark" | "osm" | "sat";
+
+interface BaseTileConfig {
+  label: string;
+  url: string;
+  options: L.TileLayerOptions;
+}
+
+const BASE_TILE_CONFIGS: Record<BaseMapStyle, BaseTileConfig> = {
+  dark: {
+    label: "Темна",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    options: {
+      subdomains: "abcd",
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap &copy; CARTO"
+    }
+  },
+  osm: {
+    label: "OSM",
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    options: {
+      subdomains: "abc",
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }
+  },
+  sat: {
+    label: "Супутник",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    options: {
+      maxZoom: 18,
+      attribution: "&copy; Esri World Imagery"
+    }
+  }
+};
+
+function formatDeg(value: number, posHem: string, negHem: string): string {
+  return `${Math.abs(value).toFixed(3)}°${value >= 0 ? posHem : negHem}`;
+}
+
+function bboxToLeafletBounds(bbox: [number, number, number, number]): L.LatLngBoundsLiteral {
+  const [west, south, east, north] = bbox;
+  return [
+    [south, west],
+    [north, east]
+  ];
+}
+
+function extractCentroid(fc: SpillContourFeatureCollection): [number, number] | null {
+  const firstFeature = fc.features[0];
+  if (!firstFeature) return null;
+
+  let ring: number[][] | undefined;
+  if (firstFeature.geometry.type === "Polygon") {
+    const coords = firstFeature.geometry.coordinates as number[][][];
+    ring = coords[0];
+  } else if (firstFeature.geometry.type === "MultiPolygon") {
+    const coords = firstFeature.geometry.coordinates as number[][][][];
+    ring = coords[0]?.[0];
+  }
+
+  if (!ring || ring.length === 0) return null;
+
+  const isClosed =
+    ring.length > 1 &&
+    ring[0][0] === ring[ring.length - 1][0] &&
+    ring[0][1] === ring[ring.length - 1][1];
+  const count = isClosed ? ring.length - 1 : ring.length;
+  if (count <= 0) return null;
+
+  let sumLon = 0;
+  let sumLat = 0;
+  for (let i = 0; i < count; i += 1) {
+    sumLon += ring[i][0];
+    sumLat += ring[i][1];
+  }
+
+  return [sumLat / count, sumLon / count];
+}
+
+function buildArrowHead(
+  fromPt: [number, number],
+  toPt: [number, number]
+): [number, number][] | null {
+  const dLat = toPt[0] - fromPt[0];
+  const cosLat = Math.max(0.2, Math.cos((toPt[0] * Math.PI) / 180));
+  const dLonScaled = (toPt[1] - fromPt[1]) * cosLat;
+  const segLen = Math.hypot(dLat, dLonScaled);
+  if (segLen < 1e-4) return null;
+
+  const armLen = Math.min(0.055, Math.max(0.018, segLen * 0.28));
+  const angle = Math.atan2(dLat, dLonScaled);
+  const spread = 0.48; // ~27 deg
+
+  const wing1Lat = toPt[0] - armLen * Math.sin(angle - spread);
+  const wing1Lon = toPt[1] - (armLen * Math.cos(angle - spread)) / cosLat;
+
+  const wing2Lat = toPt[0] - armLen * Math.sin(angle + spread);
+  const wing2Lon = toPt[1] - (armLen * Math.cos(angle + spread)) / cosLat;
+
+  return [[wing1Lat, wing1Lon], toPt, [wing2Lat, wing2Lon]];
+}
+
 /**
  * [Dev 1 — Lead] Головна карта Leaflet:
- * - Ліворуч від шторки: звичайна карта (OSM / супутникові тайли)
- * - Праворуч від шторки: SAR-шар (T0 або after_<step>) + маска розливу + GeoJSON + траєкторія дрейфу
+ * - Ліворуч від шторки: базова підкладка (Темна / OSM / Супутник)
+ * - Праворуч від шторки (`sarRightPane` із `clip: rect(...)`):
+ *   SAR-шар (T0 або after_<step>) + маска розливу + GeoJSON-контур + траєкторія дрейфу
  */
 export function MainComparisonMap({
   detail,
@@ -25,44 +133,613 @@ export function MainComparisonMap({
   splitRatio,
   onSplitChange
 }: MainComparisonMapProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const sarPaneRef = useRef<HTMLElement | null>(null);
+  const sarRendererRef = useRef<L.SVG | null>(null);
+
+  const baseLayerRef = useRef<L.TileLayer | null>(null);
+  const referenceGroupRef = useRef<L.LayerGroup | null>(null);
+  const sarImageLayerRef = useRef<L.ImageOverlay | null>(null);
+  const maskImageLayerRef = useRef<L.ImageOverlay | null>(null);
+  const vectorGroupRef = useRef<L.LayerGroup | null>(null);
+  const activeContourLayerRef = useRef<L.GeoJSON | null>(null);
+
+  const splitRatioRef = useRef(splitRatio);
+  splitRatioRef.current = splitRatio;
+
+  const spillOpacityRef = useRef(spillOpacity);
+  spillOpacityRef.current = spillOpacity;
+
+  const lastFittedIdRef = useRef<string | null>(null);
+
+  const [baseStyle, setBaseStyle] = useState<BaseMapStyle>("dark");
+  const [cursorCoords, setCursorCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [scaleKm, setScaleKm] = useState<number>(25);
+
   const activeSnap =
-    detail && activeStepIdx >= 0 ? detail.snapshots[activeStepIdx] ?? detail.snapshots[0] : null;
+    detail && activeStepIdx >= 0 ? detail.snapshots[activeStepIdx] ?? null : null;
+
+  const updateClip = useCallback(() => {
+    const map = mapRef.current;
+    const sarPane = sarPaneRef.current;
+    if (!map || !sarPane) return;
+
+    const size = map.getSize();
+    if (size.x <= 0 || size.y <= 0) return;
+
+    const splitX = Math.round(size.x * splitRatioRef.current);
+    const nw = map.containerPointToLayerPoint([splitX, 0]);
+    const se = map.containerPointToLayerPoint([size.x, size.y]);
+    sarPane.style.clip = `rect(${nw.y}px, ${se.x}px, ${se.y}px, ${nw.x}px)`;
+  }, []);
+
+  const updateScaleBar = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const size = map.getSize();
+    if (size.x < 80 || size.y <= 0) return;
+
+    const cx = Math.floor(size.x / 2);
+    const cy = Math.floor(size.y / 2);
+    const p1 = map.containerPointToLatLng([cx, cy]);
+    const p2 = map.containerPointToLatLng([cx + 44, cy]);
+    const meters = map.distance(p1, p2);
+    if (Number.isFinite(meters) && meters > 0) {
+      setScaleKm(meters / 1000);
+    }
+  }, []);
+
+  const fitToDetailBounds = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !detail) return;
+    map.fitBounds(bboxToLeafletBounds(detail.bbox), { padding: [24, 24] });
+    updateClip();
+    updateScaleBar();
+  }, [detail, updateClip, updateScaleBar]);
+
+  // 1. Ініціалізація екземпляра Leaflet, панелі sarRightPane та обробників подій
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || mapRef.current) return;
+
+    container.style.setProperty("background", "#070709", "important");
+
+    const map = L.map(container, {
+      zoomControl: false,
+      attributionControl: true
+    });
+    map.setView([20, 15], 3);
+
+    const sarPane = map.createPane("sarRightPane");
+    sarPane.style.zIndex = "410";
+    sarPane.style.pointerEvents = "none";
+
+    const sarRenderer = L.svg({ pane: "sarRightPane" });
+    const referenceGroup = L.layerGroup().addTo(map);
+    const vectorGroup = L.layerGroup().addTo(map);
+
+    mapRef.current = map;
+    sarPaneRef.current = sarPane;
+    sarRendererRef.current = sarRenderer;
+    referenceGroupRef.current = referenceGroup;
+    vectorGroupRef.current = vectorGroup;
+
+    const handleViewChange = () => {
+      updateClip();
+      updateScaleBar();
+    };
+
+    const handleMouseMove = (e: L.LeafletMouseEvent) => {
+      setCursorCoords({ lat: e.latlng.lat, lon: e.latlng.lng });
+    };
+
+    const handleMouseOut = () => {
+      setCursorCoords(null);
+    };
+
+    map.on("move zoom viewreset moveend zoomend resize", handleViewChange);
+    map.on("mousemove", handleMouseMove);
+    map.on("mouseout", handleMouseOut);
+
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+      handleViewChange();
+    });
+    resizeObserver.observe(container);
+
+    handleViewChange();
+
+    return () => {
+      resizeObserver.disconnect();
+      map.off("move zoom viewreset moveend zoomend resize", handleViewChange);
+      map.off("mousemove", handleMouseMove);
+      map.off("mouseout", handleMouseOut);
+      map.remove();
+      mapRef.current = null;
+      sarPaneRef.current = null;
+      sarRendererRef.current = null;
+      baseLayerRef.current = null;
+      referenceGroupRef.current = null;
+      sarImageLayerRef.current = null;
+      maskImageLayerRef.current = null;
+      vectorGroupRef.current = null;
+      activeContourLayerRef.current = null;
+    };
+  }, [updateClip, updateScaleBar]);
+
+  // 2. Перемикання базової тайлової підкладки
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (baseLayerRef.current) {
+      baseLayerRef.current.remove();
+      baseLayerRef.current = null;
+    }
+
+    const cfg = BASE_TILE_CONFIGS[baseStyle];
+    const layer = L.tileLayer(cfg.url, cfg.options).addTo(map);
+    baseLayerRef.current = layer;
+  }, [baseStyle]);
+
+  // 3. Оновлення кліпінгу шторки без перестворення шарів
+  useEffect(() => {
+    updateClip();
+  }, [splitRatio, updateClip]);
+
+  // 4. Позиціонування камери та маркер епіцентру при зміні події
+  useEffect(() => {
+    const map = mapRef.current;
+    const referenceGroup = referenceGroupRef.current;
+    if (!map || !referenceGroup) return;
+
+    referenceGroup.clearLayers();
+
+    if (!detail) {
+      lastFittedIdRef.current = null;
+      return;
+    }
+
+    const bounds = bboxToLeafletBounds(detail.bbox);
+    L.rectangle(bounds, {
+      color: "#3f3f46",
+      weight: 1,
+      dashArray: "4 4",
+      fill: false,
+      interactive: false
+    }).addTo(referenceGroup);
+
+    const [epLon, epLat] = detail.coords;
+    L.circleMarker([epLat, epLon], {
+      radius: 5,
+      color: "#09090b",
+      weight: 1.5,
+      fillColor: "#f97316",
+      fillOpacity: 0.95,
+      interactive: false
+    }).addTo(referenceGroup);
+
+    if (lastFittedIdRef.current !== detail.id) {
+      lastFittedIdRef.current = detail.id;
+      map.fitBounds(bounds, { padding: [24, 24] });
+      updateClip();
+      updateScaleBar();
+    }
+  }, [detail, updateClip, updateScaleBar]);
+
+  // 5. Растрові шари SAR і маски розливу в панелі праворуч від шторки
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (sarImageLayerRef.current) {
+      sarImageLayerRef.current.remove();
+      sarImageLayerRef.current = null;
+    }
+    if (maskImageLayerRef.current) {
+      maskImageLayerRef.current.remove();
+      maskImageLayerRef.current = null;
+    }
+
+    if (!detail) return;
+
+    const bounds = bboxToLeafletBounds(detail.bbox);
+    const snap = activeStepIdx >= 0 ? detail.snapshots[activeStepIdx] ?? null : null;
+    const sarUrl = snap ? snap.after_url : detail.baseline_before_url;
+
+    sarImageLayerRef.current = L.imageOverlay(sarUrl, bounds, {
+      pane: "sarRightPane",
+      opacity: 0.9,
+      interactive: false
+    }).addTo(map);
+
+    if (snap && snap.mask_url) {
+      maskImageLayerRef.current = L.imageOverlay(snap.mask_url, bounds, {
+        pane: "sarRightPane",
+        opacity: spillOpacityRef.current,
+        interactive: false
+      }).addTo(map);
+    }
+
+    updateClip();
+  }, [detail, activeStepIdx, updateClip]);
+
+  // 6. Плавне оновлення прозорості маски та заливки контуру
+  useEffect(() => {
+    if (maskImageLayerRef.current) {
+      maskImageLayerRef.current.setOpacity(spillOpacity);
+    }
+    if (activeContourLayerRef.current) {
+      activeContourLayerRef.current.setStyle({
+        fillOpacity: Math.min(0.45, spillOpacity * 0.35)
+      });
+    }
+  }, [spillOpacity]);
+
+  // 7. Векторний GeoJSON-контур і траєкторія руху (дрейф)
+  useEffect(() => {
+    const vectorGroup = vectorGroupRef.current;
+    const sarRenderer = sarRendererRef.current;
+    if (!vectorGroup || !sarRenderer) return;
+
+    vectorGroup.clearLayers();
+    activeContourLayerRef.current = null;
+
+    if (!detail || activeStepIdx < 0 || (!showContour && !showTrajectory)) {
+      return;
+    }
+
+    const stepsToLoad = detail.snapshots.slice(0, activeStepIdx + 1);
+    if (stepsToLoad.length === 0) return;
+
+    let cancelled = false;
+
+    async function renderVectors() {
+      try {
+        const collections = await Promise.all(
+          stepsToLoad.map((snap) => fetchGeoJson(snap.contour_geojson_url))
+        );
+        if (cancelled || !vectorGroupRef.current || !sarRendererRef.current) return;
+
+        const group = vectorGroupRef.current;
+        const renderer = sarRendererRef.current;
+        group.clearLayers();
+        activeContourLayerRef.current = null;
+
+        // Попередні пунктирні контури для відображення історії розтікання
+        if (showTrajectory && collections.length > 1) {
+          for (let i = 0; i < collections.length - 1; i += 1) {
+            const histFc = collections[i];
+            L.geoJSON(histFc as unknown as Parameters<typeof L.geoJSON>[0], {
+              pane: "sarRightPane",
+              interactive: false,
+              style: () => ({
+                renderer,
+                color: "#fbbf24",
+                weight: 1.5,
+                dashArray: "5 5",
+                fillColor: "#fbbf24",
+                fillOpacity: 0.06
+              })
+            }).addTo(group);
+          }
+        }
+
+        // Активний векторний контур поточного кроку
+        if (showContour && collections.length > 0) {
+          const currentFc = collections[collections.length - 1];
+          const contourLayer = L.geoJSON(currentFc as unknown as Parameters<typeof L.geoJSON>[0], {
+            pane: "sarRightPane",
+            interactive: false,
+            style: () => ({
+              renderer,
+              color: "#ef4444",
+              weight: 2.2,
+              fillColor: "#ef4444",
+              fillOpacity: Math.min(0.45, spillOpacityRef.current * 0.35)
+            })
+          }).addTo(group);
+          activeContourLayerRef.current = contourLayer;
+        }
+
+        // Лінія та стрілка дрейфу центроїдів T1 -> ... -> Tk
+        if (showTrajectory && detail) {
+          const centroids = collections
+            .map(extractCentroid)
+            .filter((pt): pt is [number, number] => pt !== null);
+
+          if (centroids.length > 0) {
+            const [epLon, epLat] = detail.coords;
+            const trailPoints: [number, number][] = [[epLat, epLon], ...centroids];
+
+            L.polyline(trailPoints, {
+              pane: "sarRightPane",
+              renderer,
+              interactive: false,
+              color: "#fbbf24",
+              weight: 2.2,
+              dashArray: "6 4",
+              opacity: 0.95
+            }).addTo(group);
+
+            centroids.forEach((pt, idx) => {
+              const isLatest = idx === centroids.length - 1;
+              L.circleMarker(pt, {
+                pane: "sarRightPane",
+                renderer,
+                interactive: false,
+                radius: isLatest ? 5 : 3.8,
+                color: "#09090b",
+                weight: 1.5,
+                fillColor: isLatest ? "#ef4444" : "#fbbf24",
+                fillOpacity: 1
+              }).addTo(group);
+            });
+
+            if (trailPoints.length >= 2) {
+              const prevPt = trailPoints[trailPoints.length - 2];
+              const endPt = trailPoints[trailPoints.length - 1];
+              const arrowPts = buildArrowHead(prevPt, endPt);
+              if (arrowPts) {
+                L.polyline(arrowPts, {
+                  pane: "sarRightPane",
+                  renderer,
+                  interactive: false,
+                  color: "#fbbf24",
+                  weight: 2.2,
+                  opacity: 0.95
+                }).addTo(group);
+              }
+            }
+          }
+        }
+
+        updateClip();
+      } catch {
+        // Окремі збої GeoJSON не мають ламати базову карту
+      }
+    }
+
+    renderVectors();
+    return () => {
+      cancelled = true;
+    };
+  }, [detail, activeStepIdx, showContour, showTrajectory, updateClip]);
+
+  const handleZoomIn = () => mapRef.current?.zoomIn();
+  const handleZoomOut = () => mapRef.current?.zoomOut();
+
+  const scaleLabel = scaleKm >= 1 ? `${Math.round(scaleKm)} км` : `${Math.round(scaleKm * 1000)} м`;
 
   return (
-    <div className="map-stage" style={{ display: "grid", placeItems: "center", padding: 24 }}>
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#070709" }}>
+      <div
+        ref={containerRef}
+        aria-label="Інтерактивна карта порівняння SAR-знімків"
+        style={{ position: "absolute", inset: 0 }}
+      />
+
       <SplitCurtainControl splitRatio={splitRatio} onSplitChange={onSplitChange} />
+
+      {/* Лівий верхній бейдж + перемикач підкладки */}
       <div
         style={{
-          maxWidth: 540,
-          padding: 16,
-          border: "1px solid var(--border)",
-          borderRadius: 4,
+          position: "absolute",
+          top: 12,
+          left: 12,
+          zIndex: 440,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "4px 8px",
           background: "var(--bg-panel)",
-          zIndex: 10
+          border: "1px solid var(--border)",
+          borderRadius: 4
         }}
       >
-        <div className="section-title" style={{ marginBottom: 8 }}>
-          MainComparisonMap — Stage 0 Каркас (Dev 1)
-        </div>
-        <div style={{ color: "var(--text-secondary)", marginBottom: 10 }}>
-          На Етапі 1 тут підключається <code>Leaflet</code> (<code>fitBounds</code>,{" "}
-          <code>L.imageOverlay</code>, <code>L.geoJSON</code>, кліпінг шторки та вектор дрейфу).
-        </div>
+        <span
+          className="mono"
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.05em",
+            color: "var(--accent-signal)",
+            paddingRight: 4,
+            borderRight: "1px solid var(--border)"
+          }}
+        >
+          ЗВИЧАЙНА КАРТА
+        </span>
+
+        {(Object.keys(BASE_TILE_CONFIGS) as BaseMapStyle[]).map((styleKey) => {
+          const isActive = baseStyle === styleKey;
+          return (
+            <button
+              key={styleKey}
+              type="button"
+              className="btn"
+              onClick={() => setBaseStyle(styleKey)}
+              style={{
+                height: 20,
+                padding: "0 6px",
+                fontSize: 10,
+                borderColor: isActive ? "var(--border-strong)" : "transparent",
+                background: isActive ? "var(--bg-hover)" : "transparent",
+                color: isActive ? "var(--text-primary)" : "var(--text-muted)"
+              }}
+            >
+              {BASE_TILE_CONFIGS[styleKey].label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Правий верхній бейдж SAR */}
+      <div
+        className="mono"
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 12,
+          zIndex: 440,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "5px 10px",
+          background: "var(--bg-panel)",
+          border: "1px solid var(--border)",
+          borderRadius: 4,
+          fontSize: 11,
+          color: "var(--text-primary)",
+          pointerEvents: "none"
+        }}
+      >
+        <span style={{ color: "var(--accent-spill)", fontWeight: 600 }}>SAR РАДАР</span>
+        <span style={{ color: "var(--border-strong)" }}>|</span>
         {detail ? (
-          <div className="mono" style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
-            <div>bbox: [{detail.bbox.join(", ")}]</div>
-            <div>
-              SAR-шар ({activeStepIdx < 0 ? "T0 базовий" : activeSnap?.step_id.toUpperCase()}):{" "}
-              {activeStepIdx < 0 ? detail.baseline_before_url : activeSnap?.after_url}
-            </div>
-            <div>
-              opacity={Math.round(spillOpacity * 100)}% | contour={String(showContour)} | trajectory=
-              {String(showTrajectory)} | split={Math.round(splitRatio * 100)}%
-            </div>
-          </div>
+          activeSnap ? (
+            <>
+              <span>{activeSnap.step_id.toUpperCase()}</span>
+              <span>{activeSnap.date}</span>
+              <span style={{ color: "var(--text-secondary)" }}>{activeSnap.area_km2.toFixed(1)} км²</span>
+            </>
+          ) : (
+            <>
+              <span>T0 БАЗА</span>
+              <span>{detail.baseline_date}</span>
+              <span style={{ color: "var(--text-secondary)" }}>0.0 км²</span>
+            </>
+          )
         ) : (
-          <div style={{ color: "var(--text-muted)" }}>Завантаження геоданих...</div>
+          <span style={{ color: "var(--text-muted)" }}>Очікування...</span>
         )}
+      </div>
+
+      {/* Кнопки масштабу праворуч */}
+      <div
+        aria-label="Масштаб карти"
+        style={{
+          position: "absolute",
+          top: 52,
+          right: 12,
+          zIndex: 440,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4
+        }}
+      >
+        <button type="button" className="btn" onClick={handleZoomIn} title="Наблизити" style={{ width: 28, height: 28, padding: 0 }}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+        <button type="button" className="btn" onClick={handleZoomOut} title="Віддалити" style={{ width: 28, height: 28, padding: 0 }}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="btn"
+          disabled={!detail}
+          onClick={fitToDetailBounds}
+          title="Повернути камеру до меж події"
+          style={{ width: 28, height: 28, padding: 0 }}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Нижній лівий HUD (курсор + bbox) */}
+      <div
+        className="mono"
+        style={{
+          position: "absolute",
+          left: 12,
+          bottom: 12,
+          zIndex: 440,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "4px 10px",
+          background: "var(--bg-panel)",
+          border: "1px solid var(--border)",
+          borderRadius: 4,
+          fontSize: 11,
+          color: "var(--text-secondary)",
+          pointerEvents: "none"
+        }}
+      >
+        <span>
+          {cursorCoords
+            ? `Курсор: ${formatDeg(cursorCoords.lat, "N", "S")}, ${formatDeg(cursorCoords.lon, "E", "W")}`
+            : detail
+              ? `Центр: ${formatDeg(detail.coords[1], "N", "S")}, ${formatDeg(detail.coords[0], "E", "W")}`
+              : "Курсор: —"}
+        </span>
+        {detail && (
+          <>
+            <span style={{ color: "var(--border-strong)" }}>|</span>
+            <span style={{ color: "var(--text-muted)" }}>bbox: [{detail.bbox.join(", ")}]</span>
+          </>
+        )}
+      </div>
+
+      {/* Нижній правий HUD (радарна шкала + масштаб) */}
+      <div
+        className="mono"
+        style={{
+          position: "absolute",
+          right: 12,
+          bottom: 24,
+          zIndex: 440,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "4px 10px",
+          background: "var(--bg-panel)",
+          border: "1px solid var(--border)",
+          borderRadius: 4,
+          fontSize: 10,
+          color: "var(--text-secondary)",
+          pointerEvents: "none"
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span>-25 dB</span>
+          <svg width="50" height="6" viewBox="0 0 50 6" aria-hidden="true">
+            <rect x="0" y="0" width="10" height="6" fill="#09090b" />
+            <rect x="10" y="0" width="10" height="6" fill="#1e293b" />
+            <rect x="20" y="0" width="10" height="6" fill="#475569" />
+            <rect x="30" y="0" width="10" height="6" fill="#94a3b8" />
+            <rect x="40" y="0" width="10" height="6" fill="#e2e8f0" />
+          </svg>
+          <span>0 dB</span>
+        </div>
+        <span style={{ color: "var(--border-strong)" }}>|</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span
+            style={{
+              display: "inline-block",
+              width: 44,
+              height: 5,
+              borderLeft: "1px solid var(--text-secondary)",
+              borderRight: "1px solid var(--text-secondary)",
+              borderBottom: "1px solid var(--text-secondary)"
+            }}
+          />
+          <span>{scaleLabel}</span>
+        </div>
       </div>
     </div>
   );

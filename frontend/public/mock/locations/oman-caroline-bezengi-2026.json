@@ -1,8 +1,16 @@
 {
   "id": "oman-caroline-bezengi-2026",
   "title": "Острови Халланіят, Оман",
-  "coords": [56.02, 17.50],
-  "bbox": [55.35, 16.90, 56.85, 18.10],
+  "coords": [
+    56.02,
+    17.5
+  ],
+  "bbox": [
+    55.35,
+    16.9,
+    56.85,
+    18.1
+  ],
   "baseline_date": "2026-06-01",
   "baseline_before_url": "/mock/assets/sar-before.svg",
   "description": "Посадка на мілину танкера Caroline Bezengi після вибуху призвела до масштабного розливу нафти в Аравійському морі. На радарних знімках NISAR чітко фіксується динаміка розширення гладкої темної плями біля заповідного острова Аль-Кіблія.",
@@ -13,8 +21,8 @@
       "date": "2026-07-02",
       "label": "Початковий шлейф",
       "area_km2": 420.0,
-      "after_url": "/mock/assets/sar-after.svg",
-      "mask_url": "/mock/assets/spill-mask.svg",
+      "after_url": "/mock/assets/oman-caroline-bezengi-2026_after_t1.svg",
+      "mask_url": "/mock/assets/oman-caroline-bezengi-2026_mask_t1.svg",
       "contour_geojson_url": "/mock/geojson/oman-caroline-bezengi-2026_t1.geojson"
     },
     {
@@ -22,8 +30,8 @@
       "date": "2026-08-18",
       "label": "Максимум розливу",
       "area_km2": 2040.5,
-      "after_url": "/mock/assets/sar-after.svg",
-      "mask_url": "/mock/assets/spill-mask.svg",
+      "after_url": "/mock/assets/oman-caroline-bezengi-2026_after_t2.svg",
+      "mask_url": "/mock/assets/oman-caroline-bezengi-2026_mask_t2.svg",
       "contour_geojson_url": "/mock/geojson/oman-caroline-bezengi-2026_t2.geojson"
     },
     {
@@ -31,8 +39,8 @@
       "date": "2026-09-11",
       "label": "Дрейф та розсіювання",
       "area_km2": 1180.2,
-      "after_url": "/mock/assets/sar-after.svg",
-      "mask_url": "/mock/assets/spill-mask.svg",
+      "after_url": "/mock/assets/oman-caroline-bezengi-2026_after_t3.svg",
+      "mask_url": "/mock/assets/oman-caroline-bezengi-2026_mask_t3.svg",
       "contour_geojson_url": "/mock/geojson/oman-caroline-bezengi-2026_t3.geojson"
     }
   ]

@@ -1,8 +1,16 @@
 {
   "id": "kerch-strait-2025",
   "title": "Керченська протока: аварія танкерів",
-  "coords": [36.55, 45.12],
-  "bbox": [36.25, 44.90, 36.92, 45.36],
+  "coords": [
+    36.55,
+    45.12
+  ],
+  "bbox": [
+    36.25,
+    44.9,
+    36.92,
+    45.36
+  ],
   "baseline_date": "2024-12-03",
   "baseline_before_url": "/mock/assets/sar-before.svg",
   "description": "Штормова аварія танкерів «Волгонефть-212» та «Волгонефть-239» у грудні 2024 року спричинила витік тисяч тонн важкого мазуту. Багаточасові SAR-сцени дозволяють відстежити міграцію плям уздовж берегової лінії навіть за зимової штормової хмарності.",
@@ -13,8 +21,8 @@
       "date": "2024-12-19",
       "label": "Перші витоки біля коси",
       "area_km2": 38.4,
-      "after_url": "/mock/assets/sar-after.svg",
-      "mask_url": "/mock/assets/spill-mask.svg",
+      "after_url": "/mock/assets/kerch-strait-2025_after_t1.svg",
+      "mask_url": "/mock/assets/kerch-strait-2025_mask_t1.svg",
       "contour_geojson_url": "/mock/geojson/kerch-strait-2025_t1.geojson"
     },
     {
@@ -22,8 +30,8 @@
       "date": "2025-01-12",
       "label": "Винос у Чорне море",
       "area_km2": 142.8,
-      "after_url": "/mock/assets/sar-after.svg",
-      "mask_url": "/mock/assets/spill-mask.svg",
+      "after_url": "/mock/assets/kerch-strait-2025_after_t2.svg",
+      "mask_url": "/mock/assets/kerch-strait-2025_mask_t2.svg",
       "contour_geojson_url": "/mock/geojson/kerch-strait-2025_t2.geojson"
     },
     {
@@ -31,8 +39,8 @@
       "date": "2025-07-14",
       "label": "Вторинний шлейф від уламків",
       "area_km2": 86.5,
-      "after_url": "/mock/assets/sar-after.svg",
-      "mask_url": "/mock/assets/spill-mask.svg",
+      "after_url": "/mock/assets/kerch-strait-2025_after_t3.svg",
+      "mask_url": "/mock/assets/kerch-strait-2025_mask_t3.svg",
       "contour_geojson_url": "/mock/geojson/kerch-strait-2025_t3.geojson"
     }
   ]
